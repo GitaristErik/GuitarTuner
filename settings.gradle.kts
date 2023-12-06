@@ -16,8 +16,23 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+        maven {
+            name = "TarsosDSP repository"
+            url = uri("https://mvn.0110.be/releases")
+        }
     }
 }
+
+/*
+sourceControl {
+    gitRepository(
+        uri("https://github.com/billthefarmer/mididriver.git")
+    ) {
+        producesModule("org.billthefarmer.mididriver:library")
+    }
+}
+*/
 
 rootProject.name = "GuitarTuner"
 include(":app")

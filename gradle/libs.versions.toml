@@ -1,19 +1,33 @@
 [versions]
-agp = "8.3.0-alpha13"
+agp = "8.2.0"
 kotlin = "1.9.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.6.2"
-activityCompose = "1.8.0"
-composeBom = "2023.08.00"
+test-manifest = "1.5.4"
+activityCompose = "1.8.1"
+composeBom = "2023.10.01"
+animation = "1.5.4"
+material3 = "1.1.2"
+materialIconsExtended = "1.5.4"
+materialRipple = "1.5.4"
+material3WindowSizeClass = "1.1.2"
+aboutlibrariesCore = "10.9.2"
+aboutlibrariesCompose = "10.9.2"
+aboutlibraries = "10.9.2"
+theme = "v0.2.0"
+preview = "v0.2.0"
+core = "2.5"
+mididriver = "v1.25"
+datastorePreferences = "1.0.0"
+lifecycleRuntimeCompose = "2.6.2"
+kotlinxCoroutinesTest = "1.8.0-RC"
 
 [libraries]
+# Android & Compose
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -21,11 +35,38 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "animation" }
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIconsExtended" }
+androidx-material-ripple = { group = "androidx.compose.material", name = "material-ripple", version.ref = "materialRipple" }
+androidx-material3-window = { group = "androidx.compose.material3", name = "material3-window-size-class", version.ref = "material3WindowSizeClass" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+
+# Testing
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+
+# Open Source Licenses
+aboutlibraries-core = { group = "com.mikepenz", name = "aboutlibraries-core", version.ref = "aboutlibrariesCore" }
+aboutlibraries-compose = { group = "com.mikepenz", name = "aboutlibraries-compose", version.ref = "aboutlibrariesCompose" }
+aboutlibraries = { group = "com.mikepenz", name = "aboutlibraries", version.ref = "aboutlibraries" }
+
+# Utility
+theme = { group = "com.github.rohankhayech.AndroidUtils", name = "theme", version.ref = "theme" }
+preview = { group = "com.github.rohankhayech.AndroidUtils", name = "preview", version.ref = "preview" }
+
+# Audio
+audio-core = { group = "be.tarsos.dsp", name = "core", version.ref = "core" }
+audio-mididriver = { group = "com.github.billthefarmer", name = "mididriver", version.ref = "mididriver" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+#   id 'com.mikepenz.aboutlibraries.plugin'
+aboutLibrariesPlugin = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
 
