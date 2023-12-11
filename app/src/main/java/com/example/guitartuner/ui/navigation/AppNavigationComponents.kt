@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
@@ -36,6 +39,8 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import com.example.guitartuner.R
@@ -57,16 +62,12 @@ fun AppNavigationRail(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            NavigationRailItem(
-                selected = false,
-                onClick = onDrawerClicked,
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Menu,
-                        contentDescription = stringResource(id = R.string.navigation_drawer)
-                    )
-                }
-            )
+            NavigationRailItem(selected = false, onClick = onDrawerClicked, icon = {
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = stringResource(id = R.string.navigation_drawer)
+                )
+            })
             Spacer(Modifier.height(8.dp)) // NavigationRailHeaderPadding
             Spacer(Modifier.height(4.dp)) // NavigationRailVerticalPadding
         }
@@ -96,14 +97,25 @@ fun AppNavigationRail(
 
 @Composable
 fun AppBottomNavigationBar(
-    selectedDestination: String,
-    navigateToTopLevelDestination: (ReplyTopLevelDestination) -> Unit
+    selectedDestination: String, navigateToTopLevelDestination: (ReplyTopLevelDestination) -> Unit
 ) {
-    NavigationBar(modifier = Modifier.fillMaxWidth()) {
+    NavigationBar(
+        modifier = Modifier.fillMaxWidth(),
+        windowInsets = NavigationBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+    ) {
         TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
             NavigationBarItem(
                 selected = selectedDestination == replyDestination.route,
                 onClick = { navigateToTopLevelDestination(replyDestination) },
+                alwaysShowLabel = selectedDestination != replyDestination.route,
+                label = {
+                    Text(
+                        text = stringResource(id = replyDestination.iconTextId),
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        softWrap = false
+                    )
+                },
                 icon = {
                     Icon(
                         imageVector = replyDestination.selectedIcon,
@@ -129,16 +141,14 @@ fun PermanentNavigationDrawerContent(
         Layout(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.inverseOnSurface)
-                .padding(16.dp),
-            content = {
+                .padding(16.dp), content = {
                 Column(
                     modifier = Modifier.layoutId(LayoutType.HEADER),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        modifier = Modifier
-                            .padding(16.dp),
+                        modifier = Modifier.padding(16.dp),
                         text = stringResource(id = R.string.app_name).uppercase(),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
@@ -152,8 +162,7 @@ fun PermanentNavigationDrawerContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
-                        NavigationDrawerItem(
-                            selected = selectedDestination == replyDestination.route,
+                        NavigationDrawerItem(selected = selectedDestination == replyDestination.route,
                             label = {
                                 Text(
                                     text = stringResource(id = replyDestination.iconTextId),
@@ -171,12 +180,10 @@ fun PermanentNavigationDrawerContent(
                             colors = NavigationDrawerItemDefaults.colors(
                                 unselectedContainerColor = Color.Transparent
                             ),
-                            onClick = { navigateToTopLevelDestination(replyDestination) }
-                        )
+                            onClick = { navigateToTopLevelDestination(replyDestination) })
                     }
                 }
-            },
-            measurePolicy = navigationMeasurePolicy(navigationContentPosition)
+            }, measurePolicy = navigationMeasurePolicy(navigationContentPosition)
         )
     }
 }
@@ -188,13 +195,15 @@ fun ModalNavigationDrawerContent(
     navigateToTopLevelDestination: (ReplyTopLevelDestination) -> Unit,
     onDrawerClicked: () -> Unit = {}
 ) {
-    ModalDrawerSheet {
+    ModalDrawerSheet(
+        drawerContainerColor = MaterialTheme.colorScheme.inverseOnSurface,
+        drawerContentColor = MaterialTheme.colorScheme.onSurface,
+    ) {
         // TODO remove custom nav drawer content positioning when NavDrawer component supports it. ticket : b/232495216
         Layout(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.inverseOnSurface)
-                .padding(16.dp),
-            content = {
+                .padding(16.dp), content = {
                 Column(
                     modifier = Modifier.layoutId(LayoutType.HEADER),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -228,8 +237,7 @@ fun ModalNavigationDrawerContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
-                        NavigationDrawerItem(
-                            selected = selectedDestination == replyDestination.route,
+                        NavigationDrawerItem(selected = selectedDestination == replyDestination.route,
                             label = {
                                 Text(
                                     text = stringResource(id = replyDestination.iconTextId),
@@ -247,12 +255,10 @@ fun ModalNavigationDrawerContent(
                             colors = NavigationDrawerItemDefaults.colors(
                                 unselectedContainerColor = Color.Transparent
                             ),
-                            onClick = { navigateToTopLevelDestination(replyDestination) }
-                        )
+                            onClick = { navigateToTopLevelDestination(replyDestination) })
                     }
                 }
-            },
-            measurePolicy = navigationMeasurePolicy(navigationContentPosition)
+            }, measurePolicy = navigationMeasurePolicy(navigationContentPosition)
         )
     }
 }

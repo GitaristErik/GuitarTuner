@@ -90,7 +90,11 @@ fun BaseApp(
             navigationType = if (foldingDevicePosture is DevicePosture.BookPosture) {
                 NavigationType.NAVIGATION_RAIL
             } else {
-                NavigationType.PERMANENT_NAVIGATION_DRAWER
+                if(windowSize.heightSizeClass == WindowHeightSizeClass.Compact) {
+                    NavigationType.NAVIGATION_RAIL
+                } else {
+                    NavigationType.PERMANENT_NAVIGATION_DRAWER
+                }
             }
             contentType = ContentType.DUAL_PANE
         }
@@ -143,8 +147,7 @@ private fun AppNavigationWrapper(
         ReplyNavigationActions(navController)
     }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val selectedDestination =
-        navBackStackEntry?.destination?.route ?: ReplyRoute.TUNER
+    val selectedDestination = navBackStackEntry?.destination?.route ?: ReplyRoute.TUNER
 
     if (appNavigationInfo.navigationType == NavigationType.PERMANENT_NAVIGATION_DRAWER) {
         // TODO check on custom width of PermanentNavigationDrawer: b/232495216
@@ -170,24 +173,21 @@ private fun AppNavigationWrapper(
                     navigationContentPosition = appNavigationInfo.navigationContentPosition,
                     navigateToTopLevelDestination = navigationActions::navigateTo,
                     onDrawerClicked = {
-                        scope.launch {
-                            drawerState.close()
-                        }
+                        scope.launch { drawerState.close() }
                     }
                 )
             },
-            drawerState = drawerState
+            drawerState = drawerState,
         ) {
             AppContent(
                 appNavigationInfo = appNavigationInfo,
                 navController = navController,
                 selectedDestination = selectedDestination,
                 navigateToTopLevelDestination = navigationActions::navigateTo,
-            ) {
-                scope.launch {
-                    drawerState.open()
-                }
-            }
+                onDrawerClicked = {
+                    scope.launch { drawerState.open() }
+                },
+            )
         }
     }
 }

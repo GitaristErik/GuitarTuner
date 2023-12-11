@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GuitarTuner</string>
+    <string name="app_name">Guitar Tuner</string>
 
 <!--    Navigation -->
     <string name="navigation_drawer">Navigation Drawer</string>
