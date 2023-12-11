@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.example.guitartuner.ui.BaseApp
 import com.example.guitartuner.ui.theme.GuitarTunerTheme
 import com.google.accompanist.adaptive.calculateDisplayFeatures
-import com.rohankhayech.android.util.ui.preview.FullPreview
+import com.rohankhayech.android.util.ui.preview.OrientationThemePreview
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -53,7 +53,7 @@ fun PreviewWrapper() {
     }
 }
 
-@FullPreview
+@OrientationThemePreview
 @Composable
 private fun TunerPreview() {
     PreviewWrapper()

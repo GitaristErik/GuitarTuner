@@ -29,9 +29,9 @@ import com.example.guitartuner.ui.navigation.AppBottomNavigationBar
 import com.example.guitartuner.ui.navigation.AppNavigationRail
 import com.example.guitartuner.ui.navigation.ModalNavigationDrawerContent
 import com.example.guitartuner.ui.navigation.PermanentNavigationDrawerContent
-import com.example.guitartuner.ui.navigation.ReplyNavigationActions
-import com.example.guitartuner.ui.navigation.ReplyRoute
-import com.example.guitartuner.ui.navigation.ReplyTopLevelDestination
+import com.example.guitartuner.ui.navigation.AppNavigationActions
+import com.example.guitartuner.ui.navigation.AppRoute
+import com.example.guitartuner.ui.navigation.AppTopLevelDestination
 import com.example.guitartuner.ui.tuner.TunerScreen
 import com.example.guitartuner.ui.utils.AppNavigationInfo
 import com.example.guitartuner.ui.utils.ContentType
@@ -144,10 +144,10 @@ private fun AppNavigationWrapper(
 
     val navController = rememberNavController()
     val navigationActions = remember(navController) {
-        ReplyNavigationActions(navController)
+        AppNavigationActions(navController)
     }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val selectedDestination = navBackStackEntry?.destination?.route ?: ReplyRoute.TUNER
+    val selectedDestination = navBackStackEntry?.destination?.route ?: AppRoute.TUNER
 
     if (appNavigationInfo.navigationType == NavigationType.PERMANENT_NAVIGATION_DRAWER) {
         // TODO check on custom width of PermanentNavigationDrawer: b/232495216
@@ -198,7 +198,7 @@ fun AppContent(
     appNavigationInfo: AppNavigationInfo,
     navController: NavHostController,
     selectedDestination: String,
-    navigateToTopLevelDestination: (ReplyTopLevelDestination) -> Unit,
+    navigateToTopLevelDestination: (AppTopLevelDestination) -> Unit,
     onDrawerClicked: () -> Unit = {}
 ) {
     Row(modifier = modifier.fillMaxSize()) {
@@ -243,20 +243,20 @@ private fun AppNavHost(
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = ReplyRoute.TUNER,
+        startDestination = AppRoute.TUNER,
     ) {
-        composable(ReplyRoute.TUNER) {
+        composable(AppRoute.TUNER) {
             TunerScreen(
                 appNavigationInfo = appNavigationInfo,
             )
         }
-        composable(ReplyRoute.METRONOME) {
+        composable(AppRoute.METRONOME) {
             EmptyComingSoon()
         }
-        composable(ReplyRoute.GAUGE) {
+        composable(AppRoute.GAUGE) {
             EmptyComingSoon()
         }
-        composable(ReplyRoute.SETTINGS) {
+        composable(AppRoute.SETTINGS) {
             EmptyComingSoon()
         }
     }

@@ -50,7 +50,7 @@ import com.example.guitartuner.ui.utils.NavigationContentPosition
 fun AppNavigationRail(
     selectedDestination: String,
     navigationContentPosition: NavigationContentPosition,
-    navigateToTopLevelDestination: (ReplyTopLevelDestination) -> Unit,
+    navigateToTopLevelDestination: (AppTopLevelDestination) -> Unit,
     onDrawerClicked: () -> Unit = {},
 ) {
     NavigationRail(
@@ -97,7 +97,7 @@ fun AppNavigationRail(
 
 @Composable
 fun AppBottomNavigationBar(
-    selectedDestination: String, navigateToTopLevelDestination: (ReplyTopLevelDestination) -> Unit
+    selectedDestination: String, navigateToTopLevelDestination: (AppTopLevelDestination) -> Unit
 ) {
     NavigationBar(
         modifier = Modifier.fillMaxWidth(),
@@ -131,7 +131,7 @@ fun AppBottomNavigationBar(
 fun PermanentNavigationDrawerContent(
     selectedDestination: String,
     navigationContentPosition: NavigationContentPosition,
-    navigateToTopLevelDestination: (ReplyTopLevelDestination) -> Unit,
+    navigateToTopLevelDestination: (AppTopLevelDestination) -> Unit,
 ) {
     PermanentDrawerSheet(
         modifier = Modifier.sizeIn(minWidth = 200.dp, maxWidth = 300.dp),
@@ -193,7 +193,7 @@ fun PermanentNavigationDrawerContent(
 fun ModalNavigationDrawerContent(
     selectedDestination: String,
     navigationContentPosition: NavigationContentPosition,
-    navigateToTopLevelDestination: (ReplyTopLevelDestination) -> Unit,
+    navigateToTopLevelDestination: (AppTopLevelDestination) -> Unit,
     onDrawerClicked: () -> Unit = {}
 ) {
     ModalDrawerSheet(

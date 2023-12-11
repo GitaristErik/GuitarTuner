@@ -14,23 +14,23 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.example.guitartuner.R
 
-object ReplyRoute {
+object AppRoute {
     const val TUNER = "Tuner"
     const val GAUGE = "Gauge"
     const val METRONOME = "Metronome"
     const val SETTINGS = "Settings"
 }
 
-data class ReplyTopLevelDestination(
+data class AppTopLevelDestination(
     val route: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
     val iconTextId: Int
 )
 
-class ReplyNavigationActions(private val navController: NavHostController) {
+class AppNavigationActions(private val navController: NavHostController) {
 
-    fun navigateTo(destination: ReplyTopLevelDestination) {
+    fun navigateTo(destination: AppTopLevelDestination) {
         navController.navigate(destination.route) {
             // Pop up to the start destination of the graph to
             // avoid building up a large stack of destinations
@@ -48,26 +48,26 @@ class ReplyNavigationActions(private val navController: NavHostController) {
 }
 
 val TOP_LEVEL_DESTINATIONS = listOf(
-    ReplyTopLevelDestination(
-        route = ReplyRoute.TUNER,
+    AppTopLevelDestination(
+        route = AppRoute.TUNER,
         selectedIcon = Icons.Filled.SettingsVoice,
         unselectedIcon = Icons.Outlined.SettingsVoice,
         iconTextId = R.string.tab_tuner
     ),
-    ReplyTopLevelDestination(
-        route = ReplyRoute.GAUGE,
+    AppTopLevelDestination(
+        route = AppRoute.GAUGE,
         selectedIcon = Icons.Filled.Timer,
         unselectedIcon = Icons.Outlined.Timer,
         iconTextId = R.string.tab_metronome
     ),
-    ReplyTopLevelDestination(
-        route = ReplyRoute.METRONOME,
+    AppTopLevelDestination(
+        route = AppRoute.METRONOME,
         selectedIcon = Icons.Filled.Calculate,
         unselectedIcon = Icons.Outlined.Calculate,
         iconTextId = R.string.tab_gauge
     ),
-    ReplyTopLevelDestination(
-        route = ReplyRoute.SETTINGS,
+    AppTopLevelDestination(
+        route = AppRoute.SETTINGS,
         selectedIcon = Icons.Filled.Tune,
         unselectedIcon = Icons.Outlined.Tune,
         iconTextId = R.string.tab_settings
