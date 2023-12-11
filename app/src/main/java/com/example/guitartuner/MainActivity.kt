@@ -8,14 +8,13 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.example.guitartuner.ui.BaseApp
 import com.example.guitartuner.ui.theme.GuitarTunerTheme
 import com.google.accompanist.adaptive.calculateDisplayFeatures
-import com.rohankhayech.android.util.ui.preview.LandscapeThemePreview
-import com.rohankhayech.android.util.ui.preview.TabletThemePreview
-import com.rohankhayech.android.util.ui.preview.ThemePreview
+import com.rohankhayech.android.util.ui.preview.FullPreview
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -39,29 +38,23 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
-fun PreviewWrapper(dpSize: DpSize) {
+fun PreviewWrapper() {
+    val windowSize = WindowSizeClass.calculateFromSize(
+        with(LocalConfiguration.current) {
+            DpSize(width = screenWidthDp.dp, height = screenHeightDp.dp)
+        }
+    )
+
     GuitarTunerTheme {
         BaseApp(
-            windowSize = WindowSizeClass.calculateFromSize(dpSize),
+            windowSize = windowSize,
             displayFeatures = emptyList()
         )
     }
 }
 
-@ThemePreview
+@FullPreview
 @Composable
 private fun TunerPreview() {
-    PreviewWrapper(DpSize(400.dp, 600.dp))
-}
-
-@TabletThemePreview
-@Composable
-private fun TabletPreview() {
-    PreviewWrapper(DpSize(800.dp, 600.dp))
-}
-
-@LandscapeThemePreview
-@Composable
-private fun LandscapePreview() {
-    PreviewWrapper(DpSize(600.dp, 400.dp))
+    PreviewWrapper()
 }
