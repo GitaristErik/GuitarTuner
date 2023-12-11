@@ -78,12 +78,12 @@ fun AppNavigationRail(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
-                NavigationRailItem(
-                    selected = selectedDestination == replyDestination.route,
+                val selected = selectedDestination == replyDestination.route
+                NavigationRailItem(selected = selected,
                     onClick = { navigateToTopLevelDestination(replyDestination) },
                     icon = {
                         Icon(
-                            imageVector = replyDestination.selectedIcon,
+                            imageVector = if (selected) replyDestination.selectedIcon else replyDestination.unselectedIcon,
                             contentDescription = stringResource(
                                 id = replyDestination.iconTextId
                             )
@@ -104,10 +104,10 @@ fun AppBottomNavigationBar(
         windowInsets = NavigationBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
     ) {
         TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
+            val selected = selectedDestination == replyDestination.route
             NavigationBarItem(
-                selected = selectedDestination == replyDestination.route,
+                selected = selected,
                 onClick = { navigateToTopLevelDestination(replyDestination) },
-                alwaysShowLabel = selectedDestination != replyDestination.route,
                 label = {
                     Text(
                         text = stringResource(id = replyDestination.iconTextId),
@@ -118,7 +118,7 @@ fun AppBottomNavigationBar(
                 },
                 icon = {
                     Icon(
-                        imageVector = replyDestination.selectedIcon,
+                        imageVector = if (selected) replyDestination.selectedIcon else replyDestination.unselectedIcon,
                         contentDescription = stringResource(id = replyDestination.iconTextId)
                     )
                 }
@@ -162,7 +162,8 @@ fun PermanentNavigationDrawerContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
-                        NavigationDrawerItem(selected = selectedDestination == replyDestination.route,
+                        val selected = selectedDestination == replyDestination.route
+                        NavigationDrawerItem(selected = selected,
                             label = {
                                 Text(
                                     text = stringResource(id = replyDestination.iconTextId),
@@ -171,7 +172,7 @@ fun PermanentNavigationDrawerContent(
                             },
                             icon = {
                                 Icon(
-                                    imageVector = replyDestination.selectedIcon,
+                                    imageVector = if (selected) replyDestination.selectedIcon else replyDestination.unselectedIcon,
                                     contentDescription = stringResource(
                                         id = replyDestination.iconTextId
                                     )
@@ -237,7 +238,8 @@ fun ModalNavigationDrawerContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
-                        NavigationDrawerItem(selected = selectedDestination == replyDestination.route,
+                        val selected = selectedDestination == replyDestination.route
+                        NavigationDrawerItem(selected = selected,
                             label = {
                                 Text(
                                     text = stringResource(id = replyDestination.iconTextId),
@@ -246,7 +248,11 @@ fun ModalNavigationDrawerContent(
                             },
                             icon = {
                                 Icon(
-                                    imageVector = replyDestination.selectedIcon,
+                                    imageVector = if (selected) {
+                                        replyDestination.selectedIcon
+                                    } else {
+                                        replyDestination.unselectedIcon
+                                    },
                                     contentDescription = stringResource(
                                         id = replyDestination.iconTextId
                                     )
