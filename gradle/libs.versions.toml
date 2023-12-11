@@ -1,4 +1,5 @@
 [versions]
+accompanistAdaptive = "0.26.2-beta"
 agp = "8.2.0"
 kotlin = "1.9.0"
 coreKtx = "1.12.0"
@@ -24,9 +25,13 @@ mididriver = "v1.25"
 datastorePreferences = "1.0.0"
 lifecycleRuntimeCompose = "2.6.2"
 kotlinxCoroutinesTest = "1.8.0-RC"
+androidx-lifecycle-compose = "2.6.2"
+androidx-lifecycle-runtime-compose = "2.6.2"
+androidx-navigation = "2.7.5"
 
 [libraries]
 # Android & Compose
+accompanist-adaptive = { module = "com.google.accompanist:accompanist-adaptive", version.ref = "accompanistAdaptive" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -42,6 +47,9 @@ androidx-material-ripple = { group = "androidx.compose.material", name = "materi
 androidx-material3-window = { group = "androidx.compose.material3", name = "material3-window-size-class", version.ref = "material3WindowSizeClass" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+androidx-lifecycle-viewModelCompose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle-compose" }
+androidx-lifecycle-runtime = "androidx.lifecycle:lifecycle-runtime-ktx:2.6.2"
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

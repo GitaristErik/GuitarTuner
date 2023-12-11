@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">GuitarTuner</string>
+
+<!--    Navigation -->
+    <string name="navigation_drawer">Navigation Drawer</string>
+    <string name="tab_tuner">Tuner</string>
+    <string name="tab_metronome">Metronome</string>
+    <string name="tab_gauge">Strings Gauge</string>
+    <string name="tab_settings">Settings"</string>
+
+<!--    Empty page -->
+    <string name="empty_screen_title">Screen under construction</string>
+    <string name="empty_screen_subtitle">This screen is still under construction. This sample will help you learn about adaptive layouts in Jetpack Compose</string>
+
+
 </resources>

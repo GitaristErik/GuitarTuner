@@ -72,9 +72,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.material.ripple)
     implementation(libs.androidx.material3.window)
-
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.lifecycle.runtime.compose)
 
     // Open Source Licenses
     implementation(libs.aboutlibraries.core)
@@ -90,6 +88,13 @@ dependencies {
     implementation(libs.audio.mididriver) {
         version { branch = "master" }
     }
+
+    // Other
+    implementation(libs.accompanist.adaptive)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.lifecycle.viewModelCompose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.navigation.compose)
 
     // Testing
     testImplementation(libs.kotlinx.coroutines.test)
