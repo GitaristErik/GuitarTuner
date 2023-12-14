@@ -12,5 +12,14 @@
     <string name="empty_screen_title">Screen under construction</string>
     <string name="empty_screen_subtitle">This screen is still under construction. This sample will help you learn about adaptive layouts in Jetpack Compose</string>
 
+<!--    Tuner -->
+<!--    Tuner: Chart -->
+    <string name="listening">Listening</string>
+    <string name="in_tune">In Tune</string>
+    <string name="tune_up">Tune Up</string>
+    <string name="tune_down">Tune Down</string>
+    <string name="semitones">Semitones</string>
+    <string name="cents">Cents</string>
+    <string name="auto_detect_label">Auto</string>
 
 </resources>

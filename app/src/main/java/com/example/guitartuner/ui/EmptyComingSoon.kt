@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.guitartuner.R
+import com.rohankhayech.android.util.ui.preview.ThemePreview
 
 @Composable
 fun EmptyComingSoon(
@@ -41,7 +42,7 @@ fun EmptyComingSoon(
     }
 }
 
-@Preview
+@ThemePreview
 @Composable
 fun ComingSoonPreview() {
     EmptyComingSoon()

@@ -3,12 +3,18 @@ package com.example.guitartuner.ui.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -62,4 +68,27 @@ fun GuitarTunerTheme(
         typography = Typography,
         content = content
     )
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Composable
+fun PreviewWindowWrapper(content: @Composable (WindowSizeClass) -> Unit) {
+    val windowSize = WindowSizeClass.calculateFromSize(
+        with(LocalConfiguration.current) {
+            DpSize(width = screenWidthDp.dp, height = screenHeightDp.dp)
+        }
+    )
+
+    GuitarTunerTheme {
+        content(windowSize)
+    }
+}
+
+@Composable
+fun PreviewWrapper(content: @Composable () -> Unit) {
+    GuitarTunerTheme {
+        Surface {
+            content()
+        }
+    }
 }
