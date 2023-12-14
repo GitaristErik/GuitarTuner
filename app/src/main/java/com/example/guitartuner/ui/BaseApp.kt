@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.PermanentNavigationDrawer
@@ -34,6 +36,7 @@ import com.example.guitartuner.ui.navigation.AppBottomNavigationBar
 import com.example.guitartuner.ui.navigation.AppNavigationActions
 import com.example.guitartuner.ui.navigation.AppNavigationRail
 import com.example.guitartuner.ui.navigation.AppRoute
+import com.example.guitartuner.ui.navigation.AppTopAppBar
 import com.example.guitartuner.ui.navigation.AppTopLevelDestination
 import com.example.guitartuner.ui.navigation.ModalNavigationDrawerContent
 import com.example.guitartuner.ui.navigation.PermanentNavigationDrawerContent
@@ -95,7 +98,7 @@ fun BaseApp(
             navigationType = if (foldingDevicePosture is DevicePosture.BookPosture) {
                 NavigationType.NAVIGATION_RAIL
             } else {
-                if(windowSize.heightSizeClass == WindowHeightSizeClass.Compact) {
+                if (windowSize.heightSizeClass == WindowHeightSizeClass.Compact) {
                     NavigationType.NAVIGATION_RAIL
                 } else {
                     NavigationType.PERMANENT_NAVIGATION_DRAWER
@@ -197,6 +200,7 @@ private fun AppNavigationWrapper(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppContent(
     modifier: Modifier = Modifier,
@@ -222,19 +226,30 @@ fun AppContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.inverseOnSurface)
         ) {
-            AppNavHost(
-                navController = navController,
-                appNavigationInfo = appNavigationInfo,
-                modifier = Modifier.weight(1f),
-            )
-            AnimatedVisibility(
-                visible = appNavigationInfo.navigationType == NavigationType.BOTTOM_NAVIGATION
-            ) {
-                AppBottomNavigationBar(
-                    selectedDestination = selectedDestination,
-                    navigateToTopLevelDestination = navigateToTopLevelDestination
+            Scaffold(
+                topBar = {
+                    AppTopAppBar(selectedDestination)
+                },
+                bottomBar = {
+                    AnimatedVisibility(
+                        visible = appNavigationInfo.navigationType == NavigationType.BOTTOM_NAVIGATION
+                    ) {
+                        AppBottomNavigationBar(
+                            selectedDestination = selectedDestination,
+                            navigateToTopLevelDestination = navigateToTopLevelDestination
+                        )
+                    }
+                }
+            ) { innerPaddingModifier ->
+                AppNavHost(
+                    navController = navController,
+                    appNavigationInfo = appNavigationInfo,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(innerPaddingModifier),
                 )
             }
+
         }
     }
 }
@@ -256,7 +271,10 @@ private fun AppNavHost(
             )*/
 //            EmptyComingSoon()
             Box(modifier = Modifier.fillMaxSize(), Alignment.Center) {
-                TuningDisplay(noteOffset = remember { mutableDoubleStateOf(0.09) }, TuningDisplayType.SEMITONES) {}
+                TuningDisplay(
+                    noteOffset = remember { mutableDoubleStateOf(0.09) },
+                    TuningDisplayType.SEMITONES
+                ) {}
             }
         }
         composable(AppRoute.METRONOME) {
