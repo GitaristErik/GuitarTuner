@@ -33,7 +33,7 @@ import com.example.guitartuner.R
 import com.example.guitartuner.domain.entity.tuner.Notation
 import com.example.guitartuner.domain.entity.tuner.Note
 import com.example.guitartuner.domain.entity.tuner.Pitch
-import com.example.guitartuner.ui.model.PitchButtonsUIState
+import com.example.guitartuner.ui.model.TuneButtonsUIState
 import com.example.guitartuner.ui.theme.PreviewWrapper
 import com.rohankhayech.android.util.ui.preview.ThemePreview
 
@@ -50,7 +50,7 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
 @Composable
 fun StringControls(
     inline: Boolean,
-    buttonsUIState: PitchButtonsUIState,
+    buttonsUIState: TuneButtonsUIState,
     selectedString: Int?,
     tuned: BooleanArray?,
     onSelect: (Int) -> Unit,
@@ -95,7 +95,7 @@ fun StringControls(
  */
 @Composable
 private fun SideBySideStringControls(
-    buttonsUIState: PitchButtonsUIState,
+    buttonsUIState: TuneButtonsUIState,
     selectedString: Int?,
     tuned: BooleanArray?,
     onSelect: (Int) -> Unit,
@@ -154,7 +154,7 @@ private fun SideBySideStringControls(
  */
 @Composable
 private fun InlineStringControls(
-    buttonsUIState: PitchButtonsUIState,
+    buttonsUIState: TuneButtonsUIState,
     selectedString: Int?,
     tuned: BooleanArray?,
     onSelect: (Int) -> Unit,
@@ -190,7 +190,7 @@ private fun InlineStringControls(
 @Composable
 fun CompactStringSelector(
     modifier: Modifier = Modifier,
-    buttonsUIState: PitchButtonsUIState,
+    buttonsUIState: TuneButtonsUIState,
     selectedString: Int,
     tuned: BooleanArray,
     onSelect: (Int) -> Unit,
@@ -238,7 +238,7 @@ fun CompactStringSelector(
 @Composable
 private fun StringControl(
     pitchKey: Int,
-    buttonsUIState: PitchButtonsUIState,
+    buttonsUIState: TuneButtonsUIState,
     selected: Boolean,
     tuned: Boolean,
     onSelect: (Int) -> Unit,
@@ -288,7 +288,7 @@ private fun StringControl(
 @Composable
 private fun StringSelectionButton(
     pitchKey: Int,
-    buttonsUIState: PitchButtonsUIState,
+    buttonsUIState: TuneButtonsUIState,
     tuned: Boolean,
     selected: Boolean,
     onSelect: (Int) -> Unit,
@@ -341,7 +341,7 @@ private fun StringSelectionButton(
 // Previews
 
 private val previewButtonsUIState by lazy {
-    PitchButtonsUIState(
+    TuneButtonsUIState(
         tuningName = "EBGDAE",
         pitchList = listOf(
             Pitch(0.0, Note.E, 2),

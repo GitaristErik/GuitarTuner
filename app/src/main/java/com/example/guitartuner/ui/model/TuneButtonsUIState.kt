@@ -3,7 +3,7 @@ package com.example.guitartuner.ui.model
 import com.example.guitartuner.domain.entity.tuner.Notation
 import com.example.guitartuner.domain.entity.tuner.Pitch
 
-data class PitchButtonsUIState(
+data class TuneButtonsUIState(
     val tuningName: String,
     val pitchMap: Map<Int, Pitch>,
     val notation: Notation
@@ -20,7 +20,7 @@ data class PitchButtonsUIState(
     )
 
     companion object {
-        val initialState = PitchButtonsUIState(
+        val initialState = TuneButtonsUIState(
             tuningName = "",
             pitchMap = emptyMap(),
             notation = Notation.English
