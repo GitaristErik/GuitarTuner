@@ -230,7 +230,7 @@ fun TuningItem(
     }
 }
 
-private val previewTuningState: Map<Int, TuningUIState> by lazy {
+internal val previewTuningState: Map<Int, TuningUIState> by lazy {
     listOf(
         "Standard" to "E2, A2, D3, G3, B3, E4",
         "Half Step Down (D#)" to "D#2, G#2, C#3, F#3, A#3, D#4",

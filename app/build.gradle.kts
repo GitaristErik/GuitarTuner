@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.androidx.material.ripple)
     implementation(libs.androidx.material3.window)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.constraintlayout.compose)
 
     // Open Source Licenses
     implementation(libs.aboutlibraries.core)

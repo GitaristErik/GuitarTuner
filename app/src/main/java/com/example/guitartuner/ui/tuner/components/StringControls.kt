@@ -340,8 +340,9 @@ private fun StringSelectionButton(
 
 // Previews
 
-private val previewButtonsUIState by lazy {
+internal val previewButtonsUIState by lazy {
     TuneButtonsUIState(
+        tuningId = 1,
         tuningName = "EBGDAE",
         pitchList = listOf(
             Pitch(0.0, Note.E, 2),
