@@ -2,7 +2,6 @@ package com.example.guitartuner.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,10 +18,8 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -31,16 +28,15 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.window.layout.DisplayFeature
 import androidx.window.layout.FoldingFeature
-import com.example.guitartuner.domain.entity.settings.TuningDisplayType
 import com.example.guitartuner.ui.navigation.AppBottomNavigationBar
 import com.example.guitartuner.ui.navigation.AppNavigationActions
 import com.example.guitartuner.ui.navigation.AppNavigationRail
 import com.example.guitartuner.ui.navigation.AppRoute
-import com.example.guitartuner.ui.navigation.AppTopAppBar
 import com.example.guitartuner.ui.navigation.AppTopLevelDestination
 import com.example.guitartuner.ui.navigation.ModalNavigationDrawerContent
 import com.example.guitartuner.ui.navigation.PermanentNavigationDrawerContent
-import com.example.guitartuner.ui.tuner.components.TuningDisplay
+import com.example.guitartuner.ui.navigation.TopAppBarProvider
+import com.example.guitartuner.ui.tuner.TunerScreen
 import com.example.guitartuner.ui.utils.AppNavigationInfo
 import com.example.guitartuner.ui.utils.ContentType
 import com.example.guitartuner.ui.utils.DevicePosture
@@ -228,7 +224,7 @@ fun AppContent(
         ) {
             Scaffold(
                 topBar = {
-                    AppTopAppBar(selectedDestination)
+                    TopAppBarProvider.defaultTopAppBar(selectedDestination)
                 },
                 bottomBar = {
                     AnimatedVisibility(
@@ -249,7 +245,6 @@ fun AppContent(
                         .padding(innerPaddingModifier),
                 )
             }
-
         }
     }
 }
@@ -266,16 +261,10 @@ private fun AppNavHost(
         startDestination = AppRoute.TUNER,
     ) {
         composable(AppRoute.TUNER) {
-/*            TunerScreen(
+            TunerScreen(
                 appNavigationInfo = appNavigationInfo,
-            )*/
-//            EmptyComingSoon()
-            Box(modifier = Modifier.fillMaxSize(), Alignment.Center) {
-                TuningDisplay(
-                    noteOffset = remember { mutableDoubleStateOf(0.09) },
-                    TuningDisplayType.SEMITONES
-                ) {}
-            }
+                navigateToSettingsTunings = { navController.navigate(AppRoute.SETTINGS_TUNINGS) },
+            )
         }
         composable(AppRoute.METRONOME) {
             EmptyComingSoon()
@@ -284,6 +273,9 @@ private fun AppNavHost(
             EmptyComingSoon()
         }
         composable(AppRoute.SETTINGS) {
+            EmptyComingSoon()
+        }
+        composable(AppRoute.SETTINGS_TUNINGS) {
             EmptyComingSoon()
         }
     }

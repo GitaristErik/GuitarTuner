@@ -19,6 +19,7 @@ object AppRoute {
     const val GAUGE = "Gauge"
     const val METRONOME = "Metronome"
     const val SETTINGS = "Settings"
+    const val SETTINGS_TUNINGS = "Settings:Tunings"
 }
 
 data class AppTopLevelDestination(

@@ -1,6 +1,5 @@
 package com.example.guitartuner.ui.navigation
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MenuOpen
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +30,6 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -128,32 +125,6 @@ fun AppBottomNavigationBar(
             )
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppTopAppBar(
-    selectedDestination: String,
-) {
-    TopAppBar(
-        modifier = Modifier.fillMaxWidth(),
-        title = {
-            AnimatedContent(
-                targetState = selectedDestination,
-                label = "Top App Bar"
-            ) { destination ->
-                Text(
-                    text = stringResource(
-                        id = with(TOP_LEVEL_DESTINATIONS) {
-                            firstOrNull { it.route == destination } ?: first()
-                        }.iconTextId
-                    )
-                )
-            }
-        },
-        navigationIcon = {},
-        actions = {},
-    )
 }
 
 @Composable
