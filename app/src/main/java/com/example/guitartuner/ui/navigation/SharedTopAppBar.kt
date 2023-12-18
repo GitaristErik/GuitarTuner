@@ -15,7 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
-import com.example.guitartuner.ui.navigation.AppBarScreenRoute.Companion.getAppBarScreen
+import com.example.guitartuner.ui.navigation.AppBarRoute.Companion.getAppBarScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn

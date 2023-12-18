@@ -412,13 +412,14 @@ private fun AppBar(
  * @param onConfigurePressed Called when the configure button is pressed.
  * @param tuning Currently selected tuning.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CompactAppBar(
     onSettingsPressed: () -> Unit,
     onConfigurePressed: () -> Unit,
     tuning: TuningUIState,
 ) {
-    TopAppBar(title = {
+       TopAppBar(title = {
         TuningItem(tuning = tuning, fontWeight = FontWeight.Bold)
     }, actions = {
         // Configure tuning button.

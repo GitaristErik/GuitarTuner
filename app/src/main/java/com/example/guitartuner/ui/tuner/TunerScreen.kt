@@ -9,8 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.example.guitartuner.domain.entity.settings.TunerPreferences
+import com.example.guitartuner.ui.navigation.AppBarScreen
 import com.example.guitartuner.ui.navigation.AppBarState
-import com.example.guitartuner.ui.navigation.TunerAppBar
 import com.example.guitartuner.ui.tuner.components.previewButtonsUIState
 import com.example.guitartuner.ui.tuner.components.previewTuningState
 import com.example.guitartuner.ui.utils.AppNavigationInfo
@@ -27,11 +27,11 @@ fun TunerScreen(
     Column(modifier = modifier.fillMaxSize()) {
 //        Spacer(modifier = Modifier.height(32.dp))
 
-        val screen = appBarState.currentAppBarScreen as? TunerAppBar
+        val screen = appBarState.currentAppBarScreen as? AppBarScreen.TunerAppBar
         LaunchedEffect(key1 = screen) {
             screen?.buttons?.onEach { button ->
                 when (button) {
-                    TunerAppBar.AppBarIcons.Settings -> navigateToSettingsTunings()
+                    AppBarScreen.TunerAppBar.AppBarIcons.Settings -> navigateToSettingsTunings()
                 }
             }?.launchIn(this)
         }

@@ -48,9 +48,9 @@ import com.example.guitartuner.ui.utils.NavigationContentPosition
 
 @Composable
 fun AppNavigationRail(
-    selectedDestination: String,
+    selectedDestination: AppRoutRoot,
     navigationContentPosition: NavigationContentPosition,
-    navigateToTopLevelDestination: (AppTopLevelDestination) -> Unit,
+    navigateToTopLevelDestination: (TopLevelDestination) -> Unit,
     onDrawerClicked: () -> Unit = {},
 ) {
     NavigationRail(
@@ -77,15 +77,15 @@ fun AppNavigationRail(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
-                val selected = selectedDestination == replyDestination.route
+            TopLevelDestination.entries.forEach { appDestination ->
+                val selected = selectedDestination == appDestination.route
                 NavigationRailItem(selected = selected,
-                    onClick = { navigateToTopLevelDestination(replyDestination) },
+                    onClick = { navigateToTopLevelDestination(appDestination) },
                     icon = {
                         Icon(
-                            imageVector = if (selected) replyDestination.selectedIcon else replyDestination.unselectedIcon,
+                            imageVector = if (selected) appDestination.selectedIcon else appDestination.unselectedIcon,
                             contentDescription = stringResource(
-                                id = replyDestination.iconTextId
+                                id = appDestination.iconTextId
                             )
                         )
                     }
@@ -97,20 +97,21 @@ fun AppNavigationRail(
 
 @Composable
 fun AppBottomNavigationBar(
-    selectedDestination: String, navigateToTopLevelDestination: (AppTopLevelDestination) -> Unit
+    selectedDestination: AppRoutRoot,
+    navigateToTopLevelDestination: (TopLevelDestination) -> Unit
 ) {
     NavigationBar(
         modifier = Modifier.fillMaxWidth(),
         windowInsets = NavigationBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
     ) {
-        TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
-            val selected = selectedDestination == replyDestination.route
+        TopLevelDestination.entries.forEach { appDestination ->
+            val selected = selectedDestination == appDestination.route
             NavigationBarItem(
                 selected = selected,
-                onClick = { navigateToTopLevelDestination(replyDestination) },
+                onClick = { navigateToTopLevelDestination(appDestination) },
                 label = {
                     Text(
-                        text = stringResource(id = replyDestination.iconTextId),
+                        text = stringResource(id = appDestination.iconTextId),
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,
                         softWrap = false
@@ -118,8 +119,8 @@ fun AppBottomNavigationBar(
                 },
                 icon = {
                     Icon(
-                        imageVector = if (selected) replyDestination.selectedIcon else replyDestination.unselectedIcon,
-                        contentDescription = stringResource(id = replyDestination.iconTextId)
+                        imageVector = if (selected) appDestination.selectedIcon else appDestination.unselectedIcon,
+                        contentDescription = stringResource(id = appDestination.iconTextId)
                     )
                 }
             )
@@ -129,9 +130,9 @@ fun AppBottomNavigationBar(
 
 @Composable
 fun PermanentNavigationDrawerContent(
-    selectedDestination: String,
+    selectedDestination: AppRoutRoot,
     navigationContentPosition: NavigationContentPosition,
-    navigateToTopLevelDestination: (AppTopLevelDestination) -> Unit,
+    navigateToTopLevelDestination: (TopLevelDestination) -> Unit,
 ) {
     PermanentDrawerSheet(
         modifier = Modifier.sizeIn(minWidth = 200.dp, maxWidth = 300.dp),
@@ -161,27 +162,27 @@ fun PermanentNavigationDrawerContent(
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
-                        val selected = selectedDestination == replyDestination.route
+                    TopLevelDestination.entries.forEach { appDestination ->
+                        val selected = selectedDestination == appDestination.route
                         NavigationDrawerItem(selected = selected,
                             label = {
                                 Text(
-                                    text = stringResource(id = replyDestination.iconTextId),
+                                    text = stringResource(id = appDestination.iconTextId),
                                     modifier = Modifier.padding(horizontal = 16.dp)
                                 )
                             },
                             icon = {
                                 Icon(
-                                    imageVector = if (selected) replyDestination.selectedIcon else replyDestination.unselectedIcon,
+                                    imageVector = if (selected) appDestination.selectedIcon else appDestination.unselectedIcon,
                                     contentDescription = stringResource(
-                                        id = replyDestination.iconTextId
+                                        id = appDestination.iconTextId
                                     )
                                 )
                             },
                             colors = NavigationDrawerItemDefaults.colors(
                                 unselectedContainerColor = Color.Transparent
                             ),
-                            onClick = { navigateToTopLevelDestination(replyDestination) })
+                            onClick = { navigateToTopLevelDestination(appDestination) })
                     }
                 }
             }, measurePolicy = navigationMeasurePolicy(navigationContentPosition)
@@ -191,9 +192,9 @@ fun PermanentNavigationDrawerContent(
 
 @Composable
 fun ModalNavigationDrawerContent(
-    selectedDestination: String,
+    selectedDestination: AppRoutRoot,
     navigationContentPosition: NavigationContentPosition,
-    navigateToTopLevelDestination: (AppTopLevelDestination) -> Unit,
+    navigateToTopLevelDestination: (TopLevelDestination) -> Unit,
     onDrawerClicked: () -> Unit = {}
 ) {
     ModalDrawerSheet(
@@ -237,31 +238,31 @@ fun ModalNavigationDrawerContent(
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    TOP_LEVEL_DESTINATIONS.forEach { replyDestination ->
-                        val selected = selectedDestination == replyDestination.route
+                    TopLevelDestination.entries.forEach { appDestination ->
+                        val selected = selectedDestination == appDestination.route
                         NavigationDrawerItem(selected = selected,
                             label = {
                                 Text(
-                                    text = stringResource(id = replyDestination.iconTextId),
+                                    text = stringResource(id = appDestination.iconTextId),
                                     modifier = Modifier.padding(horizontal = 16.dp)
                                 )
                             },
                             icon = {
                                 Icon(
                                     imageVector = if (selected) {
-                                        replyDestination.selectedIcon
+                                        appDestination.selectedIcon
                                     } else {
-                                        replyDestination.unselectedIcon
+                                        appDestination.unselectedIcon
                                     },
                                     contentDescription = stringResource(
-                                        id = replyDestination.iconTextId
+                                        id = appDestination.iconTextId
                                     )
                                 )
                             },
                             colors = NavigationDrawerItemDefaults.colors(
                                 unselectedContainerColor = Color.Transparent
                             ),
-                            onClick = { navigateToTopLevelDestination(replyDestination) })
+                            onClick = { navigateToTopLevelDestination(appDestination) })
                     }
                 }
             }, measurePolicy = navigationMeasurePolicy(navigationContentPosition)

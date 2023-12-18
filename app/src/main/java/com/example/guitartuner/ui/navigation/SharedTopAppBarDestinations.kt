@@ -11,37 +11,40 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.example.guitartuner.R
+import com.example.guitartuner.ui.navigation.AppBarScreen.MainAppBar
+import com.example.guitartuner.ui.navigation.AppBarScreen.MainAppBar.TitleType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-sealed interface AppBarScreen {
-    val route: AppBarScreenRoute
-    val isAppBarVisible: Boolean
-    val navigationIcon: ImageVector?
-    val navigationIconContentDescription: String?
-    val onNavigationIconClick: (() -> Unit)?
-    val title: @Composable () -> Unit // String
-    val actions: @Composable RowScope.() -> Unit // List<ActionMenuItem>
-}
-
-enum class AppBarScreenRoute(val route: String) {
-    HomeRouteAppBar(AppRoute.TUNER) {
-        override val screen: AppBarScreen by lazy { TunerAppBar() }
+enum class AppBarRoute(val route: String) {
+    GaugeAppBar(AppRoutScreen.Gauge.route) {
+        override val screen: AppBarScreen by lazy {
+            MainAppBar(this, TitleType.TitleResId(R.string.tab_gauge))
+        }
     },
-    SettingsRouteAppBar(AppRoute.SETTINGS) {
-        override val screen: AppBarScreen by lazy { SettingsAppBar() }
-    },/*
-        ManyOptionsRouteAppBar("manyOptions") {
-            override val screen: AppBarScreen by lazy { ManyOptionsAppBarScreen() }
-        },
-        NoAppBarRouteAppBar("noAppBarRoute") {
-            override val screen: AppBarScreen by lazy { NoAppBar() }
-        }*/;
+    MetronomeAppBar(AppRoutScreen.Metronome.route) {
+        override val screen: AppBarScreen by lazy {
+            MainAppBar(this, TitleType.TitleResId(R.string.tab_metronome))
+        }
+    },
+    SettingsAppBar(AppRoutScreen.SettingsAll.route) {
+        override val screen: AppBarScreen by lazy {
+            MainAppBar(this, TitleType.TitleResId(R.string.tab_settings))
+        }
+    },
+
+    TunerAppBar(AppRoutScreen.Tuner.route) {
+        override val screen: AppBarScreen by lazy { AppBarScreen.TunerAppBar() }
+    },
+    SettingsTuningsAppBar(AppRoutScreen.SettingsTunings.route) {
+        override val screen: AppBarScreen by lazy { AppBarScreen.SettingsAppBar() }
+    };
 
     abstract val screen: AppBarScreen
 
     companion object {
+
         @JvmStatic
         fun getScreenFromRoute(route: String?): AppBarScreen? =
             entries.find { it.route == route }?.screen
@@ -51,55 +54,77 @@ enum class AppBarScreenRoute(val route: String) {
     }
 }
 
+sealed class AppBarScreen {
+    abstract val route: AppBarRoute
+    abstract val title: @Composable () -> Unit // String
+    open val actions: @Composable RowScope.() -> Unit = {} // List<ActionMenuItem>
 
-class TunerAppBar : AppBarScreen {
-    enum class AppBarIcons {
-        Settings
+    open val isAppBarVisible: Boolean = true
+    open val navigationIcon: ImageVector? = null
+    open val navigationIconContentDescription: String? = null
+    open val onNavigationIconClick: (() -> Unit)? = null
+
+    abstract class AppBarScreenWithButtons<E : Enum<E>> : AppBarScreen() {
+        protected val _buttons = MutableSharedFlow<E>(extraBufferCapacity = 1)
+        val buttons: Flow<E> = _buttons.asSharedFlow()
     }
 
-    private val _buttons = MutableSharedFlow<AppBarIcons>(extraBufferCapacity = 1)
-    val buttons: Flow<AppBarIcons> = _buttons.asSharedFlow()
-
-    override val route: AppBarScreenRoute = AppBarScreenRoute.HomeRouteAppBar
-    override val isAppBarVisible: Boolean = true
-    override val navigationIcon: ImageVector? = null
-    override val onNavigationIconClick: (() -> Unit)? = null
-    override val navigationIconContentDescription: String? = null
-    override val title = @Composable { Text(stringResource(R.string.tab_tuner)) }
-    override val actions: @Composable (RowScope.() -> Unit) = {
-        IconButton(onClick = { _buttons.tryEmit(AppBarIcons.Settings) }) {
-            Icon(Icons.Default.Tune, stringResource(R.string.configure_tuning))
-        }
-    }/*    override val actions: List<ActionMenuItem> = listOf(
-            ActionMenuItem.IconMenuItem.AlwaysShown(
-                title = stringResource(R.string.configure_tuning),
-                onClick = { _buttons.tryEmit(AppBarIcons.Settings) },
-                icon = Icons.Filled.Tune,
-                contentDescription = null,
+    class MainAppBar(
+        override val route: AppBarRoute,
+        private val stringTitle: TitleType
+    ) : AppBarScreen() {
+        override val title = @Composable {
+            Text(
+                when (stringTitle) {
+                    is TitleType.TitleString -> stringTitle.title
+                    is TitleType.TitleResId -> stringResource(stringTitle.title)
+                }
             )
-        )*/
-}
+        }
 
+        init {
+            println("MainAppBar init | title = $title | route = $route")
+        }
 
-class SettingsAppBar : AppBarScreen {
-    override val route: AppBarScreenRoute = AppBarScreenRoute.SettingsRouteAppBar
-    override val isAppBarVisible: Boolean = true
-    override val navigationIcon: ImageVector = Icons.Default.ArrowBack
-    override val onNavigationIconClick: () -> Unit = {
-        _buttons.tryEmit(AppBarIcons.NavigationIcon)
-    }
-    override val navigationIconContentDescription: String? = null
-    override val title = @Composable { Text(text = "Settings") }
-    override val actions: @Composable (RowScope.() -> Unit) = {}
+        sealed interface TitleType {
 
-    enum class AppBarIcons {
-        NavigationIcon
+            @JvmInline
+            value class TitleString(val title: String) : TitleType
+
+            @JvmInline
+            value class TitleResId(val title: Int) : TitleType
+        }
     }
 
-    private val _buttons = MutableSharedFlow<AppBarIcons>(extraBufferCapacity = 1)
-    val buttons: Flow<AppBarIcons> = _buttons.asSharedFlow()
-}
+    class TunerAppBar : AppBarScreenWithButtons<TunerAppBar.AppBarIcons>() {
+        enum class AppBarIcons { Settings }
 
+        override val route: AppBarRoute = AppBarRoute.TunerAppBar
+        override val title = @Composable { Text(stringResource(R.string.tab_tuner)) }
+        override val actions: @Composable (RowScope.() -> Unit) = {
+            IconButton(onClick = { _buttons.tryEmit(AppBarIcons.Settings) }) {
+                Icon(Icons.Default.Tune, stringResource(R.string.tuner_settings))
+            }
+        }
+    }
+
+    class SettingsAppBar : AppBarScreenWithButtons<SettingsAppBar.AppBarIcons>() {
+        enum class AppBarIcons { NavigationIcon }
+
+        init {
+            println("SettingsAppBar init")
+        }
+
+        override val route: AppBarRoute = AppBarRoute.SettingsTuningsAppBar
+
+        override val title = @Composable { Text(text = stringResource(R.string.tuner_settings)) }
+        override val navigationIcon: ImageVector = Icons.Default.ArrowBack
+        override val navigationIconContentDescription: String? = null
+        override val onNavigationIconClick: () -> Unit = {
+            _buttons.tryEmit(AppBarIcons.NavigationIcon)
+        }
+    }
+}
 
 /*
 

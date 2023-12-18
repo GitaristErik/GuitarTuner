@@ -28,20 +28,23 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
 import androidx.window.layout.DisplayFeature
 import androidx.window.layout.FoldingFeature
+import com.example.guitartuner.ui.navigation.AppBarScreen
 import com.example.guitartuner.ui.navigation.AppBarState
 import com.example.guitartuner.ui.navigation.AppBottomNavigationBar
-import com.example.guitartuner.ui.navigation.AppNavigationActions
 import com.example.guitartuner.ui.navigation.AppNavigationRail
-import com.example.guitartuner.ui.navigation.AppRoute
-import com.example.guitartuner.ui.navigation.AppTopLevelDestination
+import com.example.guitartuner.ui.navigation.AppRoutRoot
+import com.example.guitartuner.ui.navigation.AppRoutScreen
 import com.example.guitartuner.ui.navigation.ModalNavigationDrawerContent
 import com.example.guitartuner.ui.navigation.PermanentNavigationDrawerContent
-import com.example.guitartuner.ui.navigation.SettingsAppBar
 import com.example.guitartuner.ui.navigation.SharedTopAppBar
+import com.example.guitartuner.ui.navigation.TopLevelDestination
+import com.example.guitartuner.ui.navigation.currentRouteAsState
+import com.example.guitartuner.ui.navigation.currentScreenAsState
+import com.example.guitartuner.ui.navigation.navigateToRouteRoot
 import com.example.guitartuner.ui.navigation.rememberAppBarState
 import com.example.guitartuner.ui.tuner.TunerScreen
 import com.example.guitartuner.ui.utils.AppNavigationInfo
@@ -75,11 +78,11 @@ fun BaseApp(
     val foldingFeature = displayFeatures.filterIsInstance<FoldingFeature>().firstOrNull()
 
     val foldingDevicePosture = when {
-        isBookPosture(foldingFeature) ->
-            DevicePosture.BookPosture(foldingFeature.bounds)
+        isBookPosture(foldingFeature) -> DevicePosture.BookPosture(foldingFeature.bounds)
 
-        isSeparating(foldingFeature) ->
-            DevicePosture.Separating(foldingFeature.bounds, foldingFeature.orientation)
+        isSeparating(foldingFeature) -> DevicePosture.Separating(
+            foldingFeature.bounds, foldingFeature.orientation
+        )
 
         else -> DevicePosture.NormalPosture
     }
@@ -127,8 +130,7 @@ fun BaseApp(
             NavigationContentPosition.TOP
         }
 
-        WindowHeightSizeClass.Medium,
-        WindowHeightSizeClass.Expanded -> {
+        WindowHeightSizeClass.Medium, WindowHeightSizeClass.Expanded -> {
             NavigationContentPosition.CENTER
         }
 
@@ -156,11 +158,9 @@ private fun AppNavigationWrapper(
     val scope = rememberCoroutineScope()
 
     val navController = rememberNavController()
-    val navigationActions = remember(navController) {
-        AppNavigationActions(navController)
-    }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val selectedDestination = navBackStackEntry?.destination?.route ?: AppRoute.TUNER
+    val selectedDestination by navController.currentScreenAsState()
+    val currentRoute by navController.currentRouteAsState()
+    val navigateTo: (TopLevelDestination) -> Unit = { navController.navigateToRouteRoot(it.route) }
 
     if (appNavigationInfo.navigationType == NavigationType.PERMANENT_NAVIGATION_DRAWER) {
         // TODO check on custom width of PermanentNavigationDrawer: b/232495216
@@ -168,27 +168,25 @@ private fun AppNavigationWrapper(
             PermanentNavigationDrawerContent(
                 selectedDestination = selectedDestination,
                 navigationContentPosition = appNavigationInfo.navigationContentPosition,
-                navigateToTopLevelDestination = navigationActions::navigateTo,
+                navigateToTopLevelDestination = navigateTo,
             )
         }) {
             AppContent(
                 appNavigationInfo = appNavigationInfo,
                 navController = navController,
                 selectedDestination = selectedDestination,
-                navigateToTopLevelDestination = navigationActions::navigateTo,
+                navigateToTopLevelDestination = navigateTo,
             )
         }
     } else {
         ModalNavigationDrawer(
             drawerContent = {
-                ModalNavigationDrawerContent(
-                    selectedDestination = selectedDestination,
+                ModalNavigationDrawerContent(selectedDestination = selectedDestination,
                     navigationContentPosition = appNavigationInfo.navigationContentPosition,
-                    navigateToTopLevelDestination = navigationActions::navigateTo,
+                    navigateToTopLevelDestination = navigateTo,
                     onDrawerClicked = {
                         scope.launch { drawerState.close() }
-                    }
-                )
+                    })
             },
             drawerState = drawerState,
         ) {
@@ -196,7 +194,7 @@ private fun AppNavigationWrapper(
                 appNavigationInfo = appNavigationInfo,
                 navController = navController,
                 selectedDestination = selectedDestination,
-                navigateToTopLevelDestination = navigationActions::navigateTo,
+                navigateToTopLevelDestination = navigateTo,
                 onDrawerClicked = {
                     scope.launch { drawerState.open() }
                 },
@@ -211,8 +209,8 @@ fun AppContent(
     modifier: Modifier = Modifier,
     appNavigationInfo: AppNavigationInfo,
     navController: NavHostController,
-    selectedDestination: String,
-    navigateToTopLevelDestination: (AppTopLevelDestination) -> Unit,
+    selectedDestination: AppRoutRoot,
+    navigateToTopLevelDestination: (TopLevelDestination) -> Unit,
     onDrawerClicked: () -> Unit = {}
 ) {
     Row(modifier = modifier.fillMaxSize()) {
@@ -234,27 +232,23 @@ fun AppContent(
             val snackbarHostState = remember { SnackbarHostState() }
             val appBarState = rememberAppBarState(navController)
 
-            Scaffold(
-                snackbarHost = { SnackbarHost(snackbarHostState) },
-                topBar = {
-                    if (appBarState.isVisible) {
-                        SharedTopAppBar(
-                            appBarState = appBarState,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                },
-                bottomBar = {
-                    AnimatedVisibility(
-                        visible = appNavigationInfo.navigationType == NavigationType.BOTTOM_NAVIGATION
-                    ) {
-                        AppBottomNavigationBar(
-                            selectedDestination = selectedDestination,
-                            navigateToTopLevelDestination = navigateToTopLevelDestination
-                        )
-                    }
+            Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }, topBar = {
+                if (appBarState.isVisible) {
+                    SharedTopAppBar(
+                        appBarState = appBarState,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
-            ) { innerPaddingModifier ->
+            }, bottomBar = {
+                AnimatedVisibility(
+                    visible = appNavigationInfo.navigationType == NavigationType.BOTTOM_NAVIGATION
+                ) {
+                    AppBottomNavigationBar(
+                        selectedDestination = selectedDestination,
+                        navigateToTopLevelDestination = navigateToTopLevelDestination
+                    )
+                }
+            }) { innerPaddingModifier ->
                 AppNavHost(
                     modifier = Modifier
                         .weight(1f)
@@ -278,38 +272,60 @@ private fun AppNavHost(
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = AppRoute.TUNER,
+        startDestination = AppRoutRoot.Tuner.route,
     ) {
-        composable(AppRoute.TUNER) {
-            TunerScreen(
-                appNavigationInfo = appNavigationInfo,
-                navigateToSettingsTunings = { navController.navigate(AppRoute.SETTINGS) },
-                appBarState = appBarState
-            )
+        navigation(
+            route = AppRoutRoot.Tuner.route,
+            startDestination = AppRoutScreen.Tuner.route,
+        ) {
+            composable(AppRoutScreen.Tuner.route) {
+                TunerScreen(
+                    appNavigationInfo = appNavigationInfo,
+                    navigateToSettingsTunings = {
+                        navController.navigate(AppRoutScreen.SettingsTunings.route)
+                    },
+                    appBarState = appBarState
+                )
+            }
         }
-        composable(AppRoute.METRONOME) {
-            EmptyComingSoon()
+
+        navigation(
+            route = AppRoutRoot.Metronome.route,
+            startDestination = AppRoutScreen.Metronome.route,
+        ) {
+            composable(AppRoutScreen.Metronome.route) {
+                EmptyComingSoon()
+            }
         }
-        composable(AppRoute.GAUGE) {
-            EmptyComingSoon()
+
+
+        navigation(
+            route = AppRoutRoot.Gauge.route,
+            startDestination = AppRoutScreen.Gauge.route,
+        ) {
+            composable(AppRoutScreen.Gauge.route) {
+                EmptyComingSoon()
+            }
         }
-        composable(AppRoute.SETTINGS) {
-            LaunchedEffect(key1 = Unit) {
-                (appBarState.currentAppBarScreen as? SettingsAppBar)?.let {
-                    it.buttons
-                    .onEach { button ->
+
+        navigation(
+            route = AppRoutRoot.Settings.route,
+            startDestination = AppRoutScreen.SettingsAll.route,
+        ) {
+            composable(AppRoutScreen.SettingsAll.route) {
+                EmptyComingSoon()
+            }
+
+            composable(AppRoutScreen.SettingsTunings.route) {
+                EmptyComingSoon()
+                LaunchedEffect(key1 = Unit) {
+                    (appBarState.currentAppBarScreen as? AppBarScreen.SettingsAppBar)?.buttons?.onEach { button ->
                         when (button) {
-                            SettingsAppBar.AppBarIcons.NavigationIcon ->
-                                navController.popBackStack()
+                            AppBarScreen.SettingsAppBar.AppBarIcons.NavigationIcon -> navController.popBackStack()
                         }
-                    }
-                    .launchIn(this)
+                    }?.launchIn(this)
                 }
             }
-            EmptyComingSoon()
-        }
-        composable(AppRoute.SETTINGS_TUNINGS) {
-            EmptyComingSoon()
         }
     }
 }
