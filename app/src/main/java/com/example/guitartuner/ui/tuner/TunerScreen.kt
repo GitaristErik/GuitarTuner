@@ -2,38 +2,38 @@ package com.example.guitartuner.ui.tuner
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import com.example.guitartuner.R
 import com.example.guitartuner.domain.entity.settings.TunerPreferences
-import com.example.guitartuner.ui.navigation.TopAppBarProvider
+import com.example.guitartuner.ui.navigation.AppBarState
+import com.example.guitartuner.ui.navigation.TunerAppBar
 import com.example.guitartuner.ui.tuner.components.previewButtonsUIState
 import com.example.guitartuner.ui.tuner.components.previewTuningState
 import com.example.guitartuner.ui.utils.AppNavigationInfo
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun TunerScreen(
     modifier: Modifier = Modifier,
     appNavigationInfo: AppNavigationInfo,
+    appBarState: AppBarState,
     navigateToSettingsTunings: () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
 //        Spacer(modifier = Modifier.height(32.dp))
 
-        TopAppBarProvider.defaultActions = {
-            IconButton(
-                onClick = {}//navigateToSettingsTunings
-            ) {
-                Icon(Icons.Default.Tune, stringResource(R.string.configure_tuning))
-            }
+        val screen = appBarState.currentAppBarScreen as? TunerAppBar
+        LaunchedEffect(key1 = screen) {
+            screen?.buttons?.onEach { button ->
+                when (button) {
+                    TunerAppBar.AppBarIcons.Settings -> navigateToSettingsTunings()
+                }
+            }?.launchIn(this)
         }
 
         TunerMainScreen(

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,11 +13,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,6 +32,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.window.layout.DisplayFeature
 import androidx.window.layout.FoldingFeature
+import com.example.guitartuner.ui.navigation.AppBarState
 import com.example.guitartuner.ui.navigation.AppBottomNavigationBar
 import com.example.guitartuner.ui.navigation.AppNavigationActions
 import com.example.guitartuner.ui.navigation.AppNavigationRail
@@ -35,7 +40,9 @@ import com.example.guitartuner.ui.navigation.AppRoute
 import com.example.guitartuner.ui.navigation.AppTopLevelDestination
 import com.example.guitartuner.ui.navigation.ModalNavigationDrawerContent
 import com.example.guitartuner.ui.navigation.PermanentNavigationDrawerContent
-import com.example.guitartuner.ui.navigation.TopAppBarProvider
+import com.example.guitartuner.ui.navigation.SettingsAppBar
+import com.example.guitartuner.ui.navigation.SharedTopAppBar
+import com.example.guitartuner.ui.navigation.rememberAppBarState
 import com.example.guitartuner.ui.tuner.TunerScreen
 import com.example.guitartuner.ui.utils.AppNavigationInfo
 import com.example.guitartuner.ui.utils.ContentType
@@ -44,6 +51,8 @@ import com.example.guitartuner.ui.utils.NavigationContentPosition
 import com.example.guitartuner.ui.utils.NavigationType
 import com.example.guitartuner.ui.utils.isBookPosture
 import com.example.guitartuner.ui.utils.isSeparating
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @Composable
@@ -222,9 +231,18 @@ fun AppContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.inverseOnSurface)
         ) {
+            val snackbarHostState = remember { SnackbarHostState() }
+            val appBarState = rememberAppBarState(navController)
+
             Scaffold(
+                snackbarHost = { SnackbarHost(snackbarHostState) },
                 topBar = {
-                    TopAppBarProvider.defaultTopAppBar(selectedDestination)
+                    if (appBarState.isVisible) {
+                        SharedTopAppBar(
+                            appBarState = appBarState,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 },
                 bottomBar = {
                     AnimatedVisibility(
@@ -238,11 +256,12 @@ fun AppContent(
                 }
             ) { innerPaddingModifier ->
                 AppNavHost(
-                    navController = navController,
-                    appNavigationInfo = appNavigationInfo,
                     modifier = Modifier
                         .weight(1f)
                         .padding(innerPaddingModifier),
+                    navController = navController,
+                    appNavigationInfo = appNavigationInfo,
+                    appBarState = appBarState
                 )
             }
         }
@@ -251,9 +270,10 @@ fun AppContent(
 
 @Composable
 private fun AppNavHost(
+    modifier: Modifier = Modifier,
     navController: NavHostController,
     appNavigationInfo: AppNavigationInfo,
-    modifier: Modifier = Modifier,
+    appBarState: AppBarState
 ) {
     NavHost(
         modifier = modifier,
@@ -263,7 +283,8 @@ private fun AppNavHost(
         composable(AppRoute.TUNER) {
             TunerScreen(
                 appNavigationInfo = appNavigationInfo,
-                navigateToSettingsTunings = { navController.navigate(AppRoute.SETTINGS_TUNINGS) },
+                navigateToSettingsTunings = { navController.navigate(AppRoute.SETTINGS) },
+                appBarState = appBarState
             )
         }
         composable(AppRoute.METRONOME) {
@@ -273,6 +294,18 @@ private fun AppNavHost(
             EmptyComingSoon()
         }
         composable(AppRoute.SETTINGS) {
+            LaunchedEffect(key1 = Unit) {
+                (appBarState.currentAppBarScreen as? SettingsAppBar)?.let {
+                    it.buttons
+                    .onEach { button ->
+                        when (button) {
+                            SettingsAppBar.AppBarIcons.NavigationIcon ->
+                                navController.popBackStack()
+                        }
+                    }
+                    .launchIn(this)
+                }
+            }
             EmptyComingSoon()
         }
         composable(AppRoute.SETTINGS_TUNINGS) {
