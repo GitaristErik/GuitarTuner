@@ -1,10 +1,17 @@
 package com.example.guitartuner.domain.entity.tuner
 
-import com.example.guitartuner.domain.entity.tuner.Note.*
+import com.example.guitartuner.domain.entity.tuner.Note.A
+import com.example.guitartuner.domain.entity.tuner.Note.B
+import com.example.guitartuner.domain.entity.tuner.Note.C
+import com.example.guitartuner.domain.entity.tuner.Note.D
+import com.example.guitartuner.domain.entity.tuner.Note.E
+import com.example.guitartuner.domain.entity.tuner.Note.F
+import com.example.guitartuner.domain.entity.tuner.Note.G
+import com.example.guitartuner.ui.settings.components.SettingsComponents
 
 enum class Notation(
     val convertFromNote: (Note) -> String
-) {
+) : SettingsComponents.SelectOption.String<Notation> {
 
     English({ note ->
         when (note) {
@@ -18,7 +25,7 @@ enum class Notation(
         }
     }),
 
-    Classic({ note ->
+    Solfeggio({ note ->
         when (note) {
             C -> "Do"
             D -> "Re"
@@ -60,4 +67,7 @@ enum class Notation(
         Note.entries.associateWith { note -> this.convertFromNote(note) }
     }
 
+    override val label: String
+        get() = "$this (${listOf(A, B, C)
+            .joinToString(separator = ", ") { this.convertFromNote(it) }})"
 }

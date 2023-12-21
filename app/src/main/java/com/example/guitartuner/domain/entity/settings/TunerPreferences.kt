@@ -23,7 +23,6 @@ data class TunerPreferences(
     val enableStringSelectSound: Boolean = DEFAULT_ENABLE_STRING_SELECT_SOUND,
     val enableInTuneSound: Boolean = DEFAULT_IN_TUNE_SOUND,
     val displayType: TuningDisplayType = DEFAULT_DISPLAY_TYPE,
-    val stringLayout: StringLayout = DEFAULT_STRING_LAYOUT,
     val useBlackTheme: Boolean = DEFAULT_USE_BLACK_THEME,
 ) {
     companion object {
@@ -31,14 +30,12 @@ data class TunerPreferences(
         val ENABLE_STRING_SELECT_SOUND_KEY = booleanPreferencesKey("enable_string_select_sound")
         val ENABLE_IN_TUNE_SOUND_KEY = booleanPreferencesKey("enable_in_tune_sound")
         val DISPLAY_TYPE_KEY = stringPreferencesKey("display_type")
-        val STRING_LAYOUT_KEY = stringPreferencesKey("string_layout")
         val USE_BLACK_THEME_KEY = booleanPreferencesKey("use_black_theme")
 
         // Defaults
         const val DEFAULT_ENABLE_STRING_SELECT_SOUND = true
         const val DEFAULT_IN_TUNE_SOUND = true
         val DEFAULT_DISPLAY_TYPE = TuningDisplayType.SIMPLE
-        val DEFAULT_STRING_LAYOUT = StringLayout.INLINE
         const val DEFAULT_USE_BLACK_THEME = false
 
         /**
@@ -49,7 +46,6 @@ data class TunerPreferences(
                 enableStringSelectSound = prefs[ENABLE_STRING_SELECT_SOUND_KEY] ?: DEFAULT_ENABLE_STRING_SELECT_SOUND,
                 enableInTuneSound = prefs[ENABLE_IN_TUNE_SOUND_KEY] ?: DEFAULT_IN_TUNE_SOUND,
                 displayType = prefs[DISPLAY_TYPE_KEY]?.let { TuningDisplayType.valueOf(it) } ?: DEFAULT_DISPLAY_TYPE,
-                stringLayout = prefs[STRING_LAYOUT_KEY]?.let { StringLayout.valueOf(it) } ?: DEFAULT_STRING_LAYOUT,
                 useBlackTheme = prefs[USE_BLACK_THEME_KEY] ?: DEFAULT_USE_BLACK_THEME
             )
         }
@@ -65,15 +61,6 @@ enum class TuningDisplayType(val multiplier: Int) {
     SEMITONES(1),
     /** Displays tuning offset in cents. */
     CENTS(100)
-}
-
-/** Enum representing the available layouts to display string controls. */
-@Immutable
-enum class StringLayout {
-    /** Displays string controls in-line (for electric guitars). */
-    INLINE,
-    /** Displays string controls side by side (for acoustic guitars). */
-    SIDE_BY_SIDE
 }
 
 /** Provides the data store for tuner preferences. */

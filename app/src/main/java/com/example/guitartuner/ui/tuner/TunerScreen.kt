@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.example.guitartuner.domain.entity.settings.TunerPreferences
+import com.example.guitartuner.domain.entity.settings.Settings
 import com.example.guitartuner.ui.navigation.AppBarScreen
 import com.example.guitartuner.ui.navigation.AppBarState
 import com.example.guitartuner.ui.tuner.components.previewButtonsUIState
@@ -46,7 +46,7 @@ fun TunerScreen(
             selectedString = 1,
             tuned = BooleanArray(6) { it == 4 },
             autoDetect = true,
-            prefs = TunerPreferences(),
+            settings = Settings.previewSettings(),
             {},
             {},
             {},

@@ -22,8 +22,10 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -32,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import androidx.window.layout.DisplayFeature
 import androidx.window.layout.FoldingFeature
+import com.example.guitartuner.domain.entity.settings.Settings
 import com.example.guitartuner.ui.navigation.AppBarScreen
 import com.example.guitartuner.ui.navigation.AppBarState
 import com.example.guitartuner.ui.navigation.AppBottomNavigationBar
@@ -46,6 +49,7 @@ import com.example.guitartuner.ui.navigation.currentRouteAsState
 import com.example.guitartuner.ui.navigation.currentScreenAsState
 import com.example.guitartuner.ui.navigation.navigateToRouteRoot
 import com.example.guitartuner.ui.navigation.rememberAppBarState
+import com.example.guitartuner.ui.settings.SettingsScreen
 import com.example.guitartuner.ui.tuner.TunerScreen
 import com.example.guitartuner.ui.utils.AppNavigationInfo
 import com.example.guitartuner.ui.utils.ContentType
@@ -269,6 +273,8 @@ private fun AppNavHost(
     appNavigationInfo: AppNavigationInfo,
     appBarState: AppBarState
 ) {
+    var data by remember { mutableStateOf(Settings.previewSettings()) }
+
     NavHost(
         modifier = modifier,
         navController = navController,
@@ -298,7 +304,6 @@ private fun AppNavHost(
             }
         }
 
-
         navigation(
             route = AppRoutRoot.Gauge.route,
             startDestination = AppRoutScreen.Gauge.route,
@@ -313,7 +318,13 @@ private fun AppNavHost(
             startDestination = AppRoutScreen.SettingsAll.route,
         ) {
             composable(AppRoutScreen.SettingsAll.route) {
-                EmptyComingSoon()
+//                SettingsScreen(TunerPreferences(), {}, {}, {}, {}, {}, {})
+                SettingsScreen(
+                    settings = data,
+                    updateSettings = { data = it },
+                    onClickAbout = {},
+                    onClickTunings = { navController.navigate(AppRoutScreen.SettingsTunings.route) },
+                )
             }
 
             composable(AppRoutScreen.SettingsTunings.route) {

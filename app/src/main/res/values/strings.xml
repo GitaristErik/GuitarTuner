@@ -39,5 +39,62 @@
     <string name="configure_tuning">Configure Tuning</string>
     <string name="dismiss">Dismiss</string>
 
+<!--    Settings -->
+    <string name="settings.general">General</string>
+    <string name="settings.general.notation">Notation</string>
+
+    <string name="settings.sound">Sound</string>
+    <string name="settings.enable.string.select.sound">Play sound on string selection</string>
+    <string name="settings.enable.string.select.sound.desc">Play a note sound when strings are selected</string>
+    <string name="settings.enable.in.tune.sound">Play in-tune sound</string>
+    <string name="settings.enable.in.tune.sound.desc">Play a sound once the string is in tune</string>
+
+    <string name="settings.theme">Theme</string>
+    <string name="settings.use.black.theme">Use full black theme in dark mode</string>
+    <string name="settings.use.black.theme.desc">Optimised for AMOLED displays</string>
+
+    <string name="settings.tuner">Tuner</string>
+    <string name="settings.tuner.tunings">Tunings</string>
+    <string name="settings.tuner.tunings.desc">Configure Tunings</string>
+
+    <string name="settings.display.type">Tuning Display</string>
+    <string name="settings.display.type.simple">Simple</string>
+    <string name="settings.display.type.semitones">Semitones</string>
+    <string name="settings.display.type.cents">Cents</string>
+
+    <string name="settings.tuner.layout">Strings Layout</string>
+    <string name="settings.tuner.layout.list">List</string>
+    <string name="settings.tuner.layout.grid">Grid</string>
+
+    <string name="settings.tuner.display">View style for offset on tuner display</string>
+    <string name="settings.tuner.display.simple">Simple</string>
+    <string name="settings.tuner.display.cents">Cents</string>
+    <string name="settings.tuner.display.semitones">Semitones</string>
+
+    <string name="settings.advanced.mode">Advanced Mode</string>
+    <string name="settings.advanced.mode.desc">Displays secondary data such as octave and frequency</string>
+    <string name="settings.noise.suppressor">Noise Suppressor</string>
+    <string name="settings.noise.suppressor.desc">Removes background noise</string>
+
+    <!--    Settings: Configure Tuner -->
+    <string name="nav_back">Back</string>
+    <string name="about">About</string>
+
+    <!--    Settings: About -->
+    <string name="license_desc">is licensed under the GNU General Public License v3.0.</string>
+    <string name="copyright">Copyright</string>
+    <string name="licence">Licence</string>
+    <string name="licence_terms">Licence terms</string>
+    <string name="source_code">Source code</string>
+    <string name="third_party_licences">Third-party licences</string>
+    <string name="oss_licences">Open Source Licences</string>
+    <string name="privacy">Privacy</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="help_feedback">Feedback</string>
+    <string name="send_feedback">Send feedback</string>
+
+    <string name="settings.notation.classic">Do Re Mi</string>
+    <string name="settings.notation.english">A B C</string>
+    <string name="settings.notation.german">A H C</string>
 
 </resources>

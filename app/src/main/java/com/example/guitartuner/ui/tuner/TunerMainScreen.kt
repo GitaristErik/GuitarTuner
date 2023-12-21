@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
@@ -44,8 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.guitartuner.R
-import com.example.guitartuner.domain.entity.settings.StringLayout
-import com.example.guitartuner.domain.entity.settings.TunerPreferences
+import com.example.guitartuner.domain.entity.settings.Settings
 import com.example.guitartuner.ui.model.TuneButtonsUIState
 import com.example.guitartuner.ui.model.TuningUIState
 import com.example.guitartuner.ui.theme.PreviewWrapper
@@ -74,7 +72,7 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
  * @param selectedString The index of the currently selected string within the tuning.
  * @param tuned An array indicating whether each string has been tuned.
  * @param autoDetect A boolean indicating whether the tuner will automatically detect the currently playing string.
- * @param prefs The user's preferences for the tuner.
+ * @param settings The user's preferences for the tuner.
  * @param onSelectString A function to be called when a string is selected.
  * @param onSelectTuning A function to be called when a tuning is selected.
  * @param onTuneUpString A function to be called when a string is tuned up.
@@ -96,7 +94,7 @@ fun TunerMainScreen(
     selectedString: Int,
     tuned: BooleanArray,
     autoDetect: Boolean,
-    prefs: TunerPreferences,
+    settings: Settings,
     onSelectString: (Int) -> Unit,
     onSelectTuning: (Int) -> Unit,
     onTuneUpString: (Int) -> Unit,
@@ -116,7 +114,7 @@ fun TunerMainScreen(
         selectedString = selectedString,
         tuned = tuned,
         autoDetect = autoDetect,
-        prefs = prefs,
+        settings = settings,
         onSelectString = onSelectString,
         onSelectTuning = onSelectTuning,
         onTuneUpString = onTuneUpString,
@@ -132,14 +130,13 @@ fun TunerMainScreen(
         portrait = { tuningDisplay, stringControls, autoDetectSwitch, tuningSelector ->
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
+                    .fillMaxSize()
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 tuningDisplay()
-                stringControls(prefs.stringLayout == StringLayout.INLINE)
+                stringControls(settings.tunerStringLayout == Settings.StringLayout.LIST)
                 autoDetectSwitch(Modifier)
                 tuningSelector(Modifier)
             }
@@ -149,8 +146,7 @@ fun TunerMainScreen(
         landscape = { tuningDisplay, stringControls, autoDetectSwitch, tuningSelector ->
             ConstraintLayout(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
                 val (display, tuningSelectorBox, stringsSelector, autoSwitch) = createRefs()
@@ -180,7 +176,7 @@ fun TunerMainScreen(
                     end.linkTo(parent.end)
                 }) {
                     stringControls(
-                        prefs.stringLayout == StringLayout.INLINE,
+                        settings.tunerStringLayout == Settings.StringLayout.LIST,
                     )
                 }
 
@@ -258,7 +254,7 @@ private typealias TunerBodyLayout = @Composable (
  * @param selectedString The index of the currently selected string within the tuning.
  * @param tuned An array indicating whether each string has been tuned.
  * @param autoDetect A boolean indicating whether the tuner will automatically detect the currently playing string.
- * @param prefs The user's preferences for the tuner.
+ * @param settings The user's preferences for the tuner.
  * @param onSelectString A function to be called when a string is selected.
  * @param onSelectTuning A function to be called when a tuning is selected.
  * @param onTuneUpString A function to be called when a string is tuned up.
@@ -284,7 +280,7 @@ private fun TunerBody(
     selectedString: Int,
     tuned: BooleanArray,
     autoDetect: Boolean,
-    prefs: TunerPreferences,
+    settings: Settings,
     onSelectString: (Int) -> Unit,
     onSelectTuning: (Int) -> Unit,
     onTuneUpString: (Int) -> Unit,
@@ -306,7 +302,7 @@ private fun TunerBody(
 
     layout({
         TuningDisplay(
-            noteOffset = noteOffset, displayType = prefs.displayType, onTuned = onTuned
+            noteOffset = noteOffset, displayType = settings.tunerDisplayType, onTuned = onTuned
         )
     }, { inline ->
         StringControls(
@@ -352,12 +348,11 @@ fun TunerPermissionScreen(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp), verticalArrangement = Arrangement.spacedBy(
-            16.dp, alignment = Alignment.CenterVertically
-        ), horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val title: String
         val rationale: String
@@ -419,7 +414,7 @@ private fun CompactAppBar(
     onConfigurePressed: () -> Unit,
     tuning: TuningUIState,
 ) {
-       TopAppBar(title = {
+    TopAppBar(title = {
         TuningItem(tuning = tuning, fontWeight = FontWeight.Bold)
     }, actions = {
         // Configure tuning button.
@@ -465,7 +460,7 @@ private fun AutoDetectSwitch(
 @Composable
 internal fun PreviewTunerWrapper(
     contentType: ContentType = ContentType.SINGLE_PANE,
-    prefs: TunerPreferences = TunerPreferences(),
+    settings: Settings = Settings.previewSettings(),
 ) {
     PreviewWrapper {
         TunerMainScreen(
@@ -478,7 +473,7 @@ internal fun PreviewTunerWrapper(
             selectedString = 1,
             tuned = BooleanArray(6) { it == 4 },
             autoDetect = true,
-            prefs = prefs,
+            settings = settings,
             {},
             {},
             {},
