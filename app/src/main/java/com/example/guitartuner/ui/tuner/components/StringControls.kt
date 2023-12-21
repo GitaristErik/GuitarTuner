@@ -341,20 +341,24 @@ private fun StringSelectionButton(
 // Previews
 
 internal val previewButtonsUIState by lazy {
-    TuneButtonsUIState(
-        tuningId = 1,
-        tuningName = "EBGDAE",
-        pitchList = listOf(
-            Pitch(0.0, Note.E, 2),
-            Pitch(0.0, Note.B, 3),
-            Pitch(0.0, Note.G, 3),
-            Pitch(0.0, Note.D, 3),
-            Pitch(0.0, Note.A, 2),
-            Pitch(0.0, Note.E, 4),
-        ),
-        notation = Notation.English
-    )
+    createPreviewButtonsUIState(Notation.English)
 }
+internal fun createPreviewButtonsUIState(
+    notation: Notation = Notation.English
+) = TuneButtonsUIState(
+    tuningId = 1,
+    tuningName = "EBGDAE",
+    pitchList = listOf(
+        Pitch(0.0, Note.E, 2),
+        Pitch(0.0, Note.B, 3),
+        Pitch(0.0, Note.G, 3),
+        Pitch(0.0, Note.D, 3),
+        Pitch(0.0, Note.A, 2),
+        Pitch(0.0, Note.E, 4),
+    ),
+    notation = notation
+)
+
 
 @ThemePreview
 @Composable

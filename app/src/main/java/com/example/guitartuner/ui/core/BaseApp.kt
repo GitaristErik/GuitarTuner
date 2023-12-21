@@ -20,25 +20,17 @@ import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
 import androidx.window.layout.DisplayFeature
 import androidx.window.layout.FoldingFeature
-import com.example.guitartuner.ui.navigation.AppBarScreen
-import com.example.guitartuner.ui.navigation.AppBarState
 import com.example.guitartuner.ui.navigation.AppBottomNavigationBar
 import com.example.guitartuner.ui.navigation.AppNavigationRail
 import com.example.guitartuner.ui.navigation.AppRoutRoot
-import com.example.guitartuner.ui.navigation.AppRoutScreen
 import com.example.guitartuner.ui.navigation.ModalNavigationDrawerContent
 import com.example.guitartuner.ui.navigation.PermanentNavigationDrawerContent
 import com.example.guitartuner.ui.navigation.SharedTopAppBar
@@ -47,9 +39,6 @@ import com.example.guitartuner.ui.navigation.currentRouteAsState
 import com.example.guitartuner.ui.navigation.currentScreenAsState
 import com.example.guitartuner.ui.navigation.navigateToRouteRoot
 import com.example.guitartuner.ui.navigation.rememberAppBarState
-import com.example.guitartuner.ui.settings.SettingsScreen
-import com.example.guitartuner.ui.settings.SettingsViewModel
-import com.example.guitartuner.ui.tuner.TunerScreen
 import com.example.guitartuner.ui.utils.AppNavigationInfo
 import com.example.guitartuner.ui.utils.ContentType
 import com.example.guitartuner.ui.utils.DevicePosture
@@ -57,10 +46,7 @@ import com.example.guitartuner.ui.utils.NavigationContentPosition
 import com.example.guitartuner.ui.utils.NavigationType
 import com.example.guitartuner.ui.utils.isBookPosture
 import com.example.guitartuner.ui.utils.isSeparating
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.navigation.koinNavViewModel
 
 @Composable
 fun BaseApp(
@@ -266,82 +252,3 @@ fun AppContent(
     }
 }
 
-@Composable
-private fun AppNavHost(
-    modifier: Modifier = Modifier,
-    navController: NavHostController,
-    appNavigationInfo: AppNavigationInfo,
-    appBarState: AppBarState
-) {
-//    var data by remember { mutableStateOf(Settings.previewSettings()) }
-    val vmSettings = koinNavViewModel<SettingsViewModel>()
-    val data by vmSettings.state.collectAsState()
-
-    NavHost(
-        modifier = modifier,
-        navController = navController,
-        startDestination = AppRoutRoot.Tuner.route,
-    ) {
-        navigation(
-            route = AppRoutRoot.Tuner.route,
-            startDestination = AppRoutScreen.Tuner.route,
-        ) {
-            composable(AppRoutScreen.Tuner.route) {
-                TunerScreen(
-                    appNavigationInfo = appNavigationInfo,
-                    navigateToSettingsTunings = {
-                        navController.navigate(AppRoutScreen.SettingsTunings.route)
-                    },
-                    appBarState = appBarState
-                )
-            }
-        }
-
-        navigation(
-            route = AppRoutRoot.Metronome.route,
-            startDestination = AppRoutScreen.Metronome.route,
-        ) {
-            composable(AppRoutScreen.Metronome.route) {
-                EmptyComingSoon()
-            }
-        }
-
-        navigation(
-            route = AppRoutRoot.Gauge.route,
-            startDestination = AppRoutScreen.Gauge.route,
-        ) {
-            composable(AppRoutScreen.Gauge.route) {
-                EmptyComingSoon()
-            }
-        }
-
-        navigation(
-            route = AppRoutRoot.Settings.route,
-            startDestination = AppRoutScreen.SettingsAll.route,
-        ) {
-            composable(AppRoutScreen.SettingsAll.route) {
-//                SettingsScreen(TunerPreferences(), {}, {}, {}, {}, {}, {})
-
-                SettingsScreen(
-                    settings = data,
-                    updateSettings = { vmSettings.updateSettings(it) },
-//                    settings = vmSettings.state.collectAsState(scope.coroutineContext).value,
-//                    updateSettings = { vmSettings.updateSettings(it) },
-                    onClickAbout = {},
-                    onClickTunings = { navController.navigate(AppRoutScreen.SettingsTunings.route) },
-                )
-            }
-
-            composable(AppRoutScreen.SettingsTunings.route) {
-                EmptyComingSoon()
-                LaunchedEffect(key1 = Unit) {
-                    (appBarState.currentAppBarScreen as? AppBarScreen.SettingsAppBar)?.buttons?.onEach { button ->
-                        when (button) {
-                            AppBarScreen.SettingsAppBar.AppBarIcons.NavigationIcon -> navController.popBackStack()
-                        }
-                    }?.launchIn(this)
-                }
-            }
-        }
-    }
-}

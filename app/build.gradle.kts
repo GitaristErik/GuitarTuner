@@ -32,7 +32,7 @@ android {
         }
         debug {
             applicationIdSuffix = ".dev"
-            versionNameSuffix =  "-dev"
+            versionNameSuffix = "-dev"
         }
     }
     compileOptions {
@@ -85,6 +85,7 @@ dependencies {
 
     // Audio
     implementation(libs.audio.core)
+    implementation(libs.peko)
     implementation(libs.audio.mididriver) {
         version { branch = "master" }
     }
@@ -97,13 +98,19 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     // Data Storage
-    implementation (libs.satchel.core)
+    implementation(libs.satchel.core)
 
     // DI
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.compose)
     implementation(libs.koin.androidx.compose.navigation)
+    implementation(libs.koin.core)
+    implementation(libs.koin.core.coroutines)
+    implementation(libs.koin.android)
+    implementation(libs.koin.android.compat)
+    implementation(libs.koin.androidx.workmanager)
+    implementation(libs.koin.androidx.navigation)
 
     // Testing
     testImplementation(libs.kotlinx.coroutines.test)

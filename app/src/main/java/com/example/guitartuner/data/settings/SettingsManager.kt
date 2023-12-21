@@ -1,4 +1,4 @@
-package com.example.guitartuner.data
+package com.example.guitartuner.data.settings
 
 import cafe.adriel.satchel.SatchelStorage
 import cafe.adriel.satchel.ktx.value
