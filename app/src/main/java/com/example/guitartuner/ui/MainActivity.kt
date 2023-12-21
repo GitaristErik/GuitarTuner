@@ -1,4 +1,4 @@
-package com.example.guitartuner
+package com.example.guitartuner.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
-import com.example.guitartuner.ui.BaseApp
+import com.example.guitartuner.ui.core.BaseApp
 import com.example.guitartuner.ui.theme.GuitarTunerTheme
 import com.example.guitartuner.ui.theme.PreviewWindowWrapper
 import com.google.accompanist.adaptive.calculateDisplayFeatures
@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
             GuitarTunerTheme {
                 val windowSize = calculateWindowSizeClass(this)
                 val displayFeatures = calculateDisplayFeatures(this)
-
                 BaseApp(
                     windowSize = windowSize,
                     displayFeatures = displayFeatures,

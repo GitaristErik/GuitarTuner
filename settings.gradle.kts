@@ -24,16 +24,6 @@ dependencyResolutionManagement {
     }
 }
 
-/*
-sourceControl {
-    gitRepository(
-        uri("https://github.com/billthefarmer/mididriver.git")
-    ) {
-        producesModule("org.billthefarmer.mididriver:library")
-    }
-}
-*/
-
 rootProject.name = "GuitarTuner"
 include(":app")
  

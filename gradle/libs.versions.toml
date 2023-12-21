@@ -1,13 +1,16 @@
 [versions]
 accompanistAdaptive = "0.26.2-beta"
 agp = "8.2.0"
+koinAndroidx = "3.5.3"
 constraintlayoutCompose = "1.0.1"
+koinCompose = "1.1.2"
 kotlin = "1.9.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.6.2"
+satchelCore = "1.0.3"
 test-manifest = "1.5.4"
 activityCompose = "1.8.1"
 composeBom = "2023.10.01"
@@ -29,14 +32,15 @@ kotlinxCoroutinesTest = "1.8.0-RC"
 androidx-lifecycle-compose = "2.6.2"
 androidx-lifecycle-runtime-compose = "2.6.2"
 androidx-navigation = "2.7.5"
+lifecycleProcess = "2.6.2"
 
 [libraries]
 # Android & Compose
-accompanist-adaptive = { module = "com.google.accompanist:accompanist-adaptive", version.ref = "accompanistAdaptive" }
+accompanist-adaptive = { module = "com.google.accompanist:accompanist-adaptive", version = "0.32.0" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.8.2" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
@@ -51,7 +55,8 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 androidx-lifecycle-viewModelCompose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle-compose" }
 androidx-lifecycle-runtime = "androidx.lifecycle:lifecycle-runtime-ktx:2.6.2"
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.7.6" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -70,9 +75,17 @@ aboutlibraries = { group = "com.mikepenz", name = "aboutlibraries", version.ref 
 theme = { group = "com.github.rohankhayech.AndroidUtils", name = "theme", version.ref = "theme" }
 preview = { group = "com.github.rohankhayech.AndroidUtils", name = "preview", version.ref = "preview" }
 
+# Data storage
+satchel-core = { module = "com.github.adrielcafe.satchel:satchel-core", version.ref = "satchelCore" }
+
 # Audio
 audio-core = { group = "be.tarsos.dsp", name = "core", version.ref = "core" }
 audio-mididriver = { group = "com.github.billthefarmer", name = "mididriver", version.ref = "mididriver" }
+
+# DI
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidx" }
+koin-androidx-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation", version.ref = "koinAndroidx" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCompose" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
