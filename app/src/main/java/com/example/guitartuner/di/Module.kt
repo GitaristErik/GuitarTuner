@@ -1,13 +1,21 @@
 package com.example.guitartuner.di
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import cafe.adriel.satchel.Satchel
 import cafe.adriel.satchel.storer.file.FileSatchelStorer
 import com.example.guitartuner.data.settings.SettingsManager
-import com.example.guitartuner.data.tuner.PermissionManager
+import com.example.guitartuner.data.tuner.PermissionManagerImpl
+import com.example.guitartuner.data.tuner.PitchGenerationRepositoryImpl
+import com.example.guitartuner.data.tuner.PitchRepositoryImpl
+import com.example.guitartuner.data.tuner.TunerRepositoryImpl
+import com.example.guitartuner.data.tuner.TuningSetsRepositoryImpl
+import com.example.guitartuner.domain.repository.tuner.PermissionManager
+import com.example.guitartuner.domain.repository.tuner.PitchGenerationRepository
+import com.example.guitartuner.domain.repository.tuner.PitchRepository
+import com.example.guitartuner.domain.repository.tuner.TunerRepository
+import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository
 import com.example.guitartuner.ui.MainActivity
 import com.example.guitartuner.ui.settings.SettingsViewModel
 import com.example.guitartuner.ui.tuner.TunerViewModel
@@ -23,22 +31,43 @@ val appModule = module {
     }
 
     scope<MainActivity> {
-
         viewModel {
-            TunerViewModel(permissionManager = get())
+            TunerViewModel(
+                tunerRepository = get(),
+                permissionManager = get(),
+                pitchGenerationRepository = get(),
+                tuningSetsRepository = get(),
+                settingsManager = get()
+            )
         }
 
-        scoped {
-            PermissionManager(
-                activity = getSource<MainActivity>().let {
-                    Log.e("MainActivity", "activity = $it")
-                    it!!
-                }
+        scoped<PitchGenerationRepository> {
+            PitchGenerationRepositoryImpl(
+                tuningSetsRepository = get(),
+                lifecycleOwner = getSource<MainActivity>()!!
+            )
+        }
+
+        scoped<TunerRepository> {
+            TunerRepositoryImpl(
+                settingsManager = get(),
+                permissionManager = get(),
+                lifecycleOwner = getSource<MainActivity>()!!
+            )
+        }
+
+        scoped<PermissionManager> {
+            PermissionManagerImpl(
+                activity = getSource<MainActivity>()!!
             )
         }
     }
 
-    single {
+    single<TuningSetsRepository> {
+        TuningSetsRepositoryImpl(get())
+    }
+
+    single<SettingsManager> {
         SettingsManager(storage = get(), scope = get())
     }
 
@@ -50,6 +79,9 @@ val appModule = module {
         )
     }
 
+    single<PitchRepository> {
+        PitchRepositoryImpl(get())
+    }
 
     single<CoroutineScope> {
         ProcessLifecycleOwner.get().lifecycleScope

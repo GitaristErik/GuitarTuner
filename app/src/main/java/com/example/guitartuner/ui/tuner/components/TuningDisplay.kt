@@ -26,11 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,15 +55,14 @@ import kotlin.math.sign
 
 /**
  * UI component consisting of a visual meter and
- * text label displaying the current tuning [offset][noteOffset].
+ * text label displaying the current tuning [offset][deviation].
  *
- * @param noteOffset The offset between the currently playing note and the selected string.
+ * @param deviation The offset between the currently playing note and the selected string.
  * @param displayType Type of tuning offset value to display.
- * @param onTuned Called when the detected note is held in tune.
  */
 @Composable
 fun TuningDisplay(
-    noteOffset: State<Double?>, displayType: TunerDisplayType, onTuned: () -> Unit
+    deviation: Double?, isTuned: Boolean, displayType: TunerDisplayType
 ) {
     // colors
     val colorProcessing = MaterialTheme.colorScheme.tertiary
@@ -80,19 +76,12 @@ fun TuningDisplay(
     val colorOnBack = MaterialTheme.colorScheme.onSurface
     val colorBack = MaterialTheme.colorScheme.outlineVariant
 
-
-    // -----
-    val offset = noteOffset.value
-
     // Calculate meter position.
     val meterPosition by animateFloatAsState(
-        targetValue = remember(offset) {
+        targetValue = remember(deviation) {
             derivedStateOf {
-                if (offset != null) {
-                    (offset.toFloat() / 4f).coerceIn(-1f..1f)
-                } else {
-                    0f
-                }
+                // (noteOffset.toFloat() / 4f).coerceIn(-1f..1f)
+                deviation?.toFloat()?.coerceIn(-1f..1f) ?: 0f
             }
         }.value, label = "Tuning Meter Position"
     )
@@ -135,16 +124,12 @@ fun TuningDisplay(
         targetValue = targetBackgroundColor, label = "Tuning Meter Background Color"
     )
 
-    val inTune = offset != null && abs(offset) < Tuner.TUNED_OFFSET_THRESHOLD
+//    val inTune = deviation != null && abs(deviation) < Tuner.TUNED_OFFSET_THRESHOLD
 
     val indicatorSize by animateFloatAsState(
-        targetValue = if (inTune) 1f else 2 / 180f,
-        animationSpec = if (inTune) tween(Tuner.TUNED_SUSTAIN_TIME - 50, 50) else spring(),
-        finishedListener = {
-            if (it == 1f) {
-                onTuned()
-            }
-        },
+        targetValue = if (isTuned) 1f else 2 / 180f,
+        animationSpec = if (isTuned) tween(Tuner.TUNED_SUSTAIN_TIME - 50, 50) else spring(),
+//        finishedListener = { if (it == 1f) { onTuned() } },
         label = "Tuning Indicator Size"
     )
 
@@ -163,7 +148,7 @@ fun TuningDisplay(
             color = color,
             backgroundColor = backgroundColor
         ) {
-            TuningMeterLabel(noteOffset = offset, color = color, displayType = displayType)
+            TuningMeterLabel(noteOffset = deviation, color = color, displayType = displayType)
         }
         AccidentalIcon(R.drawable.music_accidental_sharp, contentDescription = "Sharp")
     }
@@ -296,12 +281,12 @@ private fun TuningMeterLabel(
         // Out of Tune
     } else {
         val offset = noteOffset * displayType.multiplier
-        val dp = if (displayType == TunerDisplayType.SEMITONES) 1 else 0 // decimal places
+        val dp = if (displayType == TunerDisplayType.CENTS) 1 else 0 // decimal places
 
         Text( // Offset Value
             color = color,
             text = "%+.${dp}f".format(offset),
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.headlineMedium
         )
         Text(
             text = when (displayType) {
@@ -340,8 +325,10 @@ private fun AccidentalIcon(
 private fun ListeningPreview() {
     PreviewWrapper {
         TuningDisplay(
-            noteOffset = remember { mutableStateOf(null) }, TunerDisplayType.SEMITONES
-        ) {}
+            deviation = null,
+            isTuned = false,
+            TunerDisplayType.SEMITONES
+        )
     }
 }
 
@@ -350,8 +337,8 @@ private fun ListeningPreview() {
 private fun InTunePreview() {
     PreviewWrapper {
         TuningDisplay(
-            noteOffset = remember { mutableDoubleStateOf(0.09) }, TunerDisplayType.SEMITONES
-        ) {}
+            deviation = 0.09, isTuned = true, TunerDisplayType.SEMITONES
+        )
     }
 }
 
@@ -361,13 +348,13 @@ private fun ProcessToGoodPreview() {
     Column {
         PreviewWrapper {
             TuningDisplay(
-                noteOffset = remember { mutableDoubleStateOf(1.07) }, TunerDisplayType.SIMPLE
-            ) {}
+                deviation = 1.07, isTuned = false, TunerDisplayType.SIMPLE
+            )
         }
         PreviewWrapper {
             TuningDisplay(
-                noteOffset = remember { mutableDoubleStateOf(-1.67) }, TunerDisplayType.SIMPLE
-            ) {}
+                deviation = -1.67, isTuned = false, TunerDisplayType.SIMPLE
+            )
         }
     }
 }
@@ -378,13 +365,13 @@ private fun ProcessToBadPreview() {
     Column {
         PreviewWrapper {
             TuningDisplay(
-                noteOffset = remember { mutableDoubleStateOf(2.17) }, TunerDisplayType.SIMPLE
-            ) {}
+                deviation = 2.17, isTuned = false, TunerDisplayType.SIMPLE
+            )
         }
         PreviewWrapper {
             TuningDisplay(
-                noteOffset = remember { mutableDoubleStateOf(-3.07) }, TunerDisplayType.SIMPLE
-            ) {}
+                deviation = -3.07, isTuned = false, TunerDisplayType.SIMPLE
+            )
         }
     }
 }
@@ -394,8 +381,8 @@ private fun ProcessToBadPreview() {
 private fun RedPreview() {
     PreviewWrapper {
         TuningDisplay(
-            noteOffset = remember { mutableDoubleStateOf(-27.0) }, TunerDisplayType.CENTS
-        ) {}
+            deviation = -27.7, isTuned = false, TunerDisplayType.CENTS
+        )
     }
 }
 
@@ -404,8 +391,8 @@ private fun RedPreview() {
 private fun LargeFontLabelPreview() {
     PreviewWrapper {
         TuningDisplay(
-            noteOffset = remember { mutableDoubleStateOf(2.7) }, TunerDisplayType.SIMPLE
-        ) {}
+            deviation = 2.7, isTuned = false, TunerDisplayType.SIMPLE
+        )
     }
 }
 
@@ -414,7 +401,7 @@ private fun LargeFontLabelPreview() {
 private fun LargeFontIconPreview() {
     PreviewWrapper {
         TuningDisplay(
-            noteOffset = remember { mutableDoubleStateOf(0.09) }, TunerDisplayType.SEMITONES
-        ) {}
+            deviation = 0.07, isTuned = true, TunerDisplayType.SEMITONES
+        )
     }
 }

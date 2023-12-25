@@ -83,6 +83,12 @@ fun SettingsScreen(
             options = Settings.TunerDisplayType.entries.toTypedArray(),
             onSelected = { updateSettings(settings.copy(tunerDisplayType = it)) }
         )
+        SettingsComponents.PreferenceSelector(
+            title = stringResource(R.string.settings_detection_algorithm),
+            selected = settings.tunerPitchDetectionAlgorithm,
+            options = Settings.TunerPitchDetectionAlgorithm.entries.toTypedArray(),
+            onSelected = { updateSettings(settings.copy(tunerPitchDetectionAlgorithm = it)) }
+        )
         Divider(color = MaterialTheme.colorScheme.surfaceVariant)
         // ---------------
 
@@ -101,19 +107,6 @@ fun SettingsScreen(
             checked = settings.soundPlaySoundInTune,
             onChanged = { updateSettings(settings.copy(soundPlaySoundInTune = !settings.soundPlaySoundInTune)) }
         )
-        /*
-                val stateInTuneSound = rememberPreferenceBooleanSettingState(
-                    key = "settings_in_tune_sound", defaultValue = true
-                )
-
-                val stateStringSelectSound = rememberPreferenceBooleanSettingState(
-                    key = "settings_select_sound", defaultValue = true
-                )
-
-                val stateUseFullBlackTheme = rememberPreferenceBooleanSettingState(
-                    key = "settings_use_full_black_theme", defaultValue = true
-                )
-        */
         Divider(color = MaterialTheme.colorScheme.surfaceVariant)
 
         // ---------------
@@ -157,6 +150,7 @@ private fun Preview() {
                 generalNotation = Notation.Solfeggio,
                 tunerStringLayout = Settings.StringLayout.GRID,
                 tunerDisplayType = Settings.TunerDisplayType.SIMPLE,
+                tunerPitchDetectionAlgorithm = Settings.TunerPitchDetectionAlgorithm.YIN
             ),
             updateSettings = {},
             onClickTunings = {},

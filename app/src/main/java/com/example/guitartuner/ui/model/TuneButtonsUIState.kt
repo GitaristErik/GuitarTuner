@@ -1,37 +1,38 @@
 package com.example.guitartuner.ui.model
 
+import com.example.guitartuner.domain.entity.tuner.Alteration
+import com.example.guitartuner.domain.entity.tuner.Instrument
 import com.example.guitartuner.domain.entity.tuner.Notation
-import com.example.guitartuner.domain.entity.tuner.Pitch
+import com.example.guitartuner.domain.entity.tuner.Tone
 
 data class TuneButtonsUIState(
-    val tuningId: Int,
-    val tuningName: String,
-    val pitchMap: Map<Int, Pitch>,
-    val notation: Notation
+    val toneMap: Map<Int, Tone>,
+    val notation: Notation,
+    val instrument: Instrument,
 ) {
-
-    constructor(
-        tuningId: Int,
-        tuningName: String,
-        pitchList: List<Pitch>,
-        notation: Notation
-    ) : this(
-        tuningId,
-        tuningName,
-        pitchMap = pitchList.mapIndexed { i, p -> i to p }.toMap(),
-        notation
-    )
-
-    companion object {
-        val initialState = TuneButtonsUIState(
-            tuningId = 0,
-            tuningName = "",
-            pitchMap = emptyMap(),
-            notation = Notation.English
-        )
+    val tuningName: String = toneMap.values.joinToString(separator = "") {
+        it.note.name + it.octave + when (it.alteration) {
+            Alteration.SHARP -> "#"
+            Alteration.FLAT -> "b"
+            Alteration.NATURAL -> ""
+        }
     }
 
-    fun getNoteFullName(index: Int) = pitchMap[index]?.run {
-        "${notation.convertFromNote(note)}${octave}"
+    constructor(
+        toneList: List<Tone>,
+        notation: Notation,
+        instrument: Instrument
+    ) : this(
+        toneMap = toneList.mapIndexed { i, p -> i to p }.toMap(),
+        notation,
+        instrument
+    )
+
+    fun getNoteFullName(index: Int) = toneMap[index]?.run {
+        "${notation.convertFromNote(note)}${when (alteration) {
+            Alteration.SHARP -> "#"
+            Alteration.FLAT -> "b"
+            Alteration.NATURAL -> ""
+        }} $octave"
     }
 }

@@ -76,6 +76,13 @@
     <string name="settings.noise.suppressor">Noise Suppressor</string>
     <string name="settings.noise.suppressor.desc">Removes background noise</string>
 
+    <string name="settings.detection.algorithm">Pitch Detection Algorithm</string>
+    <string name="settings.detection.algorithm.yin" translatable="false">YIN</string>
+    <string name="settings.detection.algorithm.fft_yin" translatable="false">FFT YIN (Fast Fourier Transform)</string>
+    <string name="settings.detection.algorithm.mpm" translatable="false">MPM (McLeod Pitch Method)</string>
+    <string name="settings.detection.algorithm.amdf" translatable="false">AMDF (Average Magnitude Difference Function)</string>
+    <string name="settings.detection.algorithm.dywa" translatable="false">DYWA (Dynamic Wavelet)</string>
+
     <!--    Settings: Configure Tuner -->
     <string name="nav_back">Back</string>
     <string name="about">About</string>

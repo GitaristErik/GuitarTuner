@@ -24,15 +24,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.guitartuner.R
+import com.example.guitartuner.domain.entity.tuner.Alteration
+import com.example.guitartuner.domain.entity.tuner.Instrument
 import com.example.guitartuner.domain.entity.tuner.Notation
 import com.example.guitartuner.domain.entity.tuner.Note
 import com.example.guitartuner.domain.entity.tuner.Pitch
+import com.example.guitartuner.domain.entity.tuner.Tone
+import com.example.guitartuner.domain.repository.tuner.ChromaticScale
 import com.example.guitartuner.ui.model.TuneButtonsUIState
 import com.example.guitartuner.ui.theme.PreviewWrapper
 import com.rohankhayech.android.util.ui.preview.ThemePreview
@@ -108,17 +113,14 @@ private fun SideBySideStringControls(
     ) {
 
         val (buttonsUIState1, buttonsUIState2) = remember(buttonsUIState.tuningName) {
-            val (tune1, tune2) = with(buttonsUIState.tuningName) { chunked(length / 2) }
-            val (pitch1, pitch2) = with(buttonsUIState.pitchMap) {
+            val (tone1, tone2) = with(buttonsUIState.toneMap) {
                 toList().chunked(size / 2).map { it.toMap() }
             }
 
             buttonsUIState.copy(
-                tuningName = tune1,
-                pitchMap = pitch1,
+                toneMap = tone1
             ) to buttonsUIState.copy(
-                tuningName = tune2,
-                pitchMap = pitch2,
+                toneMap = tone2
             )
         }
 
@@ -165,7 +167,7 @@ private fun InlineStringControls(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        buttonsUIState.pitchMap.forEach { (index, _) ->
+        buttonsUIState.toneMap.forEach { (index, _) ->
             StringControl(
                 pitchKey = index,
                 buttonsUIState = buttonsUIState,
@@ -191,7 +193,7 @@ private fun InlineStringControls(
 fun CompactStringSelector(
     modifier: Modifier = Modifier,
     buttonsUIState: TuneButtonsUIState,
-    selectedString: Int,
+    selectedString: Int?,
     tuned: BooleanArray,
     onSelect: (Int) -> Unit,
 ) {
@@ -199,7 +201,7 @@ fun CompactStringSelector(
 
     val selectedStringButtonPosition = with(LocalDensity.current) {
         remember(buttonsUIState.tuningName, selectedString) {
-            (72.dp * (buttonsUIState.pitchMap.size - 1 - selectedString)).toPx()
+            (72.dp * (buttonsUIState.toneMap.size - 1 - (selectedString ?: 0))).toPx()
         }
     }
     LaunchedEffect(key1 = selectedString) {
@@ -212,7 +214,7 @@ fun CompactStringSelector(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(Modifier.width(8.dp))
-        buttonsUIState.pitchMap.forEach { (pitchKey, _) ->
+        buttonsUIState.toneMap.forEach { (pitchKey, _) ->
             StringSelectionButton(
                 pitchKey = pitchKey,
                 buttonsUIState = buttonsUIState,
@@ -245,17 +247,34 @@ private fun StringControl(
     onTuneDown: (Int) -> Unit,
     onTuneUp: (Int) -> Unit,
 ) {
-    val pitch = buttonsUIState.pitchMap[pitchKey] ?: return
+    val tone = buttonsUIState.toneMap[pitchKey] ?: return
 
     Row(verticalAlignment = Alignment.CenterVertically) {
+        val enabledToneDown by remember(tone) {
+            derivedStateOf {
+                tone > buttonsUIState.instrument.lowestPitch.tone
+            }
+        }
+        val enabledToneUp by remember(tone) {
+            derivedStateOf {
+                tone < buttonsUIState.instrument.highestPitch.tone
+            }
+        }
+
+        val getTint: @Composable (Boolean) -> Color = { enabled ->
+            with(MaterialTheme.colorScheme) {
+                if (enabled) onSurfaceVariant else outlineVariant
+            }
+        }
+
         // Tune Down Button
         IconButton(
             onClick = remember(onTuneDown, pitchKey) { { onTuneDown(pitchKey) } },
-            enabled = remember(pitch) { derivedStateOf { pitch.isValidPitch() } }.value
+            enabled = enabledToneDown
         ) {
             Icon(
                 Icons.Default.KeyboardArrowDown,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = getTint(enabledToneDown),
                 contentDescription = stringResource(R.string.tune_down)
             )
         }
@@ -265,11 +284,11 @@ private fun StringControl(
         // Tune Up Button
         IconButton(
             onClick = remember(onTuneUp, pitchKey) { { onTuneUp(pitchKey) } },
-            enabled = remember(pitch) { derivedStateOf { pitch.isValidPitch() } }.value
+            enabled = enabledToneUp
         ) {
             Icon(
                 Icons.Default.KeyboardArrowUp,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = getTint(enabledToneUp),
                 contentDescription = stringResource(id = R.string.tune_up)
             )
         }
@@ -343,21 +362,42 @@ private fun StringSelectionButton(
 internal val previewButtonsUIState by lazy {
     createPreviewButtonsUIState(Notation.English)
 }
+
 internal fun createPreviewButtonsUIState(
     notation: Notation = Notation.English
 ) = TuneButtonsUIState(
-    tuningId = 1,
-    tuningName = "EBGDAE",
-    pitchList = listOf(
-        Pitch(0.0, Note.E, 2),
-        Pitch(0.0, Note.B, 3),
-        Pitch(0.0, Note.G, 3),
-        Pitch(0.0, Note.D, 3),
-        Pitch(0.0, Note.A, 2),
-        Pitch(0.0, Note.E, 4),
+    toneList = listOf(
+        Tone(Note.E, 2),
+        Tone(Note.B, 3),
+        Tone(Note.G, 3),
+        Tone(Note.D, 3),
+        Tone(Note.A, 2),
+        Tone(Note.E, 4),
     ),
-    notation = notation
+    notation = notation,
+    instrument = previewInstrument
 )
+
+internal val previewInstrument by lazy {
+    val chromaToPitch = { chroma: ChromaticScale ->
+        Pitch(
+            chroma.ordinal,
+            chroma.frequency.toDouble(),
+            Tone(
+                chroma.note,
+                chroma.octave,
+                if(chroma.semitone) Alteration.SHARP else Alteration.NATURAL
+            )
+        )
+    }
+    Instrument(
+        instrumentId = 0,
+        name = "Guitar",
+        countStrings = 6,
+        lowestPitch = chromaToPitch(ChromaticScale.E0),
+        highestPitch = chromaToPitch(ChromaticScale.C6_SHARP),
+    )
+}
 
 
 @ThemePreview

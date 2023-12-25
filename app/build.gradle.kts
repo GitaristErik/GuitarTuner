@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.aboutLibrariesPlugin)
+    alias(libs.plugins.devtoolsKsp)
 }
 
 android {
@@ -89,7 +90,7 @@ dependencies {
     implementation(libs.preview)
 
     // Audio
-    implementation(libs.audio.core)
+    implementation(files("libs/TarsosDSP-Android.jar"))
     implementation(libs.peko)
     implementation(libs.audio.mididriver) {
         version { branch = "master" }
@@ -104,6 +105,13 @@ dependencies {
 
     // Data Storage
     implementation(libs.satchel.core)
+
+    // Room
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx) // Kotlin Extensions and Coroutines support
+    testImplementation(libs.androidx.room.testing) // Test helpers
+    implementation(libs.androidx.room.paging)  // Paging 3 Integration
 
     // DI
     implementation(libs.androidx.lifecycle.process)

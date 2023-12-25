@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,8 +49,8 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
 @Composable
 fun TuningSelector(
     modifier: Modifier = Modifier,
-    selectedTuningId: Int,
-    tunings: State<Map<Int, TuningUIState>>,
+    currentTuningSet: TuningUIState,
+    tunings: Map<Int, TuningUIState>,
     enabled: Boolean = true,
     openDirect: Boolean,
     onSelect: (Int) -> Unit,
@@ -93,12 +92,9 @@ fun TuningSelector(
         ) {
 
             // Current Tuning
-            val currentTuning: TuningUIState = tunings.value.let {
-                it[selectedTuningId] ?: it.values.first()
-            }
-
             CurrentTuningField(
-                tuning = currentTuning,
+                modifier = Modifier.menuAnchor(),
+                tuning = currentTuningSet,
                 expanded = expanded,
                 showExpanded = enabled
             )
@@ -108,7 +104,7 @@ fun TuningSelector(
                 expanded = expanded && enabled,
                 onDismissRequest = { expanded = false }
             ) {
-                tunings.value.forEach { (tuningId, tuningOption) ->
+                tunings.forEach { (tuningId, tuningOption) ->
                     DropdownMenuItem(
                         text = {
                             TuningItem(
@@ -153,18 +149,18 @@ fun TuningSelector(
  * Outlined dropdown box field showing the current tuning.
  *
  * @param tuning The current guitar tuning.
- * @param customTunings Set of custom tunings added by the user.
  * @param expanded Whether the dropdown box is expanded.
  * @param showExpanded Whether to show the expanded state.
  */
 @Composable
 private fun CurrentTuningField(
+    modifier: Modifier = Modifier,
     tuning: TuningUIState,
     expanded: Boolean,
     showExpanded: Boolean
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = OutlinedTextFieldDefaults.shape,
         color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -198,10 +194,8 @@ private fun CurrentTuningField(
  * UI component displaying the name and strings of the specified tuning.
  *
  * @param modifier The modifier to apply to this layout.
- * @param tuningName The tuning name to display.
- * @param strings The strings list in body to display.
+ * @param tuning The tuning to display.
  * @param fontWeight The font weight of the tuning name text.
- * @param customTunings Set of custom tunings added by the user.
  */
 @Composable
 fun TuningItem(
@@ -252,8 +246,8 @@ private fun PreviewTuningSelector() {
     PreviewWrapper {
         TuningSelector(
             Modifier.padding(8.dp),
-            selectedTuningId = 1,
-            tunings = remember { mutableStateOf(previewTuningState) },
+            currentTuningSet = previewTuningState[1]!!,
+            tunings = previewTuningState,
             openDirect = false,
             onSelect = {},
             onTuneDown = {},

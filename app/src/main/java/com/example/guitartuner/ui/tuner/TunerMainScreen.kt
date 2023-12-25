@@ -29,10 +29,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -66,6 +62,7 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
  * @param expanded A boolean indicating whether the tuner is expanded or not.
  * @param contentType An enum indicating the type of content to be displayed.
  * @param noteOffset A state holding the offset of the currently playing note.
+ * @param isTuned A boolean indicating whether the currently playing note is in tune.
  * @param tunings A state holding a map of all tunings, keyed by their ID.
  * @param selectedTuningId The ID of the currently selected tuning.
  * @param buttonsUIState The UI state of the tuning buttons.
@@ -80,18 +77,18 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
  * @param onTuneUpTuning A function to be called when the tuning is tuned up.
  * @param onTuneDownTuning A function to be called when the tuning is tuned down.
  * @param onAutoChanged A function to be called when the auto detect switch is toggled.
- * @param onTuned A function to be called when the detected note is held in tune.
  * @param onOpenTuningSelector A function to be called when the user opens the tuning selector screen.
  */
 @Composable
 fun TunerMainScreen(
     expanded: Boolean = false,
     contentType: ContentType,
-    noteOffset: State<Double?>,
-    tunings: State<Map<Int, TuningUIState>>,
-    selectedTuningId: Int,
+    noteOffset: Double?,
+    isTuned: Boolean,
+    tunings: Map<Int, TuningUIState>,
+    currentTuningSet: TuningUIState,
     buttonsUIState: TuneButtonsUIState,
-    selectedString: Int,
+    selectedString: Int?,
     tuned: BooleanArray,
     autoDetect: Boolean,
     settings: Settings,
@@ -102,15 +99,15 @@ fun TunerMainScreen(
     onTuneUpTuning: () -> Unit,
     onTuneDownTuning: () -> Unit,
     onAutoChanged: (Boolean) -> Unit,
-    onTuned: () -> Unit,
     onOpenTuningSelector: () -> Unit,
 ) {
 
     TunerBody(expanded = expanded,
         tunings = tunings,
-        selectedTuningId = selectedTuningId,
+        currentTuningSet = currentTuningSet,
         buttonsUIState = buttonsUIState,
         noteOffset = noteOffset,
+        isTuned = isTuned,
         selectedString = selectedString,
         tuned = tuned,
         autoDetect = autoDetect,
@@ -122,7 +119,6 @@ fun TunerMainScreen(
         onTuneUpTuning = onTuneUpTuning,
         onTuneDownTuning = onTuneDownTuning,
         onAutoChanged = onAutoChanged,
-        onTuned = onTuned,
         onOpenTuningSelector = onOpenTuningSelector,
         contentType = contentType,
 
@@ -251,6 +247,7 @@ private typealias TunerBodyLayout = @Composable (
  * @param selectedTuningId The ID of the currently selected tuning.
  * @param buttonsUIState The UI state of the tuning buttons.
  * @param noteOffset A state holding the offset of the currently playing note.
+ * @param isTuned A boolean indicating whether the currently playing note is in tune.
  * @param selectedString The index of the currently selected string within the tuning.
  * @param tuned An array indicating whether each string has been tuned.
  * @param autoDetect A boolean indicating whether the tuner will automatically detect the currently playing string.
@@ -262,7 +259,6 @@ private typealias TunerBodyLayout = @Composable (
  * @param onTuneUpTuning A function to be called when the tuning is tuned up.
  * @param onTuneDownTuning A function to be called when the tuning is tuned down.
  * @param onAutoChanged A function to be called when the auto detect switch is toggled.
- * @param onTuned A function to be called when the detected note is held in tune.
  * @param onOpenTuningSelector A function to be called when the user opens the tuning selector screen.
  * @param contentType An enum indicating the type of content to be displayed.
  * @param portrait A function representing the layout of the tuner body in portrait mode.
@@ -273,11 +269,12 @@ private typealias TunerBodyLayout = @Composable (
 @Composable
 private fun TunerBody(
     expanded: Boolean,
-    tunings: State<Map<Int, TuningUIState>>,
-    selectedTuningId: Int,
+    tunings: Map<Int, TuningUIState>,
+    currentTuningSet: TuningUIState,
     buttonsUIState: TuneButtonsUIState,
-    noteOffset: State<Double?>,
-    selectedString: Int,
+    noteOffset: Double?,
+    isTuned: Boolean,
+    selectedString: Int?,
     tuned: BooleanArray,
     autoDetect: Boolean,
     settings: Settings,
@@ -288,7 +285,6 @@ private fun TunerBody(
     onTuneUpTuning: () -> Unit,
     onTuneDownTuning: () -> Unit,
     onAutoChanged: (Boolean) -> Unit,
-    onTuned: () -> Unit,
     onOpenTuningSelector: () -> Unit,
     contentType: ContentType,
     portrait: TunerBodyLayout,
@@ -302,7 +298,7 @@ private fun TunerBody(
 
     layout({
         TuningDisplay(
-            noteOffset = noteOffset, displayType = settings.tunerDisplayType, onTuned = onTuned
+            deviation = noteOffset, isTuned = isTuned, displayType = settings.tunerDisplayType
         )
     }, { inline ->
         StringControls(
@@ -321,7 +317,7 @@ private fun TunerBody(
     }, { modifier ->
         TuningSelector(
             modifier = modifier,
-            selectedTuningId = selectedTuningId,
+            currentTuningSet = currentTuningSet,
             tunings = tunings,
             openDirect = false,
             onSelect = onSelectTuning,
@@ -466,15 +462,15 @@ internal fun PreviewTunerWrapper(
         TunerMainScreen(
             expanded = false,
             contentType = contentType,
-            noteOffset = remember { mutableDoubleStateOf(1.3) },
-            tunings = remember { mutableStateOf(previewTuningState) },
-            selectedTuningId = 1,
+            noteOffset = 1.3,
+            isTuned = true,
+            tunings = previewTuningState,
+            currentTuningSet = previewTuningState[1]!!,
             buttonsUIState = previewButtonsUIState,
             selectedString = 1,
             tuned = BooleanArray(6) { it == 4 },
             autoDetect = true,
             settings = settings,
-            {},
             {},
             {},
             {},

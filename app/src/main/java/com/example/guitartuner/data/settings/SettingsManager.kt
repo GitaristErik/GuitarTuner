@@ -36,6 +36,10 @@ class SettingsManager(
         key = "tuner_display_type",
         defaultValue = Settings.TunerDisplayType.SIMPLE
     )
+    var tunerPitchDetectionAlgorithm by storage.value(
+        key = "tuner_pitch_detection_algorithm",
+        defaultValue = Settings.TunerPitchDetectionAlgorithm.YIN
+    )
     var soundPlaySoundOnSelect by storage.value(
         key = "sound_play_sound_on_select",
         defaultValue = true
@@ -57,6 +61,7 @@ class SettingsManager(
             tunerEnableNoiseSuppressor = tunerEnableNoiseSuppressor,
             tunerStringLayout = tunerStringLayout,
             tunerDisplayType = tunerDisplayType,
+            tunerPitchDetectionAlgorithm = tunerPitchDetectionAlgorithm,
             
             soundPlaySoundOnSelect = soundPlaySoundOnSelect,
             soundPlaySoundInTune = soundPlaySoundInTune,
@@ -70,6 +75,7 @@ class SettingsManager(
             tunerEnableNoiseSuppressor = value.tunerEnableNoiseSuppressor
             tunerStringLayout = value.tunerStringLayout
             tunerDisplayType = value.tunerDisplayType
+            tunerPitchDetectionAlgorithm = value.tunerPitchDetectionAlgorithm
 
             soundPlaySoundOnSelect = value.soundPlaySoundOnSelect
             soundPlaySoundInTune = value.soundPlaySoundInTune

@@ -64,7 +64,7 @@ import com.rohankhayech.android.util.ui.preview.PreviewWrapper
 @Composable
 fun ConfigureTuningScreen(
     tunings: State<Map<Int, TuningUIState>>,
-    selectedTuningId: Int,
+    currentTuningSet: TuningUIState,
     buttonsUIState: TuneButtonsUIState,
     onSelectTuning: (Int) -> Unit,
     onTuneUpString: (Int) -> Unit,
@@ -113,8 +113,8 @@ fun ConfigureTuningScreen(
                 ) {
                     CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
                         TuningSelector(
-                            selectedTuningId = selectedTuningId,
-                            tunings = tunings,
+                            currentTuningSet = currentTuningSet,
+                            tunings = tunings.value,
                             openDirect = true,
                             onSelect = onSelectTuning,
                             onTuneDown = onTuneDownTuning,
@@ -156,7 +156,7 @@ private fun Preview() {
         ConfigureTuningScreen(
             tunings = remember { mutableStateOf(previewTuningState) },
             buttonsUIState = previewButtonsUIState,
-            selectedTuningId = 1,
+            currentTuningSet = previewTuningState[1]!!,
             onSelectTuning = {},
             onTuneUpString = {},
             onTuneDownString = {},

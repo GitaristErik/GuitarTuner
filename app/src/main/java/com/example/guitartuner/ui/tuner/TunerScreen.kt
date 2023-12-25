@@ -1,27 +1,19 @@
 package com.example.guitartuner.ui.tuner
 
-import android.content.Context
-import android.content.ContextWrapper
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.guitartuner.ui.MainActivity
 import com.example.guitartuner.ui.navigation.AppBarScreen
 import com.example.guitartuner.ui.navigation.AppBarState
 import com.example.guitartuner.ui.settings.SettingsViewModel
-import com.example.guitartuner.ui.tuner.components.createPreviewButtonsUIState
-import com.example.guitartuner.ui.tuner.components.previewTuningState
 import com.example.guitartuner.ui.utils.AppNavigationInfo
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.compose.navigation.koinNavViewModel
 
 @Composable
@@ -47,7 +39,15 @@ fun TunerScreen(
         val vm = MainActivity.koinMainViewModel()!!
         val vmSettings = koinNavViewModel<SettingsViewModel>()
         val settingsState by vmSettings.state.collectAsStateWithLifecycle()
-        val permissionState by vm.state.collectAsStateWithLifecycle()
+        val permissionState by vm.permissionState.collectAsStateWithLifecycle()
+        val tunerState by vm.tunerState.collectAsStateWithLifecycle()
+        val autoDetect by vm.autoMode.collectAsStateWithLifecycle()
+        val selectedString by vm.selectedString.collectAsStateWithLifecycle()
+        val buttonsState by vm.buttonsState.collectAsStateWithLifecycle()
+        val tuningsState by vm.tuningsState.collectAsStateWithLifecycle()
+        val currentTuningSet by vm.currentTuningSet.collectAsStateWithLifecycle()
+        val currentlyTunedStrings by vm.currentlyTunedStrings.collectAsStateWithLifecycle()
+
 
         if (!permissionState.hasRequiredPermissions) {
             TunerPermissionScreen(
@@ -59,33 +59,24 @@ fun TunerScreen(
             TunerMainScreen(
                 expanded = false,
                 contentType = appNavigationInfo.contentType,
-                noteOffset = remember { mutableDoubleStateOf(1.3) },
-                tunings = remember { mutableStateOf(previewTuningState) },
-                selectedTuningId = 1,
-                buttonsUIState = createPreviewButtonsUIState(settingsState.generalNotation),
-                selectedString = 1,
-                tuned = BooleanArray(6) { it == 4 },
-                autoDetect = true,
+                noteOffset = tunerState?.normalizedDeviation,
+                isTuned = tunerState?.isTuned ?: false,
+                tunings = tuningsState,
+                currentTuningSet = currentTuningSet,
+                buttonsUIState = buttonsState,
+                selectedString = selectedString,
+                tuned = currentlyTunedStrings,
+                autoDetect = autoDetect,
                 settings = settingsState,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
+                onSelectString = { vm.selectedString.value = it },
+                onSelectTuning = { vm.selectedTuningId.value = it },
+                onTuneUpString = vm::tuneUpString,
+                onTuneDownString = vm::tuneDownString,
+                onTuneUpTuning = vm::tuneUpTuning,
+                onTuneDownTuning = vm::tuneDownTuning,
+                onAutoChanged = { vm.autoMode.value = !autoDetect },
+                onOpenTuningSelector = { navigateToSettingsTunings() },
             )
         }
     }
-}
-
-fun Context.findActivity(): AndroidScopeComponent {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is AndroidScopeComponent) return context
-        context = context.baseContext
-    }
-    throw IllegalStateException("no activity")
 }
