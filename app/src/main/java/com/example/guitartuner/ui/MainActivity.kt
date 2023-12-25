@@ -1,7 +1,6 @@
 package com.example.guitartuner.ui
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -49,7 +48,7 @@ class MainActivity : ComponentActivity(), AndroidScopeComponent {
 
     private fun linkScope(scopeId: ScopeID = SCOPE_ID_KEY) {
         getKoin()
-            .createScope(scopeId, named("session"))
+            .getOrCreateScope(scopeId, named("session"))
             .linkTo(scope)
     }
 
@@ -60,9 +59,7 @@ class MainActivity : ComponentActivity(), AndroidScopeComponent {
         fun koinMainViewModel() = getKoin()
             .getScopeOrNull(SCOPE_ID_KEY)
             ?.getOrNull<MainActivity>()
-            ?.viewModel.also { vm ->
-                Log.e("MainActivity", "call viewModel provide, current viewModel: $vm")
-            }
+            ?.viewModel
     }
 }
 
