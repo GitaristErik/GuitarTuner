@@ -7,7 +7,6 @@ import android.media.MediaRecorder
 import android.media.audiofx.NoiseSuppressor
 import android.util.Log
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import be.tarsos.dsp.AudioDispatcher
@@ -39,8 +38,7 @@ import kotlin.math.roundToInt
 class TunerRepositoryImpl(
     private val settingsManager: SettingsManager,
     private val permissionManager: PermissionManager,
-    private val lifecycleOwner: LifecycleOwner
-) : LifecycleEventObserver, PitchDetectionHandler, TunerRepository {
+) : PitchDetectionHandler, TunerRepository {
 
     private companion object {
         private const val SAMPLE_RATE = 22050
@@ -69,10 +67,6 @@ class TunerRepositoryImpl(
     private var pitchProcessor: PitchProcessor? = null
     private var noiseSuppressor: NoiseSuppressor? = null
 
-    init {
-        lifecycleOwner.lifecycle.addObserver(this)
-    }
-
     override fun handlePitch(result: PitchDetectionResult?, event: AudioEvent?) {
         val pitch = result?.pitch?.toDouble() ?: -1.0
         if (pitch >= 0) {
@@ -81,20 +75,21 @@ class TunerRepositoryImpl(
     }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-        lifecycleOwner.lifecycleScope.launch {
+        source.lifecycleScope.launch {
+            Log.e("Tuner Manager", "onStateChanged : ${event} lifecycle: ${source}")
             when (event) {
-                Lifecycle.Event.ON_START -> startListener(settingsManager.settings)
-                Lifecycle.Event.ON_STOP -> stopListener()
+                Lifecycle.Event.ON_RESUME -> startListener(settingsManager.settings)
+                Lifecycle.Event.ON_PAUSE -> stopListener()
                 else -> {}
             }
         }
     }
 
-    fun restartListener() {
-        lifecycleOwner.lifecycleScope.launch {
-            stopListener()
-            startListener(settingsManager.settings)
-        }
+    suspend fun restartListener() {
+//        lifecycleOwner.lifecycleScope.launch {
+        stopListener()
+        startListener(settingsManager.settings)
+//        }
     }
 
     private suspend fun startListener(settings: Settings) {
@@ -159,48 +154,48 @@ class TunerRepositoryImpl(
             }
         }.onFailure(::logError)
     }
-/*
+    /*
 
-    private fun getTuningBinarySearch(detectedFrequency: Double): Tuning {
-        val sortedNotes = ChromaticScale.notes.sortedBy { it.frequency }
-        val index = sortedNotes.binarySearchBy(detectedFrequency) { it.frequency.toDouble() }
+        private fun getTuningBinarySearch(detectedFrequency: Double): Tuning {
+            val sortedNotes = ChromaticScale.notes.sortedBy { it.frequency }
+            val index = sortedNotes.binarySearchBy(detectedFrequency) { it.frequency.toDouble() }
 
-        val closestNoteIndex = if (index >= 0) {
-            index
-        } else {
-            val insertionPoint = -index - 1
-            if (insertionPoint == 0 || insertionPoint == sortedNotes.size) {
-                insertionPoint - 1
+            val closestNoteIndex = if (index >= 0) {
+                index
             } else {
-                val lowerNote = sortedNotes[insertionPoint - 1]
-                val upperNote = sortedNotes[insertionPoint]
-                if (abs(lowerNote.frequency - detectedFrequency) <
-                    abs(upperNote.frequency - detectedFrequency)
-                ) {
+                val insertionPoint = -index - 1
+                if (insertionPoint == 0 || insertionPoint == sortedNotes.size) {
                     insertionPoint - 1
                 } else {
-                    insertionPoint
+                    val lowerNote = sortedNotes[insertionPoint - 1]
+                    val upperNote = sortedNotes[insertionPoint]
+                    if (abs(lowerNote.frequency - detectedFrequency) <
+                        abs(upperNote.frequency - detectedFrequency)
+                    ) {
+                        insertionPoint - 1
+                    } else {
+                        insertionPoint
+                    }
                 }
             }
+
+            val closestNote = sortedNotes[closestNoteIndex]
+            val minDeviation = getTuningDeviation(closestNote.frequency.toDouble(), detectedFrequency)
+
+            return Tuning(
+                closestPitch = Pitch(
+                    frequency = closestNote.frequency.toDouble(),
+                    Tone(
+                        note = closestNote.note,
+                        octave = closestNote.octave,
+                        alteration = if (closestNote.semitone) Alteration.SHARP else Alteration.NATURAL
+                    )
+                ),
+                currentFrequency = detectedFrequency,
+                deviation = minDeviation
+            )
         }
-
-        val closestNote = sortedNotes[closestNoteIndex]
-        val minDeviation = getTuningDeviation(closestNote.frequency.toDouble(), detectedFrequency)
-
-        return Tuning(
-            closestPitch = Pitch(
-                frequency = closestNote.frequency.toDouble(),
-                Tone(
-                    note = closestNote.note,
-                    octave = closestNote.octave,
-                    alteration = if (closestNote.semitone) Alteration.SHARP else Alteration.NATURAL
-                )
-            ),
-            currentFrequency = detectedFrequency,
-            deviation = minDeviation
-        )
-    }
-*/
+    */
 
     private fun getTuning(detectedFrequency: Double): Tuning {
         var minDeviation = Int.MAX_VALUE

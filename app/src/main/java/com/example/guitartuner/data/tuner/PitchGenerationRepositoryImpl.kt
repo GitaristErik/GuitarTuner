@@ -2,7 +2,6 @@ package com.example.guitartuner.data.tuner
 
 import android.util.Log
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.example.guitartuner.domain.repository.tuner.PitchGenerationRepository
@@ -14,14 +13,10 @@ import org.billthefarmer.mididriver.MidiDriver
 
 class PitchGenerationRepositoryImpl(
     private val tuningSetsRepository: TuningSetsRepository,
-    private val lifecycleOwner: LifecycleOwner
-) : PitchGenerationRepository, LifecycleEventObserver {
-
-    init {
-        lifecycleOwner.lifecycle.addObserver(this)
-    }
+) : PitchGenerationRepository {
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        Log.e("PitchGenerationRepositoryImpl", "onStateChanged : ${event} lifecycle: ${source}")
         when (event) {
             Lifecycle.Event.ON_RESUME -> midi.start()
             Lifecycle.Event.ON_PAUSE -> midi.stop()
@@ -32,12 +27,17 @@ class PitchGenerationRepositoryImpl(
             else -> {}
         }
 
-        source.lifecycleScope.launch {
-            tuningSetsRepository.currentInstrument.collect {
-                recreateMidiDriver(it.countStrings)
+        if(!tuningSetSubscribed) {
+            source.lifecycleScope.launch {
+                tuningSetsRepository.currentInstrument.collect {
+                    recreateMidiDriver(it.countStrings)
+                }
             }
+            tuningSetSubscribed = true
         }
     }
+    private var tuningSetSubscribed = false
+
 
     private lateinit var midi: MidiController
 
@@ -52,12 +52,7 @@ class PitchGenerationRepositoryImpl(
     override fun playStringSelectSound(string: Int) {
         midi.playNote(
             string,
-            MidiController.noteIndexToMidi(getMidiNoteFromString(string)!!).also {
-                Log.e(
-                    "PitchGenerationRepositoryImpl",
-                    "playStringSelectSound: $it"
-                )
-            },
+            MidiController.noteIndexToMidi(getMidiNoteFromString(string)!!),
             DURATION_ON_SELECT_SOUND,
             tuningSetsRepository.currentInstrument.value.midiInstrument
         )

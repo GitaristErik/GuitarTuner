@@ -41,18 +41,10 @@ val appModule = module {
             )
         }
 
-        scoped<PitchGenerationRepository> {
-            PitchGenerationRepositoryImpl(
-                tuningSetsRepository = get(),
-                lifecycleOwner = getSource<MainActivity>()!!
-            )
-        }
-
         scoped<TunerRepository> {
             TunerRepositoryImpl(
                 settingsManager = get(),
                 permissionManager = get(),
-                lifecycleOwner = getSource<MainActivity>()!!
             )
         }
 
@@ -61,6 +53,12 @@ val appModule = module {
                 activity = getSource<MainActivity>()!!
             )
         }
+    }
+
+    single<PitchGenerationRepository> {
+        PitchGenerationRepositoryImpl(
+            tuningSetsRepository = get(),
+        )
     }
 
     single<TuningSetsRepository> {

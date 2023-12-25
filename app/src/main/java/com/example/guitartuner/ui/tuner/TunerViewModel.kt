@@ -1,5 +1,7 @@
 package com.example.guitartuner.ui.tuner
 
+import androidx.compose.runtime.Composable
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.guitartuner.data.settings.SettingsManager
@@ -12,6 +14,7 @@ import com.example.guitartuner.domain.repository.tuner.TunerRepository
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository
 import com.example.guitartuner.ui.model.TuneButtonsUIState
 import com.example.guitartuner.ui.model.TuningUIState
+import com.example.guitartuner.ui.utils.ObserveLifecycleEvents
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -217,5 +220,11 @@ class TunerViewModel(
 
     fun tuneDownTuning() {
         tuningSetsRepository.tuneDownTuning()
+    }
+
+    @Composable
+    fun AttachLifecycleOwner(lifecycleOwner: LifecycleOwner) {
+        tunerRepository.ObserveLifecycleEvents(lifecycleOwner = lifecycleOwner)
+        pitchGenerationRepository.ObserveLifecycleEvents(lifecycleOwner = lifecycleOwner)
     }
 }

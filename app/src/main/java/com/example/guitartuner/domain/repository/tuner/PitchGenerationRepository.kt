@@ -1,6 +1,8 @@
 package com.example.guitartuner.domain.repository.tuner
 
-interface PitchGenerationRepository {
+import androidx.lifecycle.LifecycleEventObserver
+
+interface PitchGenerationRepository : LifecycleEventObserver {
 
     fun playStringSelectSound(string: Int)
 

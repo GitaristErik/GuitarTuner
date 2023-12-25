@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.guitartuner.ui.MainActivity
 import com.example.guitartuner.ui.navigation.AppBarScreen
@@ -36,8 +37,12 @@ fun TunerScreen(
             }?.launchIn(this)
         }
 
+        // view models
         val vm = MainActivity.koinMainViewModel()!!
         val vmSettings = koinNavViewModel<SettingsViewModel>()
+
+        vm.AttachLifecycleOwner(lifecycleOwner = LocalLifecycleOwner.current)
+
         val settingsState by vmSettings.state.collectAsStateWithLifecycle()
         val permissionState by vm.permissionState.collectAsStateWithLifecycle()
         val tunerState by vm.tunerState.collectAsStateWithLifecycle()
