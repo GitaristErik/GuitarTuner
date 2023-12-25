@@ -128,7 +128,7 @@ object SettingsComponents {
     ) = Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 12.dp, bottom = 12.dp, start = 16.dp, end = 24.dp),
+            .padding(top = 12.dp, bottom = 12.dp, start = 16.dp, end = 16.dp),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
     ) {
