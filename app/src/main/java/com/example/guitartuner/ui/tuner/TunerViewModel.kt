@@ -162,6 +162,7 @@ class TunerViewModel(
         viewModelScope.launch {
             autoMode.collect {
                 tunerRepository.autoMode = it
+                selectedString.value = null
             }
         }
     }
