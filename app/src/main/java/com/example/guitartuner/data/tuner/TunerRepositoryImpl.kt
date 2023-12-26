@@ -76,7 +76,6 @@ class TunerRepositoryImpl(
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         source.lifecycleScope.launch {
-            Log.e("Tuner Manager", "onStateChanged : ${event} lifecycle: ${source}")
             when (event) {
                 Lifecycle.Event.ON_RESUME -> startListener(settingsManager.settings)
                 Lifecycle.Event.ON_PAUSE -> stopListener()

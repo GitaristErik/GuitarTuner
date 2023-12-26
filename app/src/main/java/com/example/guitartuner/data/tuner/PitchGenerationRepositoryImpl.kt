@@ -1,11 +1,11 @@
 package com.example.guitartuner.data.tuner
 
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.example.guitartuner.domain.repository.tuner.PitchGenerationRepository
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.billthefarmer.mididriver.GeneralMidiConstants
 import org.billthefarmer.mididriver.MidiConstants
@@ -16,7 +16,6 @@ class PitchGenerationRepositoryImpl(
 ) : PitchGenerationRepository {
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-        Log.e("PitchGenerationRepositoryImpl", "onStateChanged : ${event} lifecycle: ${source}")
         when (event) {
             Lifecycle.Event.ON_RESUME -> midi.start()
             Lifecycle.Event.ON_PAUSE -> midi.stop()
@@ -27,15 +26,16 @@ class PitchGenerationRepositoryImpl(
             else -> {}
         }
 
-        if(!tuningSetSubscribed) {
+        if (!tuningSetSubscribed) {
             source.lifecycleScope.launch {
-                tuningSetsRepository.currentInstrument.collect {
+                tuningSetsRepository.currentInstrument.collectLatest {
                     recreateMidiDriver(it.countStrings)
                 }
             }
             tuningSetSubscribed = true
         }
     }
+
     private var tuningSetSubscribed = false
 
 
@@ -44,7 +44,7 @@ class PitchGenerationRepositoryImpl(
     private fun getMidiNoteFromString(stringId: Int) =
         tuningSetsRepository.currentTuningSet
             .value.pitches.getOrNull(stringId)?.tone?.run {
-                (degree - 9) + (octave-4)*12
+                (degree - 9) + (octave - 4) * 12
             }
 
 
@@ -110,18 +110,33 @@ class PitchGenerationRepositoryImpl(
          * Starts the midi controller and system driver.
          */
         fun start() {
+            if (isStarted) return
             midiDriver!!.start()
+            isStarted = true
         }
 
         /**
          * Stops all playing notes and then stops the midi controller and system driver.
          */
         fun stop() {
+            if (isStopped) return
             for (i in stringThread.indices) {
                 stopNote(i)
             }
             midiDriver!!.stop()
+            isStopped = true
         }
+
+        private var isStarted: Boolean = false
+            private set(value) {
+                field = value
+                if (value) isStopped = false
+            }
+        private var isStopped: Boolean = false
+            private set(value) {
+                field = value
+                if (value) isStarted = false
+            }
 
         /**
          * Plays the specified note on the specified string for the specified duration.
