@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.example.guitartuner.R
 import com.example.guitartuner.domain.entity.settings.Settings.TunerDisplayType
-import com.example.guitartuner.domain.entity.tuner.Tuner
+import com.example.guitartuner.domain.entity.tuner.Tuning
 import com.example.guitartuner.ui.theme.PreviewWrapper
 import com.rohankhayech.android.util.ui.preview.LargeFontPreview
 import com.rohankhayech.android.util.ui.preview.ThemePreview
@@ -128,7 +128,7 @@ fun TuningDisplay(
 
     val indicatorSize by animateFloatAsState(
         targetValue = if (isTuned) 1f else 2 / 180f,
-        animationSpec = if (isTuned) tween(Tuner.TUNED_SUSTAIN_TIME - 50, 50) else spring(),
+        animationSpec = if (isTuned) tween(Tuning.TUNED_SUSTAIN_TIME - 50, 50) else spring(),
 //        finishedListener = { if (it == 1f) { onTuned() } },
         label = "Tuning Indicator Size"
     )
