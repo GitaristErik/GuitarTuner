@@ -27,7 +27,10 @@ import java.io.File
 val appModule = module {
 
     viewModel {
-        SettingsViewModel(settingsManager = get())
+        SettingsViewModel(
+            settingsManager = get(),
+            tuningsRepository = get()
+        )
     }
 
     scope<MainActivity> {

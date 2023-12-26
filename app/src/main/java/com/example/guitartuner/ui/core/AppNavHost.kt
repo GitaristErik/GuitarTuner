@@ -6,8 +6,6 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -19,12 +17,11 @@ import com.example.guitartuner.ui.navigation.AppBarState
 import com.example.guitartuner.ui.navigation.AppRoutRoot
 import com.example.guitartuner.ui.navigation.AppRoutScreen
 import com.example.guitartuner.ui.settings.SettingsScreen
-import com.example.guitartuner.ui.settings.SettingsViewModel
+import com.example.guitartuner.ui.settings.SettingsTuningsScreen
 import com.example.guitartuner.ui.tuner.TunerScreen
 import com.example.guitartuner.ui.utils.AppNavigationInfo
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.koin.androidx.compose.navigation.koinNavViewModel
 
 @Composable
 fun AppNavHost(
@@ -33,9 +30,6 @@ fun AppNavHost(
     appNavigationInfo: AppNavigationInfo,
     appBarState: AppBarState
 ) {
-//    var data by remember { mutableStateOf(Settings.previewSettings()) }
-    val vmSettings = koinNavViewModel<SettingsViewModel>()
-    val data by vmSettings.state.collectAsState()
     val context = LocalContext.current
 
     NavHost(
@@ -83,15 +77,12 @@ fun AppNavHost(
         ) {
             composable(AppRoutScreen.SettingsAll.route) {
                 SettingsScreen(
-                    settings = data,
-                    updateSettings = { vmSettings.updateSettings(it) },
                     onClickAbout = {},
                     onClickTunings = { navController.navigate(AppRoutScreen.SettingsTunings.route) },
                 )
             }
 
             composable(AppRoutScreen.SettingsTunings.route) {
-                EmptyComingSoon()
                 LaunchedEffect(key1 = Unit) {
                     (appBarState.currentAppBarScreen as? AppBarScreen.SettingsAppBar)?.buttons?.onEach { button ->
                         when (button) {
@@ -99,6 +90,7 @@ fun AppNavHost(
                         }
                     }?.launchIn(this)
                 }
+                SettingsTuningsScreen()
             }
         }
     }

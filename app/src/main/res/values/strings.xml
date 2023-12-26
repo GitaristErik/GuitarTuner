@@ -103,6 +103,8 @@
     <string name="settings.notation.classic">Do Re Mi</string>
     <string name="settings.notation.english">A B C</string>
     <string name="settings.notation.german">A H C</string>
+
+<!--    Settings Tuning Components-->
     <string name="settings.tunings.instrument.details.suffix">-Strings</string>
     <string name="settings.tunings.instrument.divider"> ‧ </string>
     <string name="settings.tunings.favourite.desc">"button for action select this tuning as favorite "</string>
@@ -112,5 +114,8 @@
     <string name="settings.tunings.alert.title">Save tuning as…</string>
     <string name="settings.tunings.alert.save">Save</string>
     <string name="settings.tunings.alert.cancel">Cancel</string>
+
+<!--    Settings Tuning Screen-->
+    <string name="settings.tunings.current.header">Current</string>
 
 </resources>

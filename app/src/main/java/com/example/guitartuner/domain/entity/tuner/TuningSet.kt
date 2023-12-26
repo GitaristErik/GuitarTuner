@@ -5,4 +5,5 @@ data class TuningSet(
     val name: String,
     val pitches: List<Pitch>,
     val instrumentId: Int,
+    val isFavorite: Boolean = false,
 )

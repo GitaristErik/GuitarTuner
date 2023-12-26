@@ -11,6 +11,8 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,15 +24,34 @@ import com.example.guitartuner.ui.settings.components.SectionLabel
 import com.example.guitartuner.ui.settings.components.SettingsComponents
 import com.example.guitartuner.ui.theme.PreviewWrapper
 import com.rohankhayech.android.util.ui.preview.ThemePreview
+import org.koin.androidx.compose.navigation.koinNavViewModel
 
 
 @Composable
 fun SettingsScreen(
+    onClickTunings: () -> Unit,
+    onClickAbout: () -> Unit,
+) {
+    val vmSettings = koinNavViewModel<SettingsViewModel>()
+    val settings by vmSettings.state.collectAsState()
+    val updateSettings = { it: Settings -> vmSettings.updateSettings(it) }
+
+    SettingsScreenBody(
+        settings = settings,
+        updateSettings = updateSettings,
+        onClickTunings = onClickTunings,
+        onClickAbout = onClickAbout,
+    )
+}
+
+@Composable
+private fun SettingsScreenBody(
     settings: Settings,
     updateSettings: (Settings) -> Unit,
     onClickTunings: () -> Unit,
     onClickAbout: () -> Unit,
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -132,15 +153,14 @@ fun SettingsScreen(
             onClick = onClickAbout
         )
         // ---------------
-    }
-}
+    }   }
 
 // Preview
 @ThemePreview
 @Composable
 private fun Preview() {
     PreviewWrapper {
-        SettingsScreen(
+        SettingsScreenBody(
             settings = Settings(
                 tunerUseAdvancedMode = false,
                 themeUseFullBlackTheme = true,
