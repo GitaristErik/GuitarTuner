@@ -148,7 +148,7 @@ fun TuningDisplay(
             color = color,
             backgroundColor = backgroundColor
         ) {
-            TuningMeterLabel(noteOffset = deviation, color = color, displayType = displayType)
+            TuningMeterLabel(noteOffset = deviation, color = color, inTune = isTuned, displayType = displayType)
         }
         AccidentalIcon(R.drawable.music_accidental_sharp, contentDescription = "Sharp")
     }
@@ -250,7 +250,7 @@ private fun DrawScope.drawMeter(
  */
 @Composable
 private fun TuningMeterLabel(
-    noteOffset: Double?, displayType: TunerDisplayType, color: Color
+    noteOffset: Double?, inTune: Boolean, displayType: TunerDisplayType, color: Color
 ) {
     Spacer(modifier = Modifier.height(24.dp))
 
@@ -267,7 +267,7 @@ private fun TuningMeterLabel(
         Text(text = stringResource(id = R.string.listening))
 
         // In Tune
-    } else if (abs(noteOffset) < Tuner.TUNED_OFFSET_THRESHOLD) {
+    } else if (inTune) {
         Icon(
             modifier = Modifier
                 .padding(bottom = 8.dp)
