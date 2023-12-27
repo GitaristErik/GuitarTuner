@@ -32,6 +32,10 @@ class SettingsManager(
         key = "tuner_enable_noise_suppressor",
         defaultValue = true
     )
+    var tunerMinDeviation by storage.value(
+        key = "tuner_min_deviation",
+        defaultValue = 10
+    )
     var tunerStringLayout by storage.value(
         key = "tuner_string_layout",
         defaultValue = Settings.StringLayout.LIST
@@ -64,6 +68,7 @@ class SettingsManager(
             
             tunerUseAdvancedMode = tunerUseAdvancedMode,
             tunerEnableNoiseSuppressor = tunerEnableNoiseSuppressor,
+            tunerMinDeviation = tunerMinDeviation,
             tunerStringLayout = tunerStringLayout,
             tunerDisplayType = tunerDisplayType,
             tunerPitchDetectionAlgorithm = tunerPitchDetectionAlgorithm,
@@ -79,6 +84,7 @@ class SettingsManager(
 
             tunerUseAdvancedMode = value.tunerUseAdvancedMode
             tunerEnableNoiseSuppressor = value.tunerEnableNoiseSuppressor
+            tunerMinDeviation = value.tunerMinDeviation
             tunerStringLayout = value.tunerStringLayout
             tunerDisplayType = value.tunerDisplayType
             tunerPitchDetectionAlgorithm = value.tunerPitchDetectionAlgorithm

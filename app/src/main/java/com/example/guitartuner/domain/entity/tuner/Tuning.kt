@@ -7,9 +7,8 @@ data class Tuning(
     val closestPitch: Pitch,
     val currentFrequency: Double,
     val deviation: Int,
+    val isTuned: Boolean = deviation.absoluteValue < MIN_DEVIATION_FOR_TUNED,
 ) {
-    val isTuned: Boolean get() = (deviation.absoluteValue < MIN_DEVIATION_FOR_TUNED)
-
     val normalizedDeviation: Double get() =
         if (deviation.absoluteValue > MAX_DEVIATION)
             deviation.sign.toDouble()

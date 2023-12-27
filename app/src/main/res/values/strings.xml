@@ -43,6 +43,10 @@
     <string name="settings.general">General</string>
     <string name="settings.general.notation">Notation</string>
 
+    <string name="settings.general.base.frequency">Base Frequency</string>
+    <string name="settings.general.base.frequency.desc">The base frequency for scale</string>
+    <string name="settings.general.base.frequency.value.desc">Hz</string>
+
     <string name="settings.sound">Sound</string>
     <string name="settings.enable.string.select.sound">Play sound on string selection</string>
     <string name="settings.enable.string.select.sound.desc">Play a note sound when strings are selected</string>
@@ -56,6 +60,11 @@
     <string name="settings.tuner">Tuner</string>
     <string name="settings.tuner.tunings">Tunings</string>
     <string name="settings.tuner.tunings.desc">Configure Tunings</string>
+
+
+    <string name="settings.tuner.deviation">Deviation for tune</string>
+    <string name="settings.tuner.deviation.desc">Minimal deviation for in tune state</string>
+    <string name="settings.tuner.deviation.desc.value">Cents</string>
 
     <string name="settings.display.type">Tuning Display</string>
     <string name="settings.display.type.simple">Simple</string>
@@ -126,8 +135,5 @@
     <string name="settings.tunings.filter.general.custom">Custom</string>
     <string name="settings.tunings.instrument.header">Instruments</string>
     <string name="settings.tunings.instrument.details.header">Instrument details</string>
-    <string name="settings.general.base.frequency">Base Frequency</string>
-    <string name="settings.general.base.frequency.desc">The base frequency for scale</string>
-    <string name="settings.general.base.frequency.value.desc">Hz</string>
 
 </resources>

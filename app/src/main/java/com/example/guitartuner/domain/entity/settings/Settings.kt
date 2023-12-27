@@ -17,6 +17,7 @@ data class Settings(
 
     val tunerUseAdvancedMode: Boolean,
     val tunerEnableNoiseSuppressor: Boolean,
+    val tunerMinDeviation: Int = 15,
     val tunerStringLayout: StringLayout,
     val tunerDisplayType: TunerDisplayType,
     val tunerPitchDetectionAlgorithm: TunerPitchDetectionAlgorithm,
@@ -92,6 +93,7 @@ data class Settings(
             tunerEnableNoiseSuppressor = false,
             tunerStringLayout = StringLayout.GRID,
             tunerDisplayType = TunerDisplayType.SIMPLE,
+            tunerMinDeviation = 15,
             soundPlaySoundInTune = true,
             soundPlaySoundOnSelect = true,
             themeUseFullBlackTheme = true,

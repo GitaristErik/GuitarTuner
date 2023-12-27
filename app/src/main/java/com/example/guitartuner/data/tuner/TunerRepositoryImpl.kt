@@ -229,7 +229,8 @@ class TunerRepositoryImpl(
                 )
             ),
             currentFrequency = detectedFrequency,
-            deviation = minDeviation
+            deviation = minDeviation,
+            isTuned = minDeviation.absoluteValue < settingsManager.tunerMinDeviation
         )
     }
 

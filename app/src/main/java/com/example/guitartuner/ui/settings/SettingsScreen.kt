@@ -101,6 +101,15 @@ private fun SettingsScreenBody(
             checked = settings.tunerUseAdvancedMode,
             onChanged = { updateSettings(settings.copy(tunerUseAdvancedMode = !settings.tunerUseAdvancedMode)) }
         )
+        SettingsComponents.PreferenceNumberInput(
+            title = stringResource(R.string.settings_tuner_deviation),
+            subtitle = stringResource(R.string.settings_tuner_deviation_desc),
+            initValue = settings.tunerMinDeviation,
+            valueDescription = stringResource(R.string.settings_tuner_deviation_desc_value),
+            onValueChange = { updateSettings(settings.copy(tunerMinDeviation = it)) },
+            max = 90,
+            min = 3,
+        )
         SettingsComponents.PreferenceSelector(
             title = stringResource(R.string.settings_tuner_layout),
             selected = settings.tunerStringLayout,
