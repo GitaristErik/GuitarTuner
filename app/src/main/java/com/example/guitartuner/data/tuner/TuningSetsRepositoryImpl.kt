@@ -59,7 +59,6 @@ class TuningSetsRepositoryImpl(
         )
 
 
-
     private val _favoritesTuningSets by lazy {
         MutableStateFlow(
             tuningsList.value.mapNotNull { if (it.first.isFavorite) it.first else null }
@@ -83,16 +82,31 @@ class TuningSetsRepositoryImpl(
     }
 
     init {
-        initFavoritesTuningSetsCollector()
-    }
-
-    private fun initFavoritesTuningSetsCollector() {
         coroutineScope.launch {
             delay(1000)
-            _tuningsList.collectLatest { tunings ->
-                Log.e("TUNING", "tunings: $tunings")
-                _favoritesTuningSets.value = tunings.mapNotNull { if (it.first.isFavorite) it.first else null }
+            initFavoritesTuningSetsCollector()
+        }
+        coroutineScope.launch {
+            delay(1000)
+            initCurrentTuningObserver()
+        }
+    }
+
+    private suspend fun initCurrentTuningObserver() {
+        _tuningsList.collectLatest { tuning ->
+            _currentTuningSet.update { cur ->
+                (fakeTuningSets.find { it.tuningId == cur.tuningId }
+                    ?: cur.copy(tuningId = -1, name = "Custom")).also {
+                    Log.e("TUNING", "update currentTuningSet: $it")
+                }
             }
+        }
+    }
+
+    private suspend fun initFavoritesTuningSetsCollector() {
+        _tuningsList.collectLatest { tunings ->
+            _favoritesTuningSets.value =
+                tunings.mapNotNull { if (it.first.isFavorite) it.first else null }
         }
     }
 
@@ -157,15 +171,12 @@ class TuningSetsRepositoryImpl(
     }
 
     override fun <T> updateTuningSet(tuningId: Int, tuningMap: Map<String, T>) {
-        Log.e("TUNING", "tuningId $tuningId  |  updateTuningSet: $tuningMap")
         val tuning = fakeTuningSets[tuningId]
         val newTuning = tuning.copy(
             name = tuningMap["name"] as? String ?: tuning.name,
             isFavorite = tuningMap["isFavorite"] as? Boolean ?: tuning.isFavorite,
             pitches = tuningMap["pitches"] as? List<Pitch> ?: tuning.pitches,
         )
-
-        Log.e("TUNING", "newTuning: $newTuning")
 
         fakeTuningSets = fakeTuningSets.map { if (it.tuningId == tuningId) newTuning else it }
         _tuningsList.update {

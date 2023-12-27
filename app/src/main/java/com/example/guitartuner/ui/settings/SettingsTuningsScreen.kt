@@ -90,16 +90,17 @@ private fun SettingsTuningsScreenContent(
         currentTuningState?.let {
             stickyHeader("current-header") { SectionHeader(title = stringResource(R.string.settings_tunings_current_header)) }
             item("current-${currentTuningState.tuningId}") {
-                TuningSettingsItem(tuning = currentTuningState, onCustomSave = {
-                })
+                TuningSettingsItem(tuning = currentTuningState,
+                    onSelect = onSelectTuning,
+                    onFavSelect = onToggleFavorite,
+                    onCustomSave = {})
             }
         }
 
         stickyHeader("general-header") { SectionHeader(title = stringResource(R.string.settings_tunings_other_header)) }
         item("filter-bar-general") {
             TuningControls.FilterBox(
-                values = generalFilters,
-                onSelect = onToggleGeneralFilter
+                values = generalFilters, onSelect = onToggleGeneralFilter
             )
         }
 
@@ -107,8 +108,7 @@ private fun SettingsTuningsScreenContent(
             stickyHeader("instrument-header") { SectionHeader(title = stringResource(R.string.settings_tunings_instrument_header)) }
             item("filter-bar-instrument") {
                 TuningControls.FilterBox(
-                    values = instrumentsFilter,
-                    onSelect = onToggleInstrumentFilter
+                    values = instrumentsFilter, onSelect = onToggleInstrumentFilter
                 )
             }
         }
@@ -144,8 +144,7 @@ private fun SettingsTuningsScreenContent(
             TuningSettingsItem(tuning = tuning,
                 onSelect = onSelectTuning,
                 onFavSelect = onToggleFavorite,
-                onCustomSave = {
-                })
+                onCustomSave = {})
         }
     }
 }
@@ -212,13 +211,15 @@ private val previewStringsFilter by lazy {
 @ThemePreview
 private fun SettingsTuningsScreenPreview() {
     PreviewWrapper {
-        SettingsTuningsScreenContent(
-            previewTuningSettingsUIState,
+        SettingsTuningsScreenContent(previewTuningSettingsUIState,
             listOf(previewTuningSettingsUIState),
-            { _, _ -> }, { _ -> }, { _ -> },
+            { _, _ -> },
+            { _ -> },
+            { _ -> },
             previewInstrumentsFilter,
             previewStringsFilter,
-            { _, _ -> }, { _, _ -> }, { _, _ -> }
-        )
+            { _, _ -> },
+            { _, _ -> },
+            { _, _ -> })
     }
 }
