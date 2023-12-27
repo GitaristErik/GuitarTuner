@@ -62,6 +62,15 @@ private fun SettingsScreenBody(
 
         // General
         SectionLabel(title = stringResource(R.string.settings_general))
+        SettingsComponents.PreferenceNumberInput(
+            title = stringResource(R.string.settings_general_base_frequency),
+            subtitle = stringResource(R.string.settings_general_base_frequency_desc),
+            initValue = settings.generalBaseFrequency,
+            valueDescription = stringResource(R.string.settings_general_base_frequency_value_desc),
+            onValueChange = { updateSettings(settings.copy(generalBaseFrequency = it)) },
+            max = 460,
+            min = 420,
+        )
         SettingsComponents.PreferenceSelector(
             title = stringResource(R.string.settings_general_notation),
             selected = settings.generalNotation,
@@ -168,6 +177,7 @@ private fun Preview() {
                 soundPlaySoundOnSelect = true,
                 tunerEnableNoiseSuppressor = false,
                 generalNotation = Notation.Solfeggio,
+                generalBaseFrequency = 440,
                 tunerStringLayout = Settings.StringLayout.GRID,
                 tunerDisplayType = Settings.TunerDisplayType.SIMPLE,
                 tunerPitchDetectionAlgorithm = Settings.TunerPitchDetectionAlgorithm.YIN

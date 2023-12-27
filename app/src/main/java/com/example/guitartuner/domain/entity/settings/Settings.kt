@@ -13,6 +13,7 @@ import com.example.guitartuner.ui.settings.components.SettingsComponents.SelectO
 
 data class Settings(
     val generalNotation: Notation,
+    val generalBaseFrequency: Int,
 
     val tunerUseAdvancedMode: Boolean,
     val tunerEnableNoiseSuppressor: Boolean,
@@ -25,7 +26,6 @@ data class Settings(
 
     val themeUseFullBlackTheme: Boolean,
 //    val accidental: AccidentalOption,
-//    val pitchDetectionAlgorithm: PitchDetectionAlgorithmOption,
 //    val deviationPrecision: DeviationPrecisionOption
 ) {
 
@@ -87,6 +87,7 @@ data class Settings(
         @JvmStatic
         fun previewSettings(): Settings = Settings(
             generalNotation = Notation.Solfeggio,
+            generalBaseFrequency = 440,
             tunerUseAdvancedMode = false,
             tunerEnableNoiseSuppressor = false,
             tunerStringLayout = StringLayout.GRID,

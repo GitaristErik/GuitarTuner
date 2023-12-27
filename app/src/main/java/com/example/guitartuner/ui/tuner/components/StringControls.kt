@@ -31,13 +31,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.guitartuner.R
+import com.example.guitartuner.data.db.ChromaticScale
 import com.example.guitartuner.domain.entity.tuner.Alteration
 import com.example.guitartuner.domain.entity.tuner.Instrument
 import com.example.guitartuner.domain.entity.tuner.Notation
 import com.example.guitartuner.domain.entity.tuner.Note
 import com.example.guitartuner.domain.entity.tuner.Pitch
 import com.example.guitartuner.domain.entity.tuner.Tone
-import com.example.guitartuner.domain.repository.tuner.ChromaticScale
 import com.example.guitartuner.ui.model.TuneButtonsUIState
 import com.example.guitartuner.ui.theme.PreviewWrapper
 import com.rohankhayech.android.util.ui.preview.ThemePreview

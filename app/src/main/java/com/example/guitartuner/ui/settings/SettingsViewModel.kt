@@ -92,12 +92,12 @@ class SettingsViewModel(
             _filtersSelectedState
                 .debounce(DELAY_FILTERS_BEFORE_REQUEST)
                 .collectLatest {
-                tuningsRepository.filterTunings {
-                    filter(it.general)
-                    filter(it.instrument)
-                    filter(it.strings)
+                    tuningsRepository.filterTunings {
+                        filter(it.general)
+                        filter(it.instrument)
+                        filter(it.strings)
+                    }
                 }
-            }
         }
     }
 

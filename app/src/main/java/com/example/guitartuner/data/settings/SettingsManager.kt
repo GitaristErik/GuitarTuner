@@ -20,6 +20,10 @@ class SettingsManager(
         key = "general_notation",
         defaultValue = Notation.Solfeggio
     )
+    var generalBaseFrequency by storage.value(
+        key = "general_base_frequency",
+        defaultValue = 440
+    )
     var tunerUseAdvancedMode by storage.value(
         key = "tuner_advanced_mode",
         defaultValue = true
@@ -56,6 +60,7 @@ class SettingsManager(
     var settings: Settings
         get() = Settings(
             generalNotation = generalNotation,
+            generalBaseFrequency = generalBaseFrequency,
             
             tunerUseAdvancedMode = tunerUseAdvancedMode,
             tunerEnableNoiseSuppressor = tunerEnableNoiseSuppressor,
@@ -70,6 +75,7 @@ class SettingsManager(
         )
         set(value) {
             generalNotation = value.generalNotation
+            generalBaseFrequency = value.generalBaseFrequency
 
             tunerUseAdvancedMode = value.tunerUseAdvancedMode
             tunerEnableNoiseSuppressor = value.tunerEnableNoiseSuppressor

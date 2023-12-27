@@ -120,11 +120,14 @@
 
     <!--    Settings Tuning Screen-->
     <string name="settings.tunings.current.header">Current</string>
-    <string name="settings_tunings_other_header">Filter</string>
-    <string name="settings_tunings_filter_general_all">All</string>
-    <string name="settings_tunings_filter_general_favorites">Favorites</string>
-    <string name="settings_tunings_filter_general_custom">Custom</string>
-    <string name="settings_tunings_instrument_header">Instruments</string>
-    <string name="settings_tunings_instrument_details_header">Instrument details</string>
+    <string name="settings.tunings.other.header">Filter</string>
+    <string name="settings.tunings.filter.general.all">All</string>
+    <string name="settings.tunings.filter.general.favorites">Favorites</string>
+    <string name="settings.tunings.filter.general.custom">Custom</string>
+    <string name="settings.tunings.instrument.header">Instruments</string>
+    <string name="settings.tunings.instrument.details.header">Instrument details</string>
+    <string name="settings.general.base.frequency">Base Frequency</string>
+    <string name="settings.general.base.frequency.desc">The base frequency for scale</string>
+    <string name="settings.general.base.frequency.value.desc">Hz</string>
 
 </resources>

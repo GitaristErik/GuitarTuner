@@ -16,13 +16,13 @@ import be.tarsos.dsp.io.android.AndroidAudioInputStream
 import be.tarsos.dsp.pitch.PitchDetectionHandler
 import be.tarsos.dsp.pitch.PitchDetectionResult
 import be.tarsos.dsp.pitch.PitchProcessor
+import com.example.guitartuner.data.db.ChromaticScale
 import com.example.guitartuner.data.settings.SettingsManager
 import com.example.guitartuner.domain.entity.settings.Settings
 import com.example.guitartuner.domain.entity.tuner.Alteration
 import com.example.guitartuner.domain.entity.tuner.Pitch
 import com.example.guitartuner.domain.entity.tuner.Tone
 import com.example.guitartuner.domain.entity.tuner.Tuning
-import com.example.guitartuner.domain.repository.tuner.ChromaticScale
 import com.example.guitartuner.domain.repository.tuner.PermissionManager
 import com.example.guitartuner.domain.repository.tuner.TunerRepository
 import kotlinx.coroutines.Dispatchers

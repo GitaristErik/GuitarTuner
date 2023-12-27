@@ -1,9 +1,9 @@
 package com.example.guitartuner.data.tuner
 
+import com.example.guitartuner.data.db.ChromaticScale
 import com.example.guitartuner.domain.entity.tuner.Alteration
 import com.example.guitartuner.domain.entity.tuner.Pitch
 import com.example.guitartuner.domain.entity.tuner.Tone
-import com.example.guitartuner.domain.repository.tuner.ChromaticScale
 import com.example.guitartuner.domain.repository.tuner.PitchRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
