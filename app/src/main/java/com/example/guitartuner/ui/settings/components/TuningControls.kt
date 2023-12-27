@@ -21,7 +21,7 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
@@ -30,8 +30,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconToggleButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
@@ -142,7 +142,7 @@ object TuningControls {
     fun LazyItemScope.SwippableTuningItem(
         tuning: TuningSettingsUIState,
         onSelect: (Int) -> Unit,
-        onFavSelect: (Int) -> Unit,
+        onFavSelect: (Int, Boolean) -> Unit,
         onDelete: (Int) -> Unit,
     ) {
         val dismissState = rememberDismissState(confirmValueChange = { dismissValue ->
@@ -213,7 +213,7 @@ object TuningControls {
     fun LazyItemScope.TuningSettingsItem(
         tuning: TuningSettingsUIState,
         onSelect: (Int) -> Unit = {},
-        onFavSelect: (Int) -> Unit = {},
+        onFavSelect: (Int, Boolean) -> Unit = { _, _ -> },
         onCustomSave: (Int) -> Unit = {},
     ) = with(tuning) {
         Surface(
@@ -289,16 +289,24 @@ object TuningControls {
 
                     // fav select button icon
                     if (!isCustom) {
-                        OutlinedIconToggleButton(modifier = Modifier.align(Alignment.CenterEnd),
+                        IconToggleButton(modifier = Modifier.align(Alignment.CenterEnd),
                             checked = isFavorite,
-                            onCheckedChange = { onFavSelect(tuningId) }) {
+//                            colors = IconButtonDefaults.iconToggleButtonColors(
+//                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+//                                contentColor = MaterialTheme.colorScheme.secondary
+//                            ),
+                            onCheckedChange = { onFavSelect(tuningId, !isFavorite) }) {
                             Icon(
-                                if (isFavorite) Icons.Outlined.StarOutline else Icons.Filled.Star,
+                                if (isFavorite) Icons.Default.Star else Icons.Default.StarOutline,
                                 contentDescription = stringResource(R.string.settings_tunings_favourite_desc),
                             )
                         }
                     } else {
                         FilledTonalIconButton(modifier = Modifier.align(Alignment.CenterEnd),
+//                            colors = IconButtonDefaults.iconButtonColors(
+//                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+//                                contentColor = MaterialTheme.colorScheme.secondary
+//                            ),
                             onClick = { onCustomSave(tuningId) }) {
                             Icon(
                                 Icons.Default.SaveAlt,
@@ -384,22 +392,22 @@ private fun PreviewTuningsFav() {
                 SectionHeader("Favourites")
             }
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(0, false, false), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(0, false, false), {}, {_,_ ->}, {})
             }
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(1, true, false), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(1, true, false), {}, {_,_ ->}, {})
             }
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(2, false, false), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(2, false, false), {}, {_,_ ->}, {})
             }
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(3, true, false), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(3, true, false), {}, {_,_ ->}, {})
             }
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(4, false, false), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(4, false, false), {}, {_,_ ->}, {})
             }
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(5, true, false), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(5, true, false), {}, {_,_ ->}, {})
             }
         }
     }
@@ -473,24 +481,24 @@ private fun PreviewTuningsCustom() {
                 SectionHeader("Custom Tunings")
             }
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(0, false, true), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(0, false, true), {}, {_,_ ->}, {})
             }
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(1, false, true), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(1, false, true), {}, {_,_ ->}, {})
             }
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(2, true, true), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(2, true, true), {}, {_,_ ->}, {})
             }
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(3, false, true), {}, {}, {})
-            }
-
-            item {
-                TuningSettingsItem(tuning = makePreviewTuningState(4, true, true), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(3, false, true), {}, {_,_ ->}, {})
             }
 
             item {
-                TuningSettingsItem(tuning = makePreviewTuningState(5, false, true), {}, {}, {})
+                TuningSettingsItem(tuning = makePreviewTuningState(4, true, true), {}, {_,_ ->}, {})
+            }
+
+            item {
+                TuningSettingsItem(tuning = makePreviewTuningState(5, false, true), {}, {_,_ ->}, {})
             }
         }
     }

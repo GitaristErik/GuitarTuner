@@ -27,26 +27,27 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
 import org.koin.androidx.compose.navigation.koinNavViewModel
 
 @Composable
-fun SettingsTuningsScreen() {
+fun SettingsTuningsScreen(navigateToUp: () -> Unit = {}) {
     val vm = koinNavViewModel<SettingsViewModel>()
     val currentTuningState by vm.currentTuningSet.collectAsState()
     val instrumentsFilter by vm.filtersInstrumentState.collectAsState()
     val stringsFilter by vm.filtersStringsState.collectAsState()
-
+    val tunings by vm.listTuningsState.collectAsState()
 
     SettingsTuningsScreenContent(
         currentTuningState,
-        instrumentsFilter,
-        stringsFilter,
-        onToggleGeneralFilter = { filter, selected ->
-            vm.toggleFilterGeneral(filter, selected)
+        tuningSets = tunings,
+        onSelectTuning = {
+            vm.selectTuning(it)
+            navigateToUp()
         },
-        onToggleInstrumentFilter = { filter, selected ->
-            vm.toggleFilterInstrument(filter, selected)
-        },
-        onToggleStringsFilter = { filter, selected ->
-            vm.toggleFilterStrings(filter, selected)
-        }
+        onToggleFavorite = vm::toggleFavoriteTuning,
+        onRemoveTuning = vm::deleteTuning,
+        instrumentsFilter = instrumentsFilter,
+        stringsFilter = stringsFilter,
+        onToggleGeneralFilter = vm::toggleFilterGeneral,
+        onToggleInstrumentFilter = vm::toggleFilterInstrument,
+        onToggleStringsFilter = vm::toggleFilterStrings,
     )
 }
 
@@ -54,6 +55,11 @@ fun SettingsTuningsScreen() {
 @Composable
 private fun SettingsTuningsScreenContent(
     currentTuningState: TuningSettingsUIState?,
+    tuningSets: List<TuningSettingsUIState> = emptyList(),
+    onToggleFavorite: (Int, Boolean) -> Unit = { _, _ -> },
+    onSelectTuning: (Int) -> Unit = {},
+//    onSaveTuning: (TuningSettingsUIState) -> Unit = {},
+    onRemoveTuning: (Int) -> Unit = {},
     instrumentsFilter: List<FilterBoxUIState<Int>>?,
     stringsFilter: List<FilterBoxUIState<Int>>?,
     onToggleGeneralFilter: (TuningFilter.General, Boolean) -> Unit,
@@ -111,13 +117,14 @@ private fun SettingsTuningsScreenContent(
             stickyHeader("instrument-details-header") { SectionHeader(title = stringResource(R.string.settings_tunings_instrument_details_header)) }
             item("filter-bar-instrument-details") {
                 TuningControls.FilterBox(
-                    values = stringsFilter.onEach {
-                        it.text += pluralStringResource(
-                            R.plurals.settings_tunings_instrument_details_suffix,
-                            it.value
+                    values = stringsFilter.map {
+                        it.copy(
+                            text = it.text + pluralStringResource(
+                                R.plurals.settings_tunings_instrument_details_suffix,
+                                it.value,
+                            )
                         )
-                    },
-                    onSelect = onToggleStringsFilter
+                    }, onSelect = onToggleStringsFilter
                 )
             }
         }
@@ -129,6 +136,16 @@ private fun SettingsTuningsScreenContent(
                     .fillMaxWidth()
                     .height(1.dp)
             )
+        }
+
+
+        items(count = tuningSets.size, key = { it -> tuningSets[it].tuningId }) { index ->
+            val tuning = tuningSets[index]
+            TuningSettingsItem(tuning = tuning,
+                onSelect = onSelectTuning,
+                onFavSelect = onToggleFavorite,
+                onCustomSave = {
+                })
         }
     }
 }
@@ -197,6 +214,8 @@ private fun SettingsTuningsScreenPreview() {
     PreviewWrapper {
         SettingsTuningsScreenContent(
             previewTuningSettingsUIState,
+            listOf(previewTuningSettingsUIState),
+            { _, _ -> }, { _ -> }, { _ -> },
             previewInstrumentsFilter,
             previewStringsFilter,
             { _, _ -> }, { _, _ -> }, { _, _ -> }

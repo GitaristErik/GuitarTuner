@@ -20,11 +20,14 @@ interface TuningSetsRepository {
     fun tuneDownTuning(semitones: Int = 1)
 
 
-    val tuningsList: StateFlow<List<TuningSet>>
+    val tuningsList: StateFlow<List<Pair<TuningSet, Instrument>>>
     val instrumentsAvailableList: StateFlow<List<Pair<Instrument, Boolean>>>
     val stringsCountAvailableList: StateFlow<List<Pair<Int, Boolean>>>
 
     fun updateTuningSet(tuningSet: TuningSet)
+    fun <T> updateTuningSet(tuningId: Int, tuningMap: Map<String, T>)
+    fun deleteTuning(tuningId: Int)
+
     fun updateInstrument(instrument: Instrument)
 
     fun filterTunings(builder: TuningFilterBuilder.() -> Unit)

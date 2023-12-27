@@ -90,7 +90,7 @@ fun AppNavHost(
                         }
                     }?.launchIn(this)
                 }
-                SettingsTuningsScreen()
+                SettingsTuningsScreen(navigateToUp = navController::popBackStack)
             }
         }
     }

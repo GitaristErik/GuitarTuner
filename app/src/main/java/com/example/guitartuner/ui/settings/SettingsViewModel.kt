@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.guitartuner.data.settings.SettingsManager
 import com.example.guitartuner.domain.entity.settings.Settings
-import com.example.guitartuner.domain.entity.tuner.Instrument
 import com.example.guitartuner.domain.entity.tuner.Pitch
 import com.example.guitartuner.domain.entity.tuner.TuningSet
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository
@@ -55,12 +54,36 @@ class SettingsViewModel(
         MutableStateFlow<List<FilterBoxUIState<Int>>?>(null)
     }
 
+    val listTuningsState get() = _listTuningsState.asStateFlow()
+    private val _listTuningsState by lazy {
+        MutableStateFlow<List<TuningSettingsUIState>>(emptyList())
+    }
+
 
     init {
         initCollectorCurrentTuning()
         initCollectorFiltersInstrument()
         initCollectorFiltersStrings()
+        initCollectorListTunings()
         initObserverFiltersSelectedState()
+    }
+
+    private fun initCollectorListTunings() {
+        viewModelScope.launch {
+            tuningsRepository.tuningsList.collectLatest {
+                _listTuningsState.value = it.map { (tuning, instrument) ->
+                    TuningSettingsUIState(
+                        tuningId = tuning.tuningId,
+                        instrumentName = instrument.name,
+                        instrumentDetails = instrument.countStrings.toString(),
+                        tuningName = tuning.name,
+                        notesList = tuning.pitches.mapToNotesList(),
+                        isFavorite = tuning.isFavorite,
+                        isCustom = tuning.tuningId < 0,
+                    )
+                }
+            }
+        }
     }
 
     @OptIn(FlowPreview::class)
@@ -130,11 +153,22 @@ class SettingsViewModel(
         map { it.tone }.joinToString(", ")
 
 
-    fun updateTuning(tuning: TuningSet) =
-        tuningsRepository.updateTuningSet(tuning)
+    fun selectTuning(tuningId: Int) {
+        tuningsRepository.selectTuning(tuningId)
+    }
 
-    fun updateInstrument(instrument: Instrument) =
-        tuningsRepository.updateInstrument(instrument)
+    fun toggleFavoriteTuning(tuningId: Int, isFavorite: Boolean) =
+        tuningsRepository.updateTuningSet(tuningId, mapOf("isFavorite" to isFavorite))
+
+    fun saveTuning(tuningSet: TuningSet) {
+        TODO("SAVE TUNING")
+//        tuningsRepository.updateTuningSet(tuningId, mapOf("tuningId" to tuningId))
+    }
+
+    fun deleteTuning(tuningId: Int) {
+        tuningsRepository.deleteTuning(tuningId)
+    }
+
 
     fun toggleFilterGeneral(
         filter: TuningFilter.General,

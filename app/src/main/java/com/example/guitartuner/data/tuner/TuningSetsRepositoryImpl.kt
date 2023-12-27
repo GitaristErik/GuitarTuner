@@ -1,5 +1,6 @@
 package com.example.guitartuner.data.tuner
 
+import android.util.Log
 import com.example.guitartuner.domain.entity.tuner.Alteration
 import com.example.guitartuner.domain.entity.tuner.Instrument
 import com.example.guitartuner.domain.entity.tuner.Note
@@ -10,17 +11,22 @@ import com.example.guitartuner.domain.repository.tuner.PitchRepository
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository.TuningFilterBuilder
 import com.example.guitartuner.ui.tuner.components.previewInstrument
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class TuningSetsRepositoryImpl(
-    private val pitchRepository: PitchRepository
+    private val pitchRepository: PitchRepository,
+    private val coroutineScope: CoroutineScope
 ) : TuningSetsRepository {
 
 
-    private val fakeTuningSets by lazy {
+    private var fakeTuningSets =
         listOf(
             // "Standard" - "E2, A2, D3, G3, B3, E4",
             TuningSet(
@@ -51,10 +57,14 @@ class TuningSetsRepositoryImpl(
                 ),
             )
         )
+
+
+
+    private val _favoritesTuningSets by lazy {
+        MutableStateFlow(
+            tuningsList.value.mapNotNull { if (it.first.isFavorite) it.first else null }
+        )
     }
-
-
-    private val _favoritesTuningSets by lazy { MutableStateFlow(fakeTuningSets) }
     override val favoritesTuningSets: StateFlow<List<TuningSet>> get() = _favoritesTuningSets.asStateFlow()
 
 
@@ -70,6 +80,20 @@ class TuningSetsRepositoryImpl(
 
     override fun selectTuning(tuningId: Int) {
         _currentTuningSet.value = fakeTuningSets[tuningId]
+    }
+
+    init {
+        initFavoritesTuningSetsCollector()
+    }
+
+    private fun initFavoritesTuningSetsCollector() {
+        coroutineScope.launch {
+            delay(1000)
+            _tuningsList.collectLatest { tunings ->
+                Log.e("TUNING", "tunings: $tunings")
+                _favoritesTuningSets.value = tunings.mapNotNull { if (it.first.isFavorite) it.first else null }
+            }
+        }
     }
 
     private fun findTuning(pitches: List<Pitch>, instrumentId: Int) = fakeTuningSets
@@ -111,9 +135,11 @@ class TuningSetsRepositoryImpl(
         pitchRepository.getPitchById((pitch.id - semitones).coerceAtLeast(0))
 
 
-    override val tuningsList: StateFlow<List<TuningSet>> get() = _tuningsList.asStateFlow()
+    override val tuningsList: StateFlow<List<Pair<TuningSet, Instrument>>> get() = _tuningsList.asStateFlow()
     private val _tuningsList by lazy {
-        MutableStateFlow(fakeTuningSets)
+        MutableStateFlow(fakeTuningSets.map { tuning ->
+            tuning to previewInstrument
+        })
     }
 
     override val instrumentsAvailableList: StateFlow<List<Pair<Instrument, Boolean>>> get() = _instrumentsAvailableList.asStateFlow()
@@ -130,8 +156,32 @@ class TuningSetsRepositoryImpl(
         TODO("Not yet implemented")
     }
 
+    override fun <T> updateTuningSet(tuningId: Int, tuningMap: Map<String, T>) {
+        Log.e("TUNING", "tuningId $tuningId  |  updateTuningSet: $tuningMap")
+        val tuning = fakeTuningSets[tuningId]
+        val newTuning = tuning.copy(
+            name = tuningMap["name"] as? String ?: tuning.name,
+            isFavorite = tuningMap["isFavorite"] as? Boolean ?: tuning.isFavorite,
+            pitches = tuningMap["pitches"] as? List<Pitch> ?: tuning.pitches,
+        )
+
+        Log.e("TUNING", "newTuning: $newTuning")
+
+        fakeTuningSets = fakeTuningSets.map { if (it.tuningId == tuningId) newTuning else it }
+        _tuningsList.update {
+            it.map { t -> if (t.first.tuningId == tuningId) newTuning to t.second else t }
+        }
+    }
+
+    override fun deleteTuning(tuningId: Int) {
+        fakeTuningSets = fakeTuningSets.filter { it.tuningId != tuningId }
+        _tuningsList.update {
+            it.filter { t -> t.first.tuningId != tuningId }
+        }
+    }
+
     override fun updateInstrument(instrument: Instrument) {
-        TODO("Not yet implemented")
+        TODO()
     }
 
     override fun filterTunings(builder: TuningFilterBuilder.() -> Unit) {
@@ -145,8 +195,8 @@ class TuningSetsRepositoryImpl(
                     when (filter) {
                         is TuningFilter.General -> when (filter) {
                             TuningFilter.General.ALL -> true
-                            TuningFilter.General.FAVORITES -> false
-                            TuningFilter.General.CUSTOM -> false
+                            TuningFilter.General.FAVORITES -> tuning.isFavorite
+                            TuningFilter.General.CUSTOM -> tuning.tuningId < 0
                         }
 
                         is TuningFilter.InstrumentId -> filter.id.contains(tuning.instrumentId)
@@ -157,7 +207,9 @@ class TuningSetsRepositoryImpl(
         }
 
         _tuningsList.update {
-            filterBuilder.filteredTunings
+            filterBuilder.filteredTunings.map { tuning ->
+                tuning to previewInstrument
+            }
         }
     }
 }
