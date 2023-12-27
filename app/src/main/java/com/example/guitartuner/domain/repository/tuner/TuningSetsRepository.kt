@@ -12,14 +12,51 @@ interface TuningSetsRepository {
 
     val currentTuningSet: StateFlow<TuningSet>
 
-//    fun getTuningSetsAll(): List<TuningSet>
-//    fun getTuningSetsFavorites(): List<TuningSet>
-//    fun getTuningSetById(id: Int): TuningSet
-//    fun getTuningBySettings(): TuningSet
     fun selectTuning(tuningId: Int)
 
     fun tuneUpString(stringId: Int, semitones: Int = 1)
     fun tuneDownString(stringId: Int, semitones: Int = 1)
     fun tuneUpTuning(semitones: Int = 1)
     fun tuneDownTuning(semitones: Int = 1)
+
+
+    val tuningsList: StateFlow<List<TuningSet>>
+    val instrumentsAvailableList: StateFlow<List<Pair<Instrument, Boolean>>>
+    val stringsCountAvailableList: StateFlow<List<Pair<Int, Boolean>>>
+
+    fun updateTuningSet(tuningSet: TuningSet)
+    fun updateInstrument(instrument: Instrument)
+
+    fun filterTunings(builder: TuningFilterBuilder.() -> Unit)
+
+    abstract class TuningFilterBuilder {
+
+        sealed interface TuningFilter {
+            enum class General : TuningFilter { ALL, FAVORITES, CUSTOM; }
+
+            data class InstrumentId(val id: Set<Int>) : TuningFilter {
+                constructor(vararg id: Int) : this(id.toSet())
+            }
+
+            data class CountStrings(val count: Set<Int>) : TuningFilter {
+                constructor(vararg count: Int) : this(count.toSet())
+            }
+
+
+            infix fun or(other: TuningFilter) = setOf(this, other)
+            infix fun or(other: Set<TuningFilter>) = setOf(this) + other
+        }
+
+
+        protected val filters: MutableSet<TuningFilter> = mutableSetOf()
+        protected var startPaging: Int = 0
+        protected var limit: Int = Int.MAX_VALUE
+
+        fun filter(vararg filter: TuningFilter) = this.also { filters += filter }
+        fun filter(vararg filter: Set<TuningFilter>) =
+            this.also { filters.addAll(filter.toList().flatten()) }
+
+        fun start(start: Int) = this.also { it.startPaging = start }
+        fun limit(limit: Int) = this.also { it.limit = limit }
+    }
 }

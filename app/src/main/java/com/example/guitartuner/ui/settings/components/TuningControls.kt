@@ -43,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -64,18 +65,21 @@ object TuningControls {
      */
     @Composable
     fun <T> FilterBox(
-        values: List<FilterBoxUIState<T>>, onSelect: (T?) -> Unit
+        values: List<FilterBoxUIState<T>>, onSelect: (T, Boolean) -> Unit
     ) {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .animateContentSize()
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 0.dp)
         ) {
             items(values.size, key = { values[it].key }) { index ->
                 TuningFilterChip(
                     filter = values[index].value,
                     filterText = values[index].text,
                     enabled = values[index].isEnabled,
-                    selected = values[index].isSelected,
+                    key = values[index].key,
                     onSelect = onSelect
                 )
             }
@@ -93,14 +97,29 @@ object TuningControls {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun <T> TuningFilterChip(
-        filter: T, filterText: String, enabled: Boolean, selected: Boolean, onSelect: (T?) -> Unit
+        filter: T,
+        filterText: String,
+        enabled: Boolean,
+        onSelect: (T, Boolean) -> Unit,
+        selected: Boolean? = null,
+        key: String? = null
     ) {
+        val (isSelected, selectChange) = if (selected == null) {
+            var state by rememberSaveable(key) { mutableStateOf(false) }
+            state to { select: Boolean -> state = select }
+        } else selected to { _ -> }
+
         FilterChip(modifier = Modifier.animateContentSize(),
             enabled = enabled,
-            selected = selected,
-            onClick = { if (enabled) if (selected) onSelect(null) else onSelect(filter) },
+            selected = isSelected,
+            onClick = {
+                if (enabled) {
+                    selectChange(!isSelected)
+                    onSelect(filter, !isSelected)
+                }
+            },
             leadingIcon = {
-                Icon(
+                if (isSelected) Icon(
                     Icons.Default.Done,
                     filterText + stringResource(R.string.settings_tunings_filter_desc)
                 )
@@ -198,7 +217,10 @@ object TuningControls {
         onCustomSave: (Int) -> Unit = {},
     ) = with(tuning) {
         Surface(
-            color = MaterialTheme.colorScheme.surface, modifier = Modifier.animateItemPlacement()
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier
+                .animateItemPlacement()
+                .clickable { onSelect(tuningId) }
         ) {
             Box(Modifier.fillMaxWidth()) {
 
@@ -206,7 +228,7 @@ object TuningControls {
                     Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 24.dp, top = 16.dp, bottom = 16.dp)
-                        .clickable { onSelect(tuningId) }) {
+                ) {
                     Column(
                         modifier = Modifier.align(Alignment.CenterStart),
                         horizontalAlignment = Alignment.Start,
@@ -233,7 +255,10 @@ object TuningControls {
                                 style = MaterialTheme.typography.labelMedium,
                             )
                             Text(
-                                text = instrumentDetails + stringResource(R.string.settings_tunings_instrument_details_suffix),
+                                text = instrumentDetails + pluralStringResource(
+                                    R.plurals.settings_tunings_instrument_details_suffix,
+                                    instrumentDetails.toIntOrNull() ?: 0
+                                ),
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
                                 fontStyle = FontStyle.Italic,

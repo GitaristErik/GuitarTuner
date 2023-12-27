@@ -1,19 +1,19 @@
 <resources>
     <string name="app_name">Guitar Tuner</string>
 
-<!--    Navigation -->
+    <!--    Navigation -->
     <string name="navigation_drawer">Navigation Drawer</string>
     <string name="tab_tuner">Tuner</string>
     <string name="tab_metronome">Metronome</string>
     <string name="tab_gauge">Strings Gauge</string>
     <string name="tab_settings">Settings"</string>
 
-<!--    Empty page -->
+    <!--    Empty page -->
     <string name="empty_screen_title">Screen under construction</string>
     <string name="empty_screen_subtitle">This screen is still under construction. This sample will help you learn about adaptive layouts in Jetpack Compose</string>
 
-<!--    Tuner -->
-<!--    Tuner: Chart -->
+    <!--    Tuner -->
+    <!--    Tuner: Chart -->
     <string name="listening">Listening</string>
     <string name="in_tune">In Tune</string>
     <string name="tune_up">Tune Up</string>
@@ -22,10 +22,10 @@
     <string name="cents">Cents</string>
     <string name="auto_detect_label">Auto</string>
 
-<!--    Tuner: Dropdown -->
+    <!--    Tuner: Dropdown -->
     <string name="open_tuning_selector">More…</string>
 
-<!--    Tuner: Main Screen-->
+    <!--    Tuner: Main Screen-->
     <string name="tuner_settings">Configure Tuning</string>
 
     <string name="request_permission">Request Permission</string>
@@ -35,11 +35,11 @@
     <string name="permission_denied">Permission Denied</string>
     <string name="open_permission_settings">Open Settings</string>
 
-<!--    Tuner: Configure Screen-->
+    <!--    Tuner: Configure Screen-->
     <string name="configure_tuning">Configure Tuning</string>
     <string name="dismiss">Dismiss</string>
 
-<!--    Settings -->
+    <!--    Settings -->
     <string name="settings.general">General</string>
     <string name="settings.general.notation">Notation</string>
 
@@ -104,8 +104,11 @@
     <string name="settings.notation.english">A B C</string>
     <string name="settings.notation.german">A H C</string>
 
-<!--    Settings Tuning Components-->
-    <string name="settings.tunings.instrument.details.suffix">-Strings</string>
+    <!--    Settings Tuning Components-->
+    <plurals name="settings.tunings.instrument.details.suffix">
+        <item quantity="one">-String</item>
+        <item quantity="other">-Strings</item>
+    </plurals>
     <string name="settings.tunings.instrument.divider"> ‧ </string>
     <string name="settings.tunings.favourite.desc">"button for action select this tuning as favorite "</string>
     <string name="settings.tunings.save.desc">"button for action save this tuning"</string>
@@ -115,7 +118,13 @@
     <string name="settings.tunings.alert.save">Save</string>
     <string name="settings.tunings.alert.cancel">Cancel</string>
 
-<!--    Settings Tuning Screen-->
+    <!--    Settings Tuning Screen-->
     <string name="settings.tunings.current.header">Current</string>
+    <string name="settings_tunings_other_header">Filter</string>
+    <string name="settings_tunings_filter_general_all">All</string>
+    <string name="settings_tunings_filter_general_favorites">Favorites</string>
+    <string name="settings_tunings_filter_general_custom">Custom</string>
+    <string name="settings_tunings_instrument_header">Instruments</string>
+    <string name="settings_tunings_instrument_details_header">Instrument details</string>
 
 </resources>

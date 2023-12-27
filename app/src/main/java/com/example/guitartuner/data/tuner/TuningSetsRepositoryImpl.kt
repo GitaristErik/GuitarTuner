@@ -8,6 +8,7 @@ import com.example.guitartuner.domain.entity.tuner.Tone
 import com.example.guitartuner.domain.entity.tuner.TuningSet
 import com.example.guitartuner.domain.repository.tuner.PitchRepository
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository
+import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository.TuningFilterBuilder
 import com.example.guitartuner.ui.tuner.components.previewInstrument
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -94,28 +95,69 @@ class TuningSetsRepositoryImpl(
         }
     }
 
-    override fun tuneUpString(stringId: Int, semitones: Int) = updateTune(
-        stringId, semitones, ::pitchTuneUp
-    )
+    override fun tuneUpString(stringId: Int, semitones: Int) =
+        updateTune(stringId, semitones, ::pitchTuneUp)
 
-    override fun tuneDownString(stringId: Int, semitones: Int) = updateTune(
-        stringId, semitones, ::pitchTuneDown
-    )
+    override fun tuneDownString(stringId: Int, semitones: Int) =
+        updateTune(stringId, semitones, ::pitchTuneDown)
 
-    override fun tuneUpTuning(semitones: Int) = updateTune(
-        null, semitones, ::pitchTuneUp
-    )
+    override fun tuneUpTuning(semitones: Int) = updateTune(null, semitones, ::pitchTuneUp)
+    override fun tuneDownTuning(semitones: Int) = updateTune(null, semitones, ::pitchTuneDown)
 
-    override fun tuneDownTuning(semitones: Int) = updateTune(
-        null, semitones, ::pitchTuneDown
-    )
+    private fun pitchTuneUp(pitch: Pitch, semitones: Int): Pitch =
+        pitchRepository.getPitchById(pitch.id + semitones)
+
+    private fun pitchTuneDown(pitch: Pitch, semitones: Int): Pitch =
+        pitchRepository.getPitchById((pitch.id - semitones).coerceAtLeast(0))
 
 
-    private fun pitchTuneUp(pitch: Pitch, semitones: Int): Pitch = pitchRepository.getPitchById(
-        pitch.id + semitones
-    )
+    override val tuningsList: StateFlow<List<TuningSet>> get() = _tuningsList.asStateFlow()
+    private val _tuningsList by lazy {
+        MutableStateFlow(fakeTuningSets)
+    }
 
-    private fun pitchTuneDown(pitch: Pitch, semitones: Int): Pitch = pitchRepository.getPitchById(
-        (pitch.id - semitones).coerceAtLeast(0)
-    )
+    override val instrumentsAvailableList: StateFlow<List<Pair<Instrument, Boolean>>> get() = _instrumentsAvailableList.asStateFlow()
+    private val _instrumentsAvailableList by lazy {
+        MutableStateFlow(listOf(previewInstrument to true))
+    }
+
+    override val stringsCountAvailableList: StateFlow<List<Pair<Int, Boolean>>> get() = _stringsCountAvailableList.asStateFlow()
+    private val _stringsCountAvailableList by lazy {
+        MutableStateFlow(listOf(6 to true))
+    }
+
+    override fun updateTuningSet(tuningSet: TuningSet) {
+        TODO("Not yet implemented")
+    }
+
+    override fun updateInstrument(instrument: Instrument) {
+        TODO("Not yet implemented")
+    }
+
+    override fun filterTunings(builder: TuningFilterBuilder.() -> Unit) {
+        val filterBuilder = object : TuningFilterBuilder() {
+            init {
+                builder()
+            }
+
+            val filteredTunings = fakeTuningSets.filter { tuning ->
+                filters.any { filter ->
+                    when (filter) {
+                        is TuningFilter.General -> when (filter) {
+                            TuningFilter.General.ALL -> true
+                            TuningFilter.General.FAVORITES -> false
+                            TuningFilter.General.CUSTOM -> false
+                        }
+
+                        is TuningFilter.InstrumentId -> filter.id.contains(tuning.instrumentId)
+                        is TuningFilter.CountStrings -> filter.count.contains(tuning.pitches.size)
+                    }
+                }
+            }// .let { it.subList(startPaging, (startPaging + limit).coerceIn(startPaging..<it.size)) }
+        }
+
+        _tuningsList.update {
+            filterBuilder.filteredTunings
+        }
+    }
 }

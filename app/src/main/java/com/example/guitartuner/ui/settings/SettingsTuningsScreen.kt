@@ -1,49 +1,205 @@
 package com.example.guitartuner.ui.settings
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.guitartuner.R
+import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository.TuningFilterBuilder.TuningFilter
+import com.example.guitartuner.ui.model.FilterBoxUIState
+import com.example.guitartuner.ui.model.TuningSettingsUIState
+import com.example.guitartuner.ui.settings.components.TuningControls
 import com.example.guitartuner.ui.settings.components.TuningControls.SectionHeader
 import com.example.guitartuner.ui.settings.components.TuningControls.TuningSettingsItem
 import com.example.guitartuner.ui.theme.PreviewWrapper
 import com.rohankhayech.android.util.ui.preview.ThemePreview
 import org.koin.androidx.compose.navigation.koinNavViewModel
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingsTuningsScreen() {
-    val vmSettings = koinNavViewModel<SettingsViewModel>()
-    val currentTuningState by vmSettings.currentTuningSet.collectAsState()
+    val vm = koinNavViewModel<SettingsViewModel>()
+    val currentTuningState by vm.currentTuningSet.collectAsState()
+    val instrumentsFilter by vm.filtersInstrumentState.collectAsState()
+    val stringsFilter by vm.filtersStringsState.collectAsState()
+
+
+    SettingsTuningsScreenContent(
+        currentTuningState,
+        instrumentsFilter,
+        stringsFilter,
+        onToggleGeneralFilter = { filter, selected ->
+            vm.toggleFilterGeneral(filter, selected)
+        },
+        onToggleInstrumentFilter = { filter, selected ->
+            vm.toggleFilterInstrument(filter, selected)
+        },
+        onToggleStringsFilter = { filter, selected ->
+            vm.toggleFilterStrings(filter, selected)
+        }
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun SettingsTuningsScreenContent(
+    currentTuningState: TuningSettingsUIState?,
+    instrumentsFilter: List<FilterBoxUIState<Int>>?,
+    stringsFilter: List<FilterBoxUIState<Int>>?,
+    onToggleGeneralFilter: (TuningFilter.General, Boolean) -> Unit,
+    onToggleInstrumentFilter: (Int, Boolean) -> Unit,
+    onToggleStringsFilter: (Int, Boolean) -> Unit,
+) {
+    val names = TuningFilter.General.entries.map {
+        stringResource(
+            when (it) {
+                TuningFilter.General.ALL -> R.string.settings_tunings_filter_general_all
+                TuningFilter.General.FAVORITES -> R.string.settings_tunings_filter_general_favorites
+                TuningFilter.General.CUSTOM -> R.string.settings_tunings_filter_general_custom
+            }
+        )
+    }
+    val generalFilters by rememberSaveable(key = "general-filters") {
+        mutableStateOf(TuningFilter.General.entries.map {
+            FilterBoxUIState(
+                key = "general_filter_" + it.name,
+                value = it,
+                text = names[it.ordinal],
+                isEnabled = true,
+            )
+        })
+    }
 
     LazyColumn {
-        stickyHeader {
-            SectionHeader(title = stringResource(id = R.string.settings_tunings_current_header))
+        currentTuningState?.let {
+            stickyHeader("current-header") { SectionHeader(title = stringResource(R.string.settings_tunings_current_header)) }
+            item("current-${currentTuningState.tuningId}") {
+                TuningSettingsItem(tuning = currentTuningState, onCustomSave = {
+                })
+            }
         }
 
-        Log.e("SettingsTuningsScreen", "currentTuningState: $currentTuningState")
+        stickyHeader("general-header") { SectionHeader(title = stringResource(R.string.settings_tunings_other_header)) }
+        item("filter-bar-general") {
+            TuningControls.FilterBox(
+                values = generalFilters,
+                onSelect = onToggleGeneralFilter
+            )
+        }
 
-        item {
-            TuningSettingsItem(tuning = currentTuningState, onCustomSave = {
+        instrumentsFilter?.let {
+            stickyHeader("instrument-header") { SectionHeader(title = stringResource(R.string.settings_tunings_instrument_header)) }
+            item("filter-bar-instrument") {
+                TuningControls.FilterBox(
+                    values = instrumentsFilter,
+                    onSelect = onToggleInstrumentFilter
+                )
+            }
+        }
 
-            })
+        stringsFilter?.let {
+            stickyHeader("instrument-details-header") { SectionHeader(title = stringResource(R.string.settings_tunings_instrument_details_header)) }
+            item("filter-bar-instrument-details") {
+                TuningControls.FilterBox(
+                    values = stringsFilter.onEach {
+                        it.text += pluralStringResource(
+                            R.plurals.settings_tunings_instrument_details_suffix,
+                            it.value
+                        )
+                    },
+                    onSelect = onToggleStringsFilter
+                )
+            }
+        }
+
+        item("filter-bar-instrument-details-divider") {
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+            )
         }
     }
 }
 
-@Composable
-private fun SettingsTuningsScreenContent() {
+private val previewTuningSettingsUIState by lazy {
+    TuningSettingsUIState(
+        tuningId = 0,
+        instrumentName = "Guitar",
+        instrumentDetails = "6 strings",
+        tuningName = "Standard",
+        notesList = "E, A, D, G, B, E",
+        isFavorite = false,
+        isCustom = false,
+    )
+}
 
+private val previewInstrumentsFilter by lazy {
+    listOf(
+        FilterBoxUIState(
+            key = "instrument_filter_0",
+            value = 0,
+            text = "Guitar",
+            isEnabled = true,
+        ),
+        FilterBoxUIState(
+            key = "instrument_filter_1",
+            value = 1,
+            text = "Bass",
+            isEnabled = true,
+        ),
+        FilterBoxUIState(
+            key = "instrument_filter_2",
+            value = 2,
+            text = "Electric Guitar",
+            isEnabled = true,
+        ),
+    )
+}
+
+private val previewStringsFilter by lazy {
+    listOf(
+        FilterBoxUIState(
+            key = "strings_filter_0",
+            value = 0,
+            text = "6 strings",
+            isEnabled = true,
+        ),
+        FilterBoxUIState(
+            key = "strings_filter_1",
+            value = 1,
+            text = "4 strings",
+            isEnabled = true,
+        ),
+        FilterBoxUIState(
+            key = "strings_filter_2",
+            value = 2,
+            text = "7 strings",
+            isEnabled = true,
+        ),
+    )
 }
 
 @Composable
 @ThemePreview
 private fun SettingsTuningsScreenPreview() {
     PreviewWrapper {
-        SettingsTuningsScreenContent()
+        SettingsTuningsScreenContent(
+            previewTuningSettingsUIState,
+            previewInstrumentsFilter,
+            previewStringsFilter,
+            { _, _ -> }, { _, _ -> }, { _, _ -> }
+        )
     }
 }
