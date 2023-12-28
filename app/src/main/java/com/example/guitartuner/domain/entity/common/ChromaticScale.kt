@@ -1,4 +1,4 @@
-package com.example.guitartuner.data.db
+package com.example.guitartuner.domain.entity.common
 
 import com.example.guitartuner.domain.entity.tuner.Note
 

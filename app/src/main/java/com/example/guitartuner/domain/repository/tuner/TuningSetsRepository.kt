@@ -14,10 +14,10 @@ interface TuningSetsRepository {
 
     fun selectTuning(tuningId: Int)
 
-    fun tuneUpString(stringId: Int, semitones: Int = 1)
-    fun tuneDownString(stringId: Int, semitones: Int = 1)
-    fun tuneUpTuning(semitones: Int = 1)
-    fun tuneDownTuning(semitones: Int = 1)
+    suspend fun tuneUpString(stringId: Int, semitones: Int = 1)
+    suspend fun tuneDownString(stringId: Int, semitones: Int = 1)
+    suspend fun tuneUpTuning(semitones: Int = 1)
+    suspend fun tuneDownTuning(semitones: Int = 1)
 
 
     val tuningsList: StateFlow<List<Pair<TuningSet, Instrument>>>

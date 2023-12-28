@@ -16,14 +16,12 @@ import be.tarsos.dsp.io.android.AndroidAudioInputStream
 import be.tarsos.dsp.pitch.PitchDetectionHandler
 import be.tarsos.dsp.pitch.PitchDetectionResult
 import be.tarsos.dsp.pitch.PitchProcessor
-import com.example.guitartuner.data.db.ChromaticScale
 import com.example.guitartuner.data.settings.SettingsManager
 import com.example.guitartuner.domain.entity.settings.Settings
-import com.example.guitartuner.domain.entity.tuner.Alteration
-import com.example.guitartuner.domain.entity.tuner.Pitch
 import com.example.guitartuner.domain.entity.tuner.Tone
 import com.example.guitartuner.domain.entity.tuner.Tuning
 import com.example.guitartuner.domain.repository.tuner.PermissionManager
+import com.example.guitartuner.domain.repository.tuner.PitchRepository
 import com.example.guitartuner.domain.repository.tuner.TunerRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +36,8 @@ import kotlin.math.roundToInt
 class TunerRepositoryImpl(
     private val settingsManager: SettingsManager,
     private val permissionManager: PermissionManager,
+    private val pitchRepository: PitchRepository,
+//    private val database: AppDatabase,
 ) : PitchDetectionHandler, TunerRepository {
 
     private companion object {
@@ -54,32 +54,41 @@ class TunerRepositoryImpl(
     override val state by lazy { _state.asStateFlow() }
 
 
-    override fun selectTone(tone: Tone) {
-        selectedTone = tone
-    }
-
-    private var selectedTone: Tone? = null
-    override var autoMode: Boolean = true
-        get() = if (selectedTone == null) true else field
-
-
-    private var audioDispatcher: AudioDispatcher? = null
-    private var pitchProcessor: PitchProcessor? = null
-    private var noiseSuppressor: NoiseSuppressor? = null
-
-    override fun handlePitch(result: PitchDetectionResult?, event: AudioEvent?) {
-        val pitch = result?.pitch?.toDouble() ?: -1.0
-        if (pitch >= 0) {
-            _state.value = getTuning(pitch)
-        }
-    }
-
+    private var lifecycleOwner: LifecycleOwner? = null
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         source.lifecycleScope.launch {
             when (event) {
                 Lifecycle.Event.ON_RESUME -> startListener(settingsManager.settings)
                 Lifecycle.Event.ON_PAUSE -> stopListener()
                 else -> {}
+            }
+        }
+        lifecycleOwner = source
+    }
+
+
+    override fun selectTone(tone: Tone) {
+        selectedTone = tone
+    }
+
+    private var selectedTone: Tone? = null
+
+    override var autoMode: Boolean = true
+        get() = if (selectedTone == null) true else field
+    private var audioDispatcher: AudioDispatcher? = null
+    private var pitchProcessor: PitchProcessor? = null
+
+    private var noiseSuppressor: NoiseSuppressor? = null
+
+    override fun handlePitch(result: PitchDetectionResult?, event: AudioEvent?) {
+        val pitch = result?.pitch?.toDouble() ?: -1.0
+        if (pitch >= 0) {
+            lifecycleOwner?.run {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    getTuning(pitch)?.let {
+                        _state.value = it
+                    }
+                }
             }
         }
     }
@@ -153,86 +162,42 @@ class TunerRepositoryImpl(
             }
         }.onFailure(::logError)
     }
-    /*
 
-        private fun getTuningBinarySearch(detectedFrequency: Double): Tuning {
-            val sortedNotes = ChromaticScale.notes.sortedBy { it.frequency }
-            val index = sortedNotes.binarySearchBy(detectedFrequency) { it.frequency.toDouble() }
+    private suspend fun getTuning(detectedFrequency: Double): Tuning? {
+        val (pitch, deviation) = if (autoMode) {
+            detectPitchIdWithDeviation(detectedFrequency)?.let {
+                pitchRepository.getPitchById(it.first)?.run { this to it.second }
+            }
+        } else {
+            pitchRepository.findPitchByTone(selectedTone!!)?.let {
+                it to getTuningDeviation(it.frequency, detectedFrequency)
+            }
+        } ?: return null
 
-            val closestNoteIndex = if (index >= 0) {
-                index
-            } else {
-                val insertionPoint = -index - 1
-                if (insertionPoint == 0 || insertionPoint == sortedNotes.size) {
-                    insertionPoint - 1
-                } else {
-                    val lowerNote = sortedNotes[insertionPoint - 1]
-                    val upperNote = sortedNotes[insertionPoint]
-                    if (abs(lowerNote.frequency - detectedFrequency) <
-                        abs(upperNote.frequency - detectedFrequency)
-                    ) {
-                        insertionPoint - 1
-                    } else {
-                        insertionPoint
+        return Tuning(
+            closestPitch = pitch,
+            currentFrequency = detectedFrequency,
+            deviation = deviation,
+            isTuned = deviation.absoluteValue < settingsManager.tunerMinDeviation
+        )
+    }
+
+    private fun detectPitchIdWithDeviation(detectedFrequency: Double) =
+        pitchRepository.purePitchesList.value.let {
+            if (it.isEmpty()) return@let null
+
+            var minDeviation = Int.MAX_VALUE
+            var closestPitch = it.first()
+            it.forEach { note ->
+                getTuningDeviation(note.frequency, detectedFrequency).let { deviation ->
+                    if (deviation.absoluteValue < minDeviation.absoluteValue) {
+                        minDeviation = deviation
+                        closestPitch = note
                     }
                 }
             }
-
-            val closestNote = sortedNotes[closestNoteIndex]
-            val minDeviation = getTuningDeviation(closestNote.frequency.toDouble(), detectedFrequency)
-
-            return Tuning(
-                closestPitch = Pitch(
-                    frequency = closestNote.frequency.toDouble(),
-                    Tone(
-                        note = closestNote.note,
-                        octave = closestNote.octave,
-                        alteration = if (closestNote.semitone) Alteration.SHARP else Alteration.NATURAL
-                    )
-                ),
-                currentFrequency = detectedFrequency,
-                deviation = minDeviation
-            )
+            closestPitch.pitchId to minDeviation
         }
-    */
-
-    private fun getTuning(detectedFrequency: Double): Tuning {
-        var minDeviation = Int.MAX_VALUE
-        var closestNote = ChromaticScale.notes.first()
-
-        if (autoMode) {
-            ChromaticScale.notes.forEach { note ->
-                val deviation = getTuningDeviation(note.frequency.toDouble(), detectedFrequency)
-                if (deviation.absoluteValue < minDeviation.absoluteValue) {
-                    minDeviation = deviation
-                    closestNote = note
-                }
-            }
-        } else {
-            closestNote = ChromaticScale.notes.first {
-                it.note == selectedTone!!.note &&
-                        it.octave == selectedTone!!.octave &&
-                        (it.semitone && selectedTone!!.alteration == Alteration.SHARP ||
-                                !it.semitone && selectedTone!!.alteration == Alteration.NATURAL)
-            }
-            minDeviation = getTuningDeviation(closestNote.frequency.toDouble(), detectedFrequency)
-        }
-
-        return Tuning(
-            closestPitch = Pitch(
-                id = closestNote.ordinal,
-                frequency = closestNote.frequency.toDouble(),
-                Tone(
-                    note = closestNote.note,
-                    octave = closestNote.octave,
-                    alteration = if (closestNote.semitone) Alteration.SHARP else Alteration.NATURAL
-                )
-            ),
-            currentFrequency = detectedFrequency,
-            deviation = minDeviation,
-            isTuned = minDeviation.absoluteValue < settingsManager.tunerMinDeviation
-        )
-    }
 
 
     /**
@@ -285,6 +250,5 @@ class TunerRepositoryImpl(
         return if (minAudioBufferSizeInSamples > BUFFER_SIZE) minAudioBufferSizeInSamples else BUFFER_SIZE
     }
 }
-
 
 fun logError(error: Throwable) = Log.e("TunerManager", error.message, error)

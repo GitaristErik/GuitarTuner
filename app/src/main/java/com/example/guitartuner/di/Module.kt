@@ -3,8 +3,10 @@ package com.example.guitartuner.di
 import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
 import cafe.adriel.satchel.Satchel
 import cafe.adriel.satchel.storer.file.FileSatchelStorer
+import com.example.guitartuner.data.db.AppDatabase
 import com.example.guitartuner.data.settings.SettingsManager
 import com.example.guitartuner.data.tuner.PermissionManagerImpl
 import com.example.guitartuner.data.tuner.PitchGenerationRepositoryImpl
@@ -28,8 +30,7 @@ val appModule = module {
 
     viewModel {
         SettingsViewModel(
-            settingsManager = get(),
-            tuningsRepository = get()
+            settingsManager = get(), tuningsRepository = get()
         )
     }
 
@@ -48,6 +49,7 @@ val appModule = module {
             TunerRepositoryImpl(
                 settingsManager = get(),
                 permissionManager = get(),
+                pitchRepository = get(),
             )
         }
 
@@ -81,7 +83,21 @@ val appModule = module {
     }
 
     single<PitchRepository> {
-        PitchRepositoryImpl(get())
+        PitchRepositoryImpl(
+            coroutineScope = get(),
+            settingsManager = get(),
+            database = get()
+        )
+    }
+
+    single<AppDatabase> {
+        Room.databaseBuilder(
+            get(),
+            AppDatabase::class.java,
+            AppDatabase.DATABASE_NAME,
+        ).fallbackToDestructiveMigration()
+            //.setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
+            .build()
     }
 
     single<CoroutineScope> {

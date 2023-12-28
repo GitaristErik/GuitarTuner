@@ -15,6 +15,7 @@ import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository
 import com.example.guitartuner.ui.model.TuneButtonsUIState
 import com.example.guitartuner.ui.model.TuningUIState
 import com.example.guitartuner.ui.utils.ObserveLifecycleEvents
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -208,19 +209,27 @@ class TunerViewModel(
     }
 
     fun tuneUpString(stringId: Int) {
-        tuningSetsRepository.tuneUpString(stringId)
+        viewModelScope.launch(Dispatchers.IO) {
+            tuningSetsRepository.tuneUpString(stringId)
+        }
     }
 
     fun tuneDownString(stringId: Int) {
-        tuningSetsRepository.tuneDownString(stringId)
+        viewModelScope.launch(Dispatchers.IO) {
+            tuningSetsRepository.tuneDownString(stringId)
+        }
     }
 
     fun tuneUpTuning() {
-        tuningSetsRepository.tuneUpTuning()
+        viewModelScope.launch(Dispatchers.IO) {
+            tuningSetsRepository.tuneUpTuning()
+        }
     }
 
     fun tuneDownTuning() {
-        tuningSetsRepository.tuneDownTuning()
+        viewModelScope.launch(Dispatchers.IO) {
+            tuningSetsRepository.tuneDownTuning()
+        }
     }
 
     @Composable

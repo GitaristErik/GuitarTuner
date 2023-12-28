@@ -1,7 +1,5 @@
 package com.example.guitartuner.data.tuner
 
-import android.util.Log
-import com.example.guitartuner.domain.entity.tuner.Alteration
 import com.example.guitartuner.domain.entity.tuner.Instrument
 import com.example.guitartuner.domain.entity.tuner.Note
 import com.example.guitartuner.domain.entity.tuner.Pitch
@@ -26,37 +24,52 @@ class TuningSetsRepositoryImpl(
 ) : TuningSetsRepository {
 
 
-    private var fakeTuningSets =
-        listOf(
-            // "Standard" - "E2, A2, D3, G3, B3, E4",
-            TuningSet(
-                tuningId = 0,
-                name = "Standard",
-                instrumentId = 0,
-                pitches = listOf(
-                    pitchRepository.findPitchByTone(Tone(Note.E, 2)),
-                    pitchRepository.findPitchByTone(Tone(Note.A, 2)),
-                    pitchRepository.findPitchByTone(Tone(Note.D, 3)),
-                    pitchRepository.findPitchByTone(Tone(Note.G, 3)),
-                    pitchRepository.findPitchByTone(Tone(Note.B, 3)),
-                    pitchRepository.findPitchByTone(Tone(Note.E, 4)),
-                ),
+    private var fakeTuningSets = listOf(
+        // "Standard" - "E2, A2, D3, G3, B3, E4",
+        TuningSet(
+            tuningId = 0,
+            name = "Standard",
+            instrumentId = 0,
+            pitches = listOf(
+                Pitch(id = 29, frequency = 82.41, tone = Tone(Note.E, 2)),
+                Pitch(id = 34, frequency = 110.0, tone = Tone(Note.A, 2)),
+                Pitch(id = 39, frequency = 146.83, tone = Tone(Note.D, 3)),
+                Pitch(id = 44, frequency = 196.0, tone = Tone(Note.G, 3)),
+                Pitch(id = 48, frequency = 246.94, tone = Tone(Note.B, 3)),
+                Pitch(id = 53, frequency = 329.63, tone = Tone(Note.E, 4)),
             ),
-            // "Half Step Down (D#)" to "D#2, G#2, C#3, F#3, A#3, D#4",
-            TuningSet(
-                tuningId = 1,
-                instrumentId = 0,
-                name = "Half Step Down (D#)",
-                pitches = listOf(
-                    pitchRepository.findPitchByTone(Tone(Note.D, 2, alteration = Alteration.SHARP)),
-                    pitchRepository.findPitchByTone(Tone(Note.G, 2, alteration = Alteration.SHARP)),
-                    pitchRepository.findPitchByTone(Tone(Note.C, 3, alteration = Alteration.SHARP)),
-                    pitchRepository.findPitchByTone(Tone(Note.F, 3, alteration = Alteration.SHARP)),
-                    pitchRepository.findPitchByTone(Tone(Note.A, 3, alteration = Alteration.SHARP)),
-                    pitchRepository.findPitchByTone(Tone(Note.D, 4, alteration = Alteration.SHARP)),
-                ),
-            )
         )
+    )
+    /* listOf(
+         // "Standard" - "E2, A2, D3, G3, B3, E4",
+         TuningSet(
+             tuningId = 0,
+             name = "Standard",
+             instrumentId = 0,
+             pitches = listOfNotNull(
+                 pitchRepository.findPitchByTone(Tone(Note.E, 2)),
+                 pitchRepository.findPitchByTone(Tone(Note.A, 2)),
+                 pitchRepository.findPitchByTone(Tone(Note.D, 3)),
+                 pitchRepository.findPitchByTone(Tone(Note.G, 3)),
+                 pitchRepository.findPitchByTone(Tone(Note.B, 3)),
+                 pitchRepository.findPitchByTone(Tone(Note.E, 4)),
+             ),
+         ),
+         // "Half Step Down (D#)" to "D#2, G#2, C#3, F#3, A#3, D#4",
+         TuningSet(
+             tuningId = 1,
+             instrumentId = 0,
+             name = "Half Step Down (D#)",
+             pitches = listOfNotNull(
+                 pitchRepository.findPitchByTone(Tone(Note.D, 2, alteration = Alteration.SHARP)),
+                 pitchRepository.findPitchByTone(Tone(Note.G, 2, alteration = Alteration.SHARP)),
+                 pitchRepository.findPitchByTone(Tone(Note.C, 3, alteration = Alteration.SHARP)),
+                 pitchRepository.findPitchByTone(Tone(Note.F, 3, alteration = Alteration.SHARP)),
+                 pitchRepository.findPitchByTone(Tone(Note.A, 3, alteration = Alteration.SHARP)),
+                 pitchRepository.findPitchByTone(Tone(Note.D, 4, alteration = Alteration.SHARP)),
+             ),
+         )
+     )*/
 
 
     private val _favoritesTuningSets by lazy {
@@ -95,10 +108,8 @@ class TuningSetsRepositoryImpl(
     private suspend fun initCurrentTuningObserver() {
         _tuningsList.collectLatest { tuning ->
             _currentTuningSet.update { cur ->
-                (fakeTuningSets.find { it.tuningId == cur.tuningId }
-                    ?: cur.copy(tuningId = -1, name = "Custom")).also {
-                    Log.e("TUNING", "update currentTuningSet: $it")
-                }
+                fakeTuningSets.find { it.tuningId == cur.tuningId }
+                    ?: cur.copy(tuningId = -1, name = "Custom")
             }
         }
     }
@@ -117,11 +128,14 @@ class TuningSetsRepositoryImpl(
         }
 
 
-    private fun updateTune(stringId: Int?, semitones: Int, tuneAction: (Pitch, Int) -> Pitch) {
+    private suspend fun updateTune(
+        stringId: Int?, semitones: Int,
+        tuneAction: suspend (Pitch, Int) -> Pitch?
+    ) {
         _currentTuningSet.update { tuning ->
             val pitches = tuning.pitches.mapIndexed { index, pitch ->
                 if (index == stringId || stringId == null) {
-                    tuneAction(pitch, semitones)
+                    tuneAction(pitch, semitones) ?: return@update tuning
                 } else {
                     pitch
                 }
@@ -133,19 +147,21 @@ class TuningSetsRepositoryImpl(
         }
     }
 
-    override fun tuneUpString(stringId: Int, semitones: Int) =
+    override suspend fun tuneUpString(stringId: Int, semitones: Int) =
         updateTune(stringId, semitones, ::pitchTuneUp)
 
-    override fun tuneDownString(stringId: Int, semitones: Int) =
+    override suspend fun tuneDownString(stringId: Int, semitones: Int) =
         updateTune(stringId, semitones, ::pitchTuneDown)
 
-    override fun tuneUpTuning(semitones: Int) = updateTune(null, semitones, ::pitchTuneUp)
-    override fun tuneDownTuning(semitones: Int) = updateTune(null, semitones, ::pitchTuneDown)
+    override suspend fun tuneUpTuning(semitones: Int) =
+        updateTune(null, semitones, ::pitchTuneUp)
+    override suspend fun tuneDownTuning(semitones: Int) =
+        updateTune(null, semitones, ::pitchTuneDown)
 
-    private fun pitchTuneUp(pitch: Pitch, semitones: Int): Pitch =
+    private suspend fun pitchTuneUp(pitch: Pitch, semitones: Int) =
         pitchRepository.getPitchById(pitch.id + semitones)
 
-    private fun pitchTuneDown(pitch: Pitch, semitones: Int): Pitch =
+    private suspend fun pitchTuneDown(pitch: Pitch, semitones: Int) =
         pitchRepository.getPitchById((pitch.id - semitones).coerceAtLeast(0))
 
 
