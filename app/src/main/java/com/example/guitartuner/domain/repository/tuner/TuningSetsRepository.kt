@@ -35,7 +35,7 @@ interface TuningSetsRepository {
     abstract class TuningFilterBuilder {
 
         sealed interface TuningFilter {
-            enum class General : TuningFilter { ALL, FAVORITES, CUSTOM; }
+            enum class General : TuningFilter { ALL, FAVORITES; }
 
             data class InstrumentId(val id: Set<Int>) : TuningFilter {
                 constructor(vararg id: Int) : this(id.toSet())

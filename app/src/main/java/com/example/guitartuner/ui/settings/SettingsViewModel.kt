@@ -39,7 +39,7 @@ class SettingsViewModel(
     private val _filtersSelectedState by lazy { MutableStateFlow(TuningFilterSelectedState()) }
 
     private data class TuningFilterSelectedState(
-        val general: Set<TuningFilter.General> = setOf(TuningFilter.General.ALL),
+        val general: Set<TuningFilter.General> = setOf(),
         val instrument: TuningFilter.InstrumentId = TuningFilter.InstrumentId(setOf()),
         val strings: TuningFilter.CountStrings = TuningFilter.CountStrings(setOf())
     )

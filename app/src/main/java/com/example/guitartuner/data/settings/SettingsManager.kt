@@ -30,6 +30,11 @@ class SettingsManager(
             .debounce(750)
 
 
+    var lastTuningSetId by storage.value(
+        key = "last_tuning_set_id",
+        defaultValue = 0
+    )
+
     var generalNotation by storage.value(
         key = "general_notation",
         defaultValue = Notation.Solfeggio

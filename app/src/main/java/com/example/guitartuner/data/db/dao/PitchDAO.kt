@@ -14,10 +14,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PitchDAO {
 
-//    @Transaction
-//    @Query("SELECT * FROM PitchTable")
-//    fun getPitchesWithTones(): StateFlow<List<PitchWithTones>>
-
     @Query("SELECT * FROM PitchTable")
     fun getPitches(): Flow<List<PitchTable>>
 
@@ -65,9 +61,5 @@ interface PitchDAO {
         deleteAllFromToneTable()
         deleteAllFromPitchCrossRefTable()
     }
-
-    // -----------
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun updatePitches(pitchList: List<Pitch>)
 
 }

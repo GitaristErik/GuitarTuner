@@ -9,19 +9,19 @@ import com.example.guitartuner.domain.entity.tuner.Pitch
 
 @Entity(primaryKeys = ["pitchId", "toneId"])
 data class PitchCrossRefTable (
-    val pitchId: Int,
-    val toneId: Int,
+    var pitchId: Int,
+    var toneId: Int,
 )
 
 //@Entity(primaryKeys = ["toneId"])
 data class PitchWithTones(
-    @Embedded val pitch: PitchTable,
+    @Embedded var pitch: PitchTable,
     @Relation(
         parentColumn = "pitchId",
         entityColumn = "toneId",
         associateBy = Junction(PitchCrossRefTable::class)
     )
-    val tones: List<ToneTable>
+    var tones: List<ToneTable>
 )
 
 fun PitchWithTones.toPitch(alteration: Alteration): Pitch = Pitch(

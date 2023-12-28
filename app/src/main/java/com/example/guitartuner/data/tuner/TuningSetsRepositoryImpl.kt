@@ -1,5 +1,12 @@
 package com.example.guitartuner.data.tuner
 
+import com.example.guitartuner.data.db.AppDatabase
+import com.example.guitartuner.data.db.model.TuningSetWithPitchesTable
+import com.example.guitartuner.data.db.model.toTuningSet
+import com.example.guitartuner.data.db.model.toTuningSetCrossRefTable
+import com.example.guitartuner.data.db.model.toTuningSetTable
+import com.example.guitartuner.data.settings.SettingsManager
+import com.example.guitartuner.domain.entity.tuner.Alteration
 import com.example.guitartuner.domain.entity.tuner.Instrument
 import com.example.guitartuner.domain.entity.tuner.Note
 import com.example.guitartuner.domain.entity.tuner.Pitch
@@ -10,95 +17,105 @@ import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository.TuningFilterBuilder
 import com.example.guitartuner.ui.tuner.components.previewInstrument
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TuningSetsRepositoryImpl(
     private val pitchRepository: PitchRepository,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val settingsManager: SettingsManager,
+    private val database: AppDatabase,
 ) : TuningSetsRepository {
-
-
-    private var fakeTuningSets = listOf(
-        // "Standard" - "E2, A2, D3, G3, B3, E4",
-        TuningSet(
-            tuningId = 0,
-            name = "Standard",
-            instrumentId = 0,
-            pitches = listOf(
-                Pitch(id = 29, frequency = 82.41, tone = Tone(Note.E, 2)),
-                Pitch(id = 34, frequency = 110.0, tone = Tone(Note.A, 2)),
-                Pitch(id = 39, frequency = 146.83, tone = Tone(Note.D, 3)),
-                Pitch(id = 44, frequency = 196.0, tone = Tone(Note.G, 3)),
-                Pitch(id = 48, frequency = 246.94, tone = Tone(Note.B, 3)),
-                Pitch(id = 53, frequency = 329.63, tone = Tone(Note.E, 4)),
-            ),
-        )
-    )
-    /* listOf(
-         // "Standard" - "E2, A2, D3, G3, B3, E4",
-         TuningSet(
-             tuningId = 0,
-             name = "Standard",
-             instrumentId = 0,
-             pitches = listOfNotNull(
-                 pitchRepository.findPitchByTone(Tone(Note.E, 2)),
-                 pitchRepository.findPitchByTone(Tone(Note.A, 2)),
-                 pitchRepository.findPitchByTone(Tone(Note.D, 3)),
-                 pitchRepository.findPitchByTone(Tone(Note.G, 3)),
-                 pitchRepository.findPitchByTone(Tone(Note.B, 3)),
-                 pitchRepository.findPitchByTone(Tone(Note.E, 4)),
-             ),
-         ),
-         // "Half Step Down (D#)" to "D#2, G#2, C#3, F#3, A#3, D#4",
-         TuningSet(
-             tuningId = 1,
-             instrumentId = 0,
-             name = "Half Step Down (D#)",
-             pitches = listOfNotNull(
-                 pitchRepository.findPitchByTone(Tone(Note.D, 2, alteration = Alteration.SHARP)),
-                 pitchRepository.findPitchByTone(Tone(Note.G, 2, alteration = Alteration.SHARP)),
-                 pitchRepository.findPitchByTone(Tone(Note.C, 3, alteration = Alteration.SHARP)),
-                 pitchRepository.findPitchByTone(Tone(Note.F, 3, alteration = Alteration.SHARP)),
-                 pitchRepository.findPitchByTone(Tone(Note.A, 3, alteration = Alteration.SHARP)),
-                 pitchRepository.findPitchByTone(Tone(Note.D, 4, alteration = Alteration.SHARP)),
-             ),
-         )
-     )*/
-
-
-    private val _favoritesTuningSets by lazy {
-        MutableStateFlow(
-            tuningsList.value.mapNotNull { if (it.first.isFavorite) it.first else null }
-        )
-    }
-    override val favoritesTuningSets: StateFlow<List<TuningSet>> get() = _favoritesTuningSets.asStateFlow()
-
 
     override val currentInstrument: StateFlow<Instrument> =
         MutableStateFlow(previewInstrument).asStateFlow()
 
+    override val favoritesTuningSets get() = _favoritesTuningSets
+    private val _favoritesTuningSets = MutableStateFlow(listOf<TuningSet>())//.asStateFlow()
+    private val _favoritesTuningDAO: Flow<List<TuningSetWithPitchesTable>> =
+        database.tuningSetDAO.getFavouritesTunings()
+
+    override val currentTuningSet get() = _currentTuningSet.asStateFlow()
     private val _currentTuningSet by lazy {
-        MutableStateFlow(fakeTuningSets[0])
-    }
-    override val currentTuningSet
-        get() = _currentTuningSet.asStateFlow()
-
-
-    override fun selectTuning(tuningId: Int) {
-        _currentTuningSet.value = fakeTuningSets[tuningId]
+        MutableStateFlow(TuningSet(0, "", emptyList(), 0))
     }
 
     init {
+        initFavoritesTuningSets()
+        initCurrentTuningSet()
+        initEmptyTuningSets()
+    }
+
+    private fun initEmptyTuningSets() {
+        coroutineScope.launch(Dispatchers.IO) {
+            if (database.tuningSetDAO.count() == 0) {
+                repeat(3) {
+                    if (pitchRepository.purePitchesList.value.isEmpty()) {
+                        delay(1000)
+                    }
+                }
+                if (pitchRepository.purePitchesList.value.isNotEmpty()) {
+                    getDefaultTuningSets().forEach { updateTuningSet(it) }
+                }
+            }
+        }
+    }
+
+    private val alteration = Alteration.SHARP
+
+    private fun initCurrentTuningSet() {
         coroutineScope.launch {
+            _currentTuningSet.value = database.tuningSetDAO
+                .getTuningSetById(settingsManager.lastTuningSetId)
+                .toTuningSet(alteration).firstOrNull() ?: return@launch
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    private fun initFavoritesTuningSets() {
+        coroutineScope.launch {
+            _favoritesTuningDAO
+                .distinctUntilChanged()
+                .debounce(100)
+                .transformLatest { list ->
+                    emit(list.toTuningSet(alteration))
+                }
+                .collectLatest {
+                    _favoritesTuningSets.value = it
+                }
+        }
+    }
+
+    override fun selectTuning(tuningId: Int) {
+        coroutineScope.launch(Dispatchers.IO) {
+            launch { settingsManager.lastTuningSetId = tuningId }
+            _currentTuningSet.value = getTuningSetById(tuningId) ?: return@launch
+        }
+    }
+
+    private suspend fun getTuningSetById(tuningId: Int) = database.tuningSetDAO
+        .getTuningSetById(tuningId)
+        .toTuningSet(alteration)
+        .firstOrNull()
+
+    /*    init {
+    *//*        coroutineScope.launch {
             delay(1000)
             initFavoritesTuningSetsCollector()
-        }
+        }*//*
         coroutineScope.launch {
             delay(1000)
             initCurrentTuningObserver()
@@ -112,20 +129,19 @@ class TuningSetsRepositoryImpl(
                     ?: cur.copy(tuningId = -1, name = "Custom")
             }
         }
-    }
+    }*/
 
-    private suspend fun initFavoritesTuningSetsCollector() {
-        _tuningsList.collectLatest { tunings ->
-            _favoritesTuningSets.value =
-                tunings.mapNotNull { if (it.first.isFavorite) it.first else null }
-        }
-    }
+    /*    private suspend fun initFavoritesTuningSetsCollector() {
+            _tuningsList.collectLatest { tunings ->
+                _favoritesTuningSets.value =
+                    tunings.mapNotNull { if (it.first.isFavorite) it.first else null }
+            }
+        }*/
 
-    private fun findTuning(pitches: List<Pitch>, instrumentId: Int) = fakeTuningSets
-        .firstOrNull {
-            it.instrumentId == instrumentId &&
-                    it.pitches.hashCode() == pitches.hashCode()
-        }
+    private fun findTuning(pitches: List<Pitch>, instrumentId: Int) = database.tuningSetDAO
+        .findTuningByPitchIdsAndInstrument(pitches.map { it.id }, instrumentId)
+        ?.toTuningSet(alteration)
+        ?.firstOrNull()
 
 
     private suspend fun updateTune(
@@ -155,6 +171,7 @@ class TuningSetsRepositoryImpl(
 
     override suspend fun tuneUpTuning(semitones: Int) =
         updateTune(null, semitones, ::pitchTuneUp)
+
     override suspend fun tuneDownTuning(semitones: Int) =
         updateTune(null, semitones, ::pitchTuneDown)
 
@@ -165,12 +182,10 @@ class TuningSetsRepositoryImpl(
         pitchRepository.getPitchById((pitch.id - semitones).coerceAtLeast(0))
 
 
-    override val tuningsList: StateFlow<List<Pair<TuningSet, Instrument>>> get() = _tuningsList.asStateFlow()
-    private val _tuningsList by lazy {
-        MutableStateFlow(fakeTuningSets.map { tuning ->
-            tuning to previewInstrument
-        })
-    }
+    override val tuningsList: StateFlow<List<Pair<TuningSet, Instrument>>> get() = _tuningsList
+    private var _tuningsList =
+        MutableStateFlow(emptyList<Pair<TuningSet, Instrument>>())
+
 
     override val instrumentsAvailableList: StateFlow<List<Pair<Instrument, Boolean>>> get() = _instrumentsAvailableList.asStateFlow()
     private val _instrumentsAvailableList by lazy {
@@ -183,60 +198,134 @@ class TuningSetsRepositoryImpl(
     }
 
     override fun updateTuningSet(tuningSet: TuningSet) {
-        TODO("Not yet implemented")
+        coroutineScope.launch(Dispatchers.IO) {
+            val insertedTuning = async {
+                val id = database.tuningSetDAO.insertTuningSet(
+                    tuningSet.toTuningSetTable()
+                )
+                tuningSet.copy(tuningId = id.toInt())
+            }
+            database.tuningSetDAO.insertTuningSetCrossRef(
+                *insertedTuning.await()
+                    .toTuningSetCrossRefTable()
+                    .toTypedArray()
+            )
+        }
     }
 
     override fun <T> updateTuningSet(tuningId: Int, tuningMap: Map<String, T>) {
-        val tuning = fakeTuningSets[tuningId]
-        val newTuning = tuning.copy(
-            name = tuningMap["name"] as? String ?: tuning.name,
-            isFavorite = tuningMap["isFavorite"] as? Boolean ?: tuning.isFavorite,
-            pitches = tuningMap["pitches"] as? List<Pitch> ?: tuning.pitches,
-        )
-
-        fakeTuningSets = fakeTuningSets.map { if (it.tuningId == tuningId) newTuning else it }
-        _tuningsList.update {
-            it.map { t -> if (t.first.tuningId == tuningId) newTuning to t.second else t }
+        coroutineScope.launch(Dispatchers.IO) {
+            val tuning = getTuningSetById(tuningId) ?: return@launch
+            val newTuning = tuning.copy(
+                name = tuningMap["name"] as? String ?: tuning.name,
+                isFavorite = tuningMap["isFavorite"] as? Boolean ?: tuning.isFavorite,
+                pitches = tuningMap["pitches"] as? List<Pitch> ?: tuning.pitches,
+                instrumentId = tuningMap["instrumentId"] as? Int ?: tuning.instrumentId,
+            )
+            updateTuningSet(newTuning)
         }
     }
 
     override fun deleteTuning(tuningId: Int) {
-        fakeTuningSets = fakeTuningSets.filter { it.tuningId != tuningId }
-        _tuningsList.update {
-            it.filter { t -> t.first.tuningId != tuningId }
+        coroutineScope.launch(Dispatchers.IO) {
+            database.tuningSetDAO.deleteTuningSetById(tuningId)
         }
     }
 
     override fun updateInstrument(instrument: Instrument) {
-        TODO()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun filterTunings(builder: TuningFilterBuilder.() -> Unit) {
-        val filterBuilder = object : TuningFilterBuilder() {
+        object : TuningFilterBuilder() {
             init {
                 builder()
             }
 
-            val filteredTunings = fakeTuningSets.filter { tuning ->
-                filters.any { filter ->
-                    when (filter) {
-                        is TuningFilter.General -> when (filter) {
-                            TuningFilter.General.ALL -> true
-                            TuningFilter.General.FAVORITES -> tuning.isFavorite
-                            TuningFilter.General.CUSTOM -> tuning.tuningId < 0
-                        }
+            val isAll = filters
+                .firstOrNull { it == TuningFilter.General.ALL }
+                ?.let { true }
 
-                        is TuningFilter.InstrumentId -> filter.id.contains(tuning.instrumentId)
-                        is TuningFilter.CountStrings -> filter.count.contains(tuning.pitches.size)
-                    }
+            val isFavorite = filters
+                .firstOrNull { it == TuningFilter.General.FAVORITES }
+                ?.let { true }
+
+            val instrumentIds = filters
+                .filterIsInstance<TuningFilter.InstrumentId>()
+                .flatMap { it.id }
+
+            val countString = filters
+                .filterIsInstance<TuningFilter.CountStrings>()
+                .flatMap { it.count }
+
+            val filteredTuningsFlow = database.tuningSetDAO
+                .filterTunings(
+                    isFavorite = if (isAll == true) null else isFavorite,
+                    instrumentIds = instrumentIds,
+//                    countString = countString,
+                    start = startPaging,
+                    limit = limit,
+                )
+                .transformLatest { list ->
+                    emit(list.toTuningSet(alteration).map { it to previewInstrument })
                 }
-            }// .let { it.subList(startPaging, (startPaging + limit).coerceIn(startPaging..<it.size)) }
-        }
 
-        _tuningsList.update {
-            filterBuilder.filteredTunings.map { tuning ->
-                tuning to previewInstrument
+        }.filteredTuningsFlow.let {
+            coroutineScope.launch(Dispatchers.IO) {
+                it.collectLatest {
+                    _tuningsList.value = it
+                }
             }
         }
+    }
+
+
+    // -----------
+
+    private suspend fun getDefaultTuningSets() = mapOf(
+        // "Standard" - "E2, A2, D3, G3, B3, E4",
+        "Standard" to listOfNotNull(
+            pitchRepository.findPitchByTone(tone = Tone(Note.E, 2)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.A, 2)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.D, 3)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.G, 3)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.B, 3)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.E, 4)),
+        ),
+        // Half step down - "Eb2, Ab2, Db3, Gb3, Bb3, Eb4",
+        "Half step down" to listOfNotNull(
+            pitchRepository.findPitchByTone(tone = Tone(Note.E, 2, Alteration.FLAT)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.A, 2, Alteration.FLAT)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.D, 3, Alteration.FLAT)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.G, 3, Alteration.FLAT)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.B, 3, Alteration.FLAT)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.E, 4, Alteration.FLAT)),
+        ),
+        // Drop D - "D2, A2, D3, G3, B3, E4",
+        "Drop D" to listOfNotNull(
+            pitchRepository.findPitchByTone(tone = Tone(Note.D, 2)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.A, 2)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.D, 3)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.G, 3)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.B, 3)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.E, 4)),
+        ),
+        // Drop C - "C2, G2, C3, F3, A3, D4",
+        "Drop C" to listOfNotNull(
+            pitchRepository.findPitchByTone(tone = Tone(Note.C, 2)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.G, 2)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.C, 3)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.F, 3)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.A, 3)),
+            pitchRepository.findPitchByTone(tone = Tone(Note.D, 4)),
+        ),
+    ).map { (name, pitches) ->
+        TuningSet(
+            tuningId = 0,
+            name = name,
+            pitches = pitches,
+            instrumentId = 1,
+            isFavorite = true,
+        )
     }
 }

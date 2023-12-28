@@ -107,40 +107,50 @@ private fun SideBySideStringControls(
     onTuneDown: (Int) -> Unit,
     onTuneUp: (Int) -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Absolute.spacedBy(8.dp)
-    ) {
+    if (buttonsUIState.toneMap.size < 2) {
+        InlineStringControls(
+            buttonsUIState = buttonsUIState,
+            selectedString = selectedString,
+            tuned = tuned,
+            onSelect = onSelect,
+            onTuneDown = onTuneDown,
+            onTuneUp = onTuneUp
+        )
+    } else {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Absolute.spacedBy(8.dp)
+        ) {
+            val (buttonsUIState1, buttonsUIState2) = remember(buttonsUIState.tuningName) {
+                val (tone1, tone2) = with(buttonsUIState.toneMap) {
+                    toList().chunked(size / 2).map { it.toMap() }
+                }
 
-        val (buttonsUIState1, buttonsUIState2) = remember(buttonsUIState.tuningName) {
-            val (tone1, tone2) = with(buttonsUIState.toneMap) {
-                toList().chunked(size / 2).map { it.toMap() }
+                buttonsUIState.copy(
+                    toneMap = tone1
+                ) to buttonsUIState.copy(
+                    toneMap = tone2
+                )
             }
 
-            buttonsUIState.copy(
-                toneMap = tone1
-            ) to buttonsUIState.copy(
-                toneMap = tone2
+            InlineStringControls(
+                buttonsUIState = buttonsUIState1,
+                selectedString = selectedString,
+                tuned = tuned,
+                onSelect = onSelect,
+                onTuneDown = onTuneDown,
+                onTuneUp = onTuneUp
+            )
+
+            InlineStringControls(
+                buttonsUIState = buttonsUIState2,
+                selectedString = selectedString,
+                tuned = tuned,
+                onSelect = onSelect,
+                onTuneDown = onTuneDown,
+                onTuneUp = onTuneUp
             )
         }
-
-        InlineStringControls(
-            buttonsUIState = buttonsUIState1,
-            selectedString = selectedString,
-            tuned = tuned,
-            onSelect = onSelect,
-            onTuneDown = onTuneDown,
-            onTuneUp = onTuneUp
-        )
-
-        InlineStringControls(
-            buttonsUIState = buttonsUIState2,
-            selectedString = selectedString,
-            tuned = tuned,
-            onSelect = onSelect,
-            onTuneDown = onTuneDown,
-            onTuneUp = onTuneUp
-        )
     }
 }
 

@@ -67,7 +67,7 @@ val appModule = module {
     }
 
     single<TuningSetsRepository> {
-        TuningSetsRepositoryImpl(get(), get())
+        TuningSetsRepositoryImpl(get(), get(), get(), get())
     }
 
     single<SettingsManager> {

@@ -71,7 +71,6 @@ private fun SettingsTuningsScreenContent(
             when (it) {
                 TuningFilter.General.ALL -> R.string.settings_tunings_filter_general_all
                 TuningFilter.General.FAVORITES -> R.string.settings_tunings_filter_general_favorites
-                TuningFilter.General.CUSTOM -> R.string.settings_tunings_filter_general_custom
             }
         )
     }
