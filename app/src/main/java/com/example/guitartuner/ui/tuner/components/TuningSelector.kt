@@ -231,6 +231,10 @@ internal val previewTuningState: Map<Int, TuningUIState> by lazy {
         "1 Step Down (D)" to "D2, G2, C3, F3, A3, D4",
         "Drop D" to "D2, A2, D3, G3, B3, E4",
         "Drop C" to "C2, G2, C3, F3, A3, D4",
+        "Open G" to "D2, G2, D3, G3, B3, D4",
+        "Open D" to "D2, A2, D3, F#3, A3, D4",
+        "All 4th" to "E2, A2, D3, G3, C4, F4",
+        "G Modal" to "D2, G2, D3, G3, C4, D4",
     ).mapIndexed { index, (name, notes) ->
         (index + 1) to TuningUIState(
             tuningName = name,
