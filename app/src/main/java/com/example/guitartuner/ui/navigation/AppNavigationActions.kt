@@ -49,18 +49,18 @@ enum class TopLevelDestination(
         unselectedIcon = Icons.Outlined.SettingsVoice,
         iconTextId = R.string.tab_tuner
     ),
-    Metronome(
-        route = AppRoutRoot.Metronome,
-        selectedIcon = Icons.Filled.Timer,
-        unselectedIcon = Icons.Outlined.Timer,
-        iconTextId = R.string.tab_metronome
-    ),
-    Gauge(
-        route = AppRoutRoot.Gauge,
-        selectedIcon = Icons.Filled.Calculate,
-        unselectedIcon = Icons.Outlined.Calculate,
-        iconTextId = R.string.tab_gauge
-    ),
+//    Metronome(
+//        route = AppRoutRoot.Metronome,
+//        selectedIcon = Icons.Filled.Timer,
+//        unselectedIcon = Icons.Outlined.Timer,
+//        iconTextId = R.string.tab_metronome
+//    ),
+//    Gauge(
+//        route = AppRoutRoot.Gauge,
+//        selectedIcon = Icons.Filled.Calculate,
+//        unselectedIcon = Icons.Outlined.Calculate,
+//        iconTextId = R.string.tab_gauge
+//    ),
     Settings(
         route = AppRoutRoot.Settings,
         selectedIcon = Icons.Filled.Tune,

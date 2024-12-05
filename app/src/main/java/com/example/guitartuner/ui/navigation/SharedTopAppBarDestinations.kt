@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
 enum class AppBarRoute(val route: String) {
-    GaugeAppBar(AppRoutScreen.Gauge.route) {
+/*    GaugeAppBar(AppRoutScreen.Gauge.route) {
         override val screen: AppBarScreen by lazy {
             MainAppBar(this, TitleType.TitleResId(R.string.tab_gauge))
         }
@@ -27,7 +27,7 @@ enum class AppBarRoute(val route: String) {
         override val screen: AppBarScreen by lazy {
             MainAppBar(this, TitleType.TitleResId(R.string.tab_metronome))
         }
-    },
+    },*/
     SettingsAppBar(AppRoutScreen.SettingsAll.route) {
         override val screen: AppBarScreen by lazy {
             MainAppBar(this, TitleType.TitleResId(R.string.tab_settings))
