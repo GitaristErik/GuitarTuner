@@ -281,7 +281,7 @@ private fun TuningMeterLabel(
         // Out of Tune
     } else {
         val offset = noteOffset * displayType.multiplier
-        val dp = if (displayType == TunerDisplayType.CENTS) 1 else 0 // decimal places
+        val dp = if (displayType == TunerDisplayType.SEMITONES) 1 else 0 // decimal places
 
         Text( // Offset Value
             color = color,
