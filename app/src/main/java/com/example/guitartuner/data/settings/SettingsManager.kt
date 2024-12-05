@@ -43,10 +43,10 @@ class SettingsManager(
         key = "general_base_frequency",
         defaultValue = 440
     )
-    var tunerUseAdvancedMode by storage.value(
+/*    var tunerUseAdvancedMode by storage.value(
         key = "tuner_advanced_mode",
         defaultValue = true
-    )
+    )*/
     var tunerEnableNoiseSuppressor by storage.value(
         key = "tuner_enable_noise_suppressor",
         defaultValue = true
@@ -75,17 +75,17 @@ class SettingsManager(
         key = "sound_play_sound_in_tune",
         defaultValue = true
     )
-    var themeUseFullBlackTheme by storage.value(
+/*    var themeUseFullBlackTheme by storage.value(
         key = "theme_use_full_black_theme",
         defaultValue = true
-    )
+    )*/
 
     var settings: Settings
         get() = Settings(
             generalNotation = generalNotation,
             generalBaseFrequency = generalBaseFrequency,
 
-            tunerUseAdvancedMode = tunerUseAdvancedMode,
+//            tunerUseAdvancedMode = tunerUseAdvancedMode,
             tunerEnableNoiseSuppressor = tunerEnableNoiseSuppressor,
             tunerMinDeviation = tunerMinDeviation,
             tunerStringLayout = tunerStringLayout,
@@ -95,7 +95,7 @@ class SettingsManager(
             soundPlaySoundOnSelect = soundPlaySoundOnSelect,
             soundPlaySoundInTune = soundPlaySoundInTune,
 
-            themeUseFullBlackTheme = themeUseFullBlackTheme,
+//            themeUseFullBlackTheme = themeUseFullBlackTheme,
         )
         set(value) {
             generalNotation = value.generalNotation
@@ -104,7 +104,7 @@ class SettingsManager(
             }
             generalBaseFrequency = value.generalBaseFrequency
 
-            tunerUseAdvancedMode = value.tunerUseAdvancedMode
+//            tunerUseAdvancedMode = value.tunerUseAdvancedMode
             tunerEnableNoiseSuppressor = value.tunerEnableNoiseSuppressor
             tunerMinDeviation = value.tunerMinDeviation
             tunerStringLayout = value.tunerStringLayout
@@ -114,7 +114,7 @@ class SettingsManager(
             soundPlaySoundOnSelect = value.soundPlaySoundOnSelect
             soundPlaySoundInTune = value.soundPlaySoundInTune
 
-            themeUseFullBlackTheme = value.themeUseFullBlackTheme
+//            themeUseFullBlackTheme = value.themeUseFullBlackTheme
         }
 
     init {

@@ -15,7 +15,7 @@ data class Settings(
     val generalNotation: Notation,
     val generalBaseFrequency: Int,
 
-    val tunerUseAdvancedMode: Boolean,
+//    val tunerUseAdvancedMode: Boolean,
     val tunerEnableNoiseSuppressor: Boolean,
     val tunerMinDeviation: Int = 15,
     val tunerStringLayout: StringLayout,
@@ -25,7 +25,7 @@ data class Settings(
     val soundPlaySoundInTune: Boolean,
     val soundPlaySoundOnSelect: Boolean,
 
-    val themeUseFullBlackTheme: Boolean,
+//    val themeUseFullBlackTheme: Boolean,
 //    val accidental: AccidentalOption,
 //    val deviationPrecision: DeviationPrecisionOption
 ) {
@@ -89,14 +89,14 @@ data class Settings(
         fun previewSettings(): Settings = Settings(
             generalNotation = Notation.Solfeggio,
             generalBaseFrequency = 440,
-            tunerUseAdvancedMode = false,
+//            tunerUseAdvancedMode = false,
             tunerEnableNoiseSuppressor = false,
             tunerStringLayout = StringLayout.GRID,
             tunerDisplayType = TunerDisplayType.SIMPLE,
             tunerMinDeviation = 15,
             soundPlaySoundInTune = true,
             soundPlaySoundOnSelect = true,
-            themeUseFullBlackTheme = true,
+//            themeUseFullBlackTheme = true,
             tunerPitchDetectionAlgorithm = TunerPitchDetectionAlgorithm.YIN
         )
     }

@@ -95,12 +95,12 @@ private fun SettingsScreenBody(
             checked = settings.tunerEnableNoiseSuppressor,
             onChanged = { updateSettings(settings.copy(tunerEnableNoiseSuppressor = !settings.tunerEnableNoiseSuppressor)) }
         )
-        SettingsComponents.PreferenceSwitch(
+/*        SettingsComponents.PreferenceSwitch(
             title = stringResource(R.string.settings_advanced_mode),
             subtitle = stringResource(R.string.settings_advanced_mode_desc),
             checked = settings.tunerUseAdvancedMode,
             onChanged = { updateSettings(settings.copy(tunerUseAdvancedMode = !settings.tunerUseAdvancedMode)) }
-        )
+        )*/
         SettingsComponents.PreferenceNumberInput(
             title = stringResource(R.string.settings_tuner_deviation),
             subtitle = stringResource(R.string.settings_tuner_deviation_desc),
@@ -150,15 +150,15 @@ private fun SettingsScreenBody(
 
         // ---------------
         // Theme preferences
-        SectionLabel(title = stringResource(R.string.settings_theme))
-
-        SettingsComponents.PreferenceSwitch(
-            title = stringResource(R.string.settings_use_black_theme),
-            subtitle = stringResource(R.string.settings_use_black_theme_desc),
-            checked = settings.themeUseFullBlackTheme,
-            onChanged = { updateSettings(settings.copy(themeUseFullBlackTheme = !settings.themeUseFullBlackTheme)) }
-        )
-        Divider(color = MaterialTheme.colorScheme.surfaceVariant)
+//        SectionLabel(title = stringResource(R.string.settings_theme))
+//
+//        SettingsComponents.PreferenceSwitch(
+//            title = stringResource(R.string.settings_use_black_theme),
+//            subtitle = stringResource(R.string.settings_use_black_theme_desc),
+//            checked = settings.themeUseFullBlackTheme,
+//            onChanged = { updateSettings(settings.copy(themeUseFullBlackTheme = !settings.themeUseFullBlackTheme)) }
+//        )
+//        Divider(color = MaterialTheme.colorScheme.surfaceVariant)
         // ---------------
 
         // About
@@ -180,8 +180,8 @@ private fun Preview() {
     PreviewWrapper {
         SettingsScreenBody(
             settings = Settings(
-                tunerUseAdvancedMode = false,
-                themeUseFullBlackTheme = true,
+//                tunerUseAdvancedMode = false,
+//                themeUseFullBlackTheme = true,
                 soundPlaySoundInTune = true,
                 soundPlaySoundOnSelect = true,
                 tunerEnableNoiseSuppressor = false,
