@@ -122,6 +122,8 @@
     <string name="settings.tunings.favourite.desc">"button for action select this tuning as favorite "</string>
     <string name="settings.tunings.save.desc">"button for action save this tuning"</string>
     <string name="settings.tunings.remove.desc">"button for action remove this tuning"</string>
+    <string name="settings.tunings.remove.toast">Tuning was deleted.</string>
+    <string name="settings.tunings.edit.desc">"button for action edit this tuning"</string>
     <string name="settings.tunings.filter.desc">"chip for filter tunings"</string>
     <string name="settings.tunings.delete.desc">"delete tuning"</string>
     <string name="settings.tunings.alert.title">Save tuning as…</string>

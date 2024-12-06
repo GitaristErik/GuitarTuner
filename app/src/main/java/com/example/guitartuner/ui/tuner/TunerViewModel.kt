@@ -60,7 +60,7 @@ class TunerViewModel(
         MutableStateFlow(TuningUIState(0, "", ""))
     }
 
-    val selectedTuningId = MutableStateFlow(-1)
+    val selectedTuningId = MutableStateFlow(1)
     val selectedString = MutableStateFlow<Int?>(null)
     val autoMode = MutableStateFlow(true)
 

@@ -105,6 +105,7 @@ dependencies {
 
     // Data Storage
     implementation(libs.satchel.core)
+    implementation(libs.androidx.material3.android)
 
     // Room
     annotationProcessor(libs.androidx.room.compiler)

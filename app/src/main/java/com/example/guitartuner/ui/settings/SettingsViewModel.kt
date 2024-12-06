@@ -2,6 +2,7 @@ package com.example.guitartuner.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.guitartuner.data.settings.SettingsManager
 import com.example.guitartuner.domain.entity.settings.Settings
 import com.example.guitartuner.domain.entity.tuner.Pitch
@@ -160,9 +161,17 @@ class SettingsViewModel(
     fun toggleFavoriteTuning(tuningId: Int, isFavorite: Boolean) =
         tuningsRepository.updateTuningSet(tuningId, mapOf("isFavorite" to isFavorite))
 
-    fun saveTuning(tuningSet: TuningSet) {
-        TODO("SAVE TUNING")
-//        tuningsRepository.updateTuningSet(tuningId, mapOf("tuningId" to tuningId))
+    fun saveTuning(tuningName: String) {
+        viewModelScope.launch {
+            val savedTuningId = tuningsRepository.updateTuningSet(
+                tuningsRepository.currentTuningSet.value.copy(
+                    tuningId = 0,
+                    name = tuningName,
+                    isFavorite = true,
+                )
+            )
+            tuningsRepository.selectTuning(savedTuningId)
+        }
     }
 
     fun deleteTuning(tuningId: Int) {

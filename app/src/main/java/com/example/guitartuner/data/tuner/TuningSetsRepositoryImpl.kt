@@ -54,6 +54,7 @@ class TuningSetsRepositoryImpl(
     }
 
     private val alteration = Alteration.SHARP
+    private val nameForUnsavedTuning: String = "Custom (unsaved)"
     private val initializationDeferred = CompletableDeferred<Unit>()
 
     init {
@@ -158,7 +159,7 @@ class TuningSetsRepositoryImpl(
             }
 
             findTuning(pitches, tuning.instrumentId) ?: tuning.copy(
-                tuningId = -1, pitches = pitches, name = "Custom"
+                tuningId = -1, pitches = pitches, name = nameForUnsavedTuning
             )
         }
     }
@@ -195,21 +196,20 @@ class TuningSetsRepositoryImpl(
         MutableStateFlow(listOf(6 to true))
     }
 
-    private suspend fun updateTuningSetSuspend(tuningSet: TuningSet) {
+    private suspend fun updateTuningSetSuspend(tuningSet: TuningSet): Int {
         val id = database.tuningSetDAO.insertTuningSet(
             tuningSet.toTuningSetTable()
-        )
-        val insertedTuning = tuningSet.copy(tuningId = id.toInt())
+        ).toInt()
+        val insertedTuning = tuningSet.copy(tuningId = id)
         database.tuningSetDAO.insertTuningSetCrossRef(
             *insertedTuning.toTuningSetCrossRefTable().toTypedArray()
         )
+        return id
     }
 
-    override fun updateTuningSet(tuningSet: TuningSet) {
-        coroutineScope.launch(Dispatchers.IO) {
-            updateTuningSetSuspend(tuningSet)
-        }
-    }
+    override suspend fun updateTuningSet(tuningSet: TuningSet) =
+        updateTuningSetSuspend(tuningSet)
+
 
     override fun <T> updateTuningSet(tuningId: Int, tuningMap: Map<String, T>) {
         coroutineScope.launch(Dispatchers.IO) {
@@ -227,6 +227,9 @@ class TuningSetsRepositoryImpl(
     override fun deleteTuning(tuningId: Int) {
         coroutineScope.launch(Dispatchers.IO) {
             database.tuningSetDAO.deleteTuningSetById(tuningId)
+        }
+        _currentTuningSet.update { tuning ->
+            tuning.copy(tuningId = -1, name = nameForUnsavedTuning)
         }
     }
 

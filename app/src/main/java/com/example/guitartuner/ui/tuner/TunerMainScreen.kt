@@ -64,7 +64,7 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
  * @param noteOffset A state holding the offset of the currently playing note.
  * @param isTuned A boolean indicating whether the currently playing note is in tune.
  * @param tunings A state holding a map of all tunings, keyed by their ID.
- * @param selectedTuningId The ID of the currently selected tuning.
+ * @param currentTuningSet The currently selected tuning.
  * @param buttonsUIState The UI state of the tuning buttons.
  * @param selectedString The index of the currently selected string within the tuning.
  * @param tuned An array indicating whether each string has been tuned.
@@ -244,7 +244,7 @@ private typealias TunerBodyLayout = @Composable (
  *
  * @param expanded A boolean indicating whether the tuner is expanded or not.
  * @param tunings A state holding a map of all tunings, keyed by their ID.
- * @param selectedTuningId The ID of the currently selected tuning.
+ * @param currentTuningSet The currently selected tuning.
  * @param buttonsUIState The UI state of the tuning buttons.
  * @param noteOffset A state holding the offset of the currently playing note.
  * @param isTuned A boolean indicating whether the currently playing note is in tune.

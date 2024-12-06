@@ -24,7 +24,7 @@ interface TuningSetsRepository {
     val instrumentsAvailableList: StateFlow<List<Pair<Instrument, Boolean>>>
     val stringsCountAvailableList: StateFlow<List<Pair<Int, Boolean>>>
 
-    fun updateTuningSet(tuningSet: TuningSet)
+    suspend fun updateTuningSet(tuningSet: TuningSet): Int
     fun <T> updateTuningSet(tuningId: Int, tuningMap: Map<String, T>)
     fun deleteTuning(tuningId: Int)
 

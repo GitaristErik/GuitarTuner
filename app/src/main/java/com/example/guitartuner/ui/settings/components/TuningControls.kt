@@ -1,5 +1,6 @@
 package com.example.guitartuner.ui.settings.components
 
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -9,33 +10,44 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
+import androidx.compose.material.rememberDismissState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue.*
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +55,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -94,7 +108,6 @@ object TuningControls {
      * @param selected Whether the filter is currently selected.
      * @param onSelect Called when the filter is selected/unselected.
      */
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun <T> TuningFilterChip(
         filter: T,
@@ -127,78 +140,16 @@ object TuningControls {
             label = { Text(filterText) })
     }
 
-
-    /**
-     * This composable function creates a list item displaying a custom tuning, with options to favourite or remove it.
-     * @param tuning The tuning to display.
-     * @param onSelect Called when this tuning is selected.
-     * @param onFavSelect Called when the favourite button is pressed.
-     * @param onDelete Called when this tuning is swiped to be removed.
-     */
-    @OptIn(
-        ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class
-    )
-    @Composable
-    fun LazyItemScope.SwippableTuningItem(
-        tuning: TuningSettingsUIState,
-        onSelect: (Int) -> Unit,
-        onFavSelect: (Int, Boolean) -> Unit,
-        onDelete: (Int) -> Unit,
-    ) {
-        val dismissState = rememberDismissState(confirmValueChange = { dismissValue ->
-            if (dismissValue == DismissValue.DismissedToStart) {
-                onDelete(tuning.tuningId)
-                true
-            } else false
-        })
-
-        SwipeToDismiss(modifier = Modifier.animateItemPlacement(),
-            state = dismissState,
-            directions = setOf(DismissDirection.EndToStart),
-            background = {
-                val color by animateColorAsState(
-                    when (dismissState.currentValue) {
-                        DismissValue.DismissedToStart -> MaterialTheme.colorScheme.errorContainer
-//                            .copy(alpha = 0.36f)
-//                            .compositeOver(MaterialTheme.colorScheme.surface)
-
-                        else -> MaterialTheme.colorScheme.onErrorContainer
-//                            .copy(alpha = 0.05f)
-//                            .compositeOver(MaterialTheme.colorScheme.surface)
-                    }, label = "Tuning Item Background Color"
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color)
-                        .padding(end = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Icon(
-                        Icons.Default.DeleteForever,
-                        contentDescription = stringResource(R.string.settings_tunings_delete_desc),
-                        tint = MaterialTheme.colorScheme.onError
-                    )
-                }
-            },
-            dismissContent = {
-                TuningSettingsItem(tuning = tuning,
-                    onSelect = onSelect,
-                    onFavSelect = onFavSelect,
-                    onCustomSave = { })
-            })
-    }
-
     /**
      * This composable function creates a UI component displaying a tuning category label with [title] text.
      * @param title The title of the section.
      */
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun LazyItemScope.SectionHeader(title: String) {
-        SectionLabel(modifier = Modifier.animateItemPlacement(), title = title)
+        SectionLabel(
+            modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
+            title = title
+        )
     }
 
     /**
@@ -206,20 +157,19 @@ object TuningControls {
      * @param tuning The tuning to display.
      * @param onSelect Called when this tuning is selected.
      * @param onFavSelect Called when the favourite button is pressed.
-     * @param onCustomSave Called when the save button is pressed.
+     * @param onSave Called when the save button is pressed.
      */
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun LazyItemScope.TuningSettingsItem(
         tuning: TuningSettingsUIState,
         onSelect: (Int) -> Unit = {},
         onFavSelect: (Int, Boolean) -> Unit = { _, _ -> },
-        onCustomSave: (Int) -> Unit = {},
+        onSave: ((TuningSettingsUIState) -> Unit)? = null,
     ) = with(tuning) {
         Surface(
             color = MaterialTheme.colorScheme.surface,
             modifier = Modifier
-                .animateItemPlacement()
+                .animateItem(fadeInSpec = null, fadeOutSpec = null)
                 .clickable { onSelect(tuningId) }
         ) {
             Box(Modifier.fillMaxWidth()) {
@@ -288,7 +238,7 @@ object TuningControls {
                     }
 
                     // fav select button icon
-                    if (!isCustom) {
+                    if (onSave == null || !isCustom) {
                         IconToggleButton(modifier = Modifier.align(Alignment.CenterEnd),
                             checked = isFavorite,
 //                            colors = IconButtonDefaults.iconToggleButtonColors(
@@ -307,7 +257,7 @@ object TuningControls {
 //                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
 //                                contentColor = MaterialTheme.colorScheme.secondary
 //                            ),
-                            onClick = { onCustomSave(tuningId) }) {
+                            onClick = { onSave(tuning) }) {
                             Icon(
                                 Icons.Default.SaveAlt,
                                 contentDescription = stringResource(R.string.settings_tunings_save_desc)
@@ -316,7 +266,7 @@ object TuningControls {
                     }
                 }
 
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
@@ -325,11 +275,145 @@ object TuningControls {
         }
     }
 
+    /**
+     * This composable function creates a UI component displaying a tuning set.
+     * This realization has swipe to dismiss functionality, allowing the user to edit or remove the tuning.
+     *
+     * @param tuning The tuning to display.
+     * @param onSelect Called when this tuning is selected.
+     * @param onFavSelect Called when the user switch to favourite the tuning.
+     * @param onRemove Called when the user swipes to remove the tuning.
+     * @param modifier The modifier to apply to this layout node.
+     */
+    @Composable
+    fun LazyItemScope.TuningSettingsItemSwippable(
+        tuning: TuningSettingsUIState,
+        onSelect: (Int) -> Unit = {},
+        onFavSelect: (Int, Boolean) -> Unit = { _, _ -> },
+        onRemove: (Int) -> Unit = {},
+        modifier: Modifier = Modifier,
+    ) = with(tuning) {
+//        val currentItem by rememberUpdatedState(emailMessage)
+        val context = LocalContext.current
+        val message = stringResource(R.string.settings_tunings_remove_toast)
+
+        val dismissState = rememberSwipeToDismissBoxState(
+            confirmValueChange = {
+                when (it) {
+                    Settled -> return@rememberSwipeToDismissBoxState false
+                    StartToEnd -> return@rememberSwipeToDismissBoxState false
+                    EndToStart -> {
+                        onRemove(tuningId)
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+                return@rememberSwipeToDismissBoxState true
+            },
+            positionalThreshold = { it * .25f }
+        )
+        SwipeToDismissBox(
+            state = dismissState,
+            modifier = modifier,
+            backgroundContent = { DismissBackground(dismissState) },
+            content = {
+                TuningSettingsItem(
+                    tuning = tuning,
+                    onSelect = onSelect,
+                    onFavSelect = onFavSelect,
+                )
+            })
+    }
+
+
+    @Composable
+    fun DismissBackground(dismissState: SwipeToDismissBoxState) {
+        val color = when (dismissState.dismissDirection) {
+            EndToStart -> MaterialTheme.colorScheme.inverseSurface
+            StartToEnd -> MaterialTheme.colorScheme.errorContainer
+            Settled -> Color.Transparent
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color)
+                .padding(12.dp, 8.dp),
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            Icon(
+                Icons.Default.Delete,
+                tint = MaterialTheme.colorScheme.onError,
+                contentDescription = stringResource(R.string.settings_tunings_remove_desc),
+            )
+        }
+    }
+
+
+    /**
+     * This composable function creates a list item displaying a custom tuning, with options to favourite or remove it.
+     * @param tuning The tuning to display.
+     * @param onSelect Called when this tuning is selected.
+     * @param onFavSelect Called when the favourite button is pressed.
+     * @param onRemove Called when this tuning is swiped to be removed.
+     */
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    fun LazyItemScope.TuningSettingsItemSwippable2(
+        tuning: TuningSettingsUIState,
+        onSelect: (Int) -> Unit,
+        onFavSelect: (Int, Boolean) -> Unit,
+        onRemove: (Int) -> Unit,
+    ) {
+        val dismissState = rememberDismissState(confirmStateChange = { dismissValue ->
+            if (dismissValue == DismissValue.DismissedToStart) {
+                onRemove(tuning.tuningId)
+                true
+            } else false
+        })
+
+        SwipeToDismiss(modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
+            state = dismissState,
+            directions = setOf(DismissDirection.EndToStart),
+            background = {
+                val color by animateColorAsState(
+                    when (dismissState.currentValue) {
+                        DismissValue.DismissedToStart -> MaterialTheme.colorScheme.errorContainer
+//                            .copy(alpha = 0.36f)
+//                            .compositeOver(MaterialTheme.colorScheme.surface)
+
+                        else -> MaterialTheme.colorScheme.onErrorContainer
+//                            .copy(alpha = 0.05f)
+//                            .compositeOver(MaterialTheme.colorScheme.surface)
+                    }, label = "Tuning Item Background Color"
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color)
+                        .padding(end = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Icon(
+                        Icons.Default.DeleteForever,
+                        contentDescription = stringResource(R.string.settings_tunings_delete_desc),
+                        tint = MaterialTheme.colorScheme.onError
+                    )
+                }
+            },
+            dismissContent = {
+                TuningSettingsItem(
+                    tuning = tuning,
+                    onSelect = onSelect,
+                    onFavSelect = onFavSelect
+                )
+            })
+    }
 
     /**
      * Dialog allowing the user to enter a name and save the specified tuning.
      * @param modifier The modifier to apply to this layout node.
-     * @param tuningId The id of the tuning to save.
      * @param tuningName The name of the tuning to save.
      * @param onSave Called when the user presses the save button.
      * @param onDismiss Called when the user dismisses the dialog.
@@ -337,14 +421,13 @@ object TuningControls {
     @Composable
     fun SaveTuningDialog(
         modifier: Modifier,
-        tuningId: Int,
         tuningName: String,
-        onSave: (String?, Int) -> Unit,
-        onDismiss: () -> Unit
+        onDismiss: () -> Unit,
+        onSave: (String) -> Unit,
     ) {
         var name by rememberSaveable { mutableStateOf("") }
 
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             modifier = modifier,
             title = {
                 Text(
@@ -360,16 +443,14 @@ object TuningControls {
                     onValueChange = { name = it })
             },
             confirmButton = {
-                androidx.compose.material3.TextButton(onClick = {
-                    onSave(
-                        name.ifBlank { null }, tuningId
-                    )
+                TextButton(onClick = {
+                    onSave(name)
                 }) {
                     Text(text = stringResource(R.string.settings_tunings_alert_save).uppercase())
                 }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(
+                TextButton(
                     onClick = onDismiss,
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
                 ) {
@@ -509,9 +590,8 @@ private fun PreviewTuningsCustom() {
 private fun PreviewAlert() {
     PreviewWrapper {
         TuningControls.SaveTuningDialog(modifier = Modifier.fillMaxSize(),
-            tuningId = 0,
             tuningName = "Drop C#",
-            onSave = { _, _ -> },
-            onDismiss = { })
+            onDismiss = { },
+            onSave = { _ -> })
     }
 }
