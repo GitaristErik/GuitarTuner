@@ -5,7 +5,7 @@
     <string name="navigation_drawer">Navigation Drawer</string>
     <string name="tab_tuner">Tuner</string>
     <string name="tab_metronome">Metronome</string>
-    <string name="tab_gauge">Strings Gauge</string>
+    <string name="tab_gauge" translatable="false">Strings Gauge</string>
     <string name="tab_settings">Settings"</string>
 
     <!--    Empty page -->
@@ -110,17 +110,18 @@
     <string name="send_feedback">Send feedback</string>
 
     <string name="settings.notation.classic">Do Re Mi</string>
-    <string name="settings.notation.english">A B C</string>
-    <string name="settings.notation.german">A H C</string>
+    <string name="settings.notation.english" translatable="false">A B C</string>
+    <string name="settings.notation.german" translatable="false">A H C</string>
 
     <!--    Settings Tuning Components-->
-    <plurals name="settings.tunings.instrument.details.suffix">
+    <plurals name="settings.tunings.instrument.details.suffix" translatable="false">
         <item quantity="one">-String</item>
         <item quantity="other">-Strings</item>
     </plurals>
-    <string name="settings.tunings.instrument.divider"> ‧ </string>
+    <string name="settings.tunings.instrument.divider" translatable="false"> ‧ </string>
     <string name="settings.tunings.favourite.desc">"button for action select this tuning as favorite "</string>
     <string name="settings.tunings.save.desc">"button for action save this tuning"</string>
+    <string name="settings.tunings.remove.desc">"button for action remove this tuning"</string>
     <string name="settings.tunings.filter.desc">"chip for filter tunings"</string>
     <string name="settings.tunings.delete.desc">"delete tuning"</string>
     <string name="settings.tunings.alert.title">Save tuning as…</string>
