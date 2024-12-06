@@ -32,12 +32,12 @@ class SettingsManager(
 
     var lastTuningSetId by storage.value(
         key = "last_tuning_set_id",
-        defaultValue = 0
+        defaultValue = 1
     )
 
     var generalNotation by storage.value(
         key = "general_notation",
-        defaultValue = Notation.Solfeggio
+        defaultValue = Notation.English
     )
     var generalBaseFrequency by storage.value(
         key = "general_base_frequency",
@@ -57,7 +57,7 @@ class SettingsManager(
     )
     var tunerStringLayout by storage.value(
         key = "tuner_string_layout",
-        defaultValue = Settings.StringLayout.LIST
+        defaultValue = Settings.StringLayout.GRID
     )
     var tunerDisplayType by storage.value(
         key = "tuner_display_type",

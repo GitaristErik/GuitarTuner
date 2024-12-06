@@ -8,6 +8,7 @@ import com.example.guitartuner.domain.entity.tuner.Note
 import com.example.guitartuner.domain.entity.tuner.Pitch
 import com.example.guitartuner.domain.entity.tuner.Tone
 import com.example.guitartuner.domain.entity.tuner.TuningSet
+import com.example.guitartuner.domain.entity.tuner.previewInstrument
 
 @Entity
 data class TuningSetTable(
@@ -49,12 +50,17 @@ data class TuningSetWithPitchesTable(
     val degree: Int,
 )
 
-fun List<TuningSetWithPitchesTable>.toTuningSet(alteration: Alteration) =
-    groupBy { it.tuningId }.map { (tuningId, tuningSetWithPitches) ->
+fun List<TuningSetWithPitchesTable>.toTuningSet(
+    alteration: Alteration,
+    stringsCount: Int = previewInstrument.countStrings
+) = groupBy { it.tuningId }.mapNotNull { (tuningId, tuningSetWithPitches) ->
+    val pitches = tuningSetWithPitches.groupBy { it.pitchId }
+    if (pitches.size != stringsCount) return@mapNotNull null
+
     TuningSet(
         tuningId = tuningId,
         name = tuningSetWithPitches.firstNotNullOf { it.name },
-        pitches = tuningSetWithPitches.groupBy { it.pitchId }.map { (pitchId, pitches) ->
+        pitches = pitches.mapNotNull { (pitchId, pitches) ->
             Pitch(
                 id = pitchId,
                 frequency = pitches.first().frequency,
@@ -71,8 +77,8 @@ fun List<TuningSetWithPitchesTable>.toTuningSet(alteration: Alteration) =
         instrumentId = tuningSetWithPitches.firstNotNullOf { it.instrumentId },
         isFavorite = tuningSetWithPitches.firstNotNullOf { it.isFavorite },
     )
-
 }
+
 fun TuningSet.toTuningSetTable() = TuningSetTable(
     tuningId = tuningId,
     name = name,

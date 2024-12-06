@@ -85,7 +85,7 @@ fun TunerMainScreen(
     contentType: ContentType,
     noteOffset: Double?,
     isTuned: Boolean,
-    tunings: Map<Int, TuningUIState>,
+    tunings: List<TuningUIState>,
     currentTuningSet: TuningUIState,
     buttonsUIState: TuneButtonsUIState,
     selectedString: Int?,
@@ -269,7 +269,7 @@ private typealias TunerBodyLayout = @Composable (
 @Composable
 private fun TunerBody(
     expanded: Boolean,
-    tunings: Map<Int, TuningUIState>,
+    tunings: List<TuningUIState>,
     currentTuningSet: TuningUIState,
     buttonsUIState: TuneButtonsUIState,
     noteOffset: Double?,

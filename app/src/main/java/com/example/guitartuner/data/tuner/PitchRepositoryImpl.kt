@@ -1,5 +1,6 @@
 package com.example.guitartuner.data.tuner
 
+import android.util.Log
 import com.example.guitartuner.data.db.AppDatabase
 import com.example.guitartuner.data.db.model.PitchCrossRefTable
 import com.example.guitartuner.data.db.model.PitchTable
@@ -35,7 +36,7 @@ class PitchRepositoryImpl(
 
     override suspend fun getPitchById(id: Int): Pitch? = database.pitchDAO
         .getPitchWithToneById(id)
-        .toPitch(alteration)
+        ?.toPitch(alteration)
 
     override suspend fun findPitchByTone(tone: Tone): Pitch? = database.pitchDAO
         .findPitchByDegreeAndOctave(tone.degree, tone.octave)
@@ -55,22 +56,33 @@ class PitchRepositoryImpl(
         }
     }
 
+    private val isInitialized = MutableStateFlow(false)
+
+
     private fun initPitches() {
         coroutineScope.launch(Dispatchers.IO) {
             launch {
-                database.pitchDAO.getPitches().collectLatest { pitchTables ->
-                    _purePitchesList.update { pitchTables }
+                isInitialized.collectLatest { isInit ->
+                    Log.e("PitchRepositoryImpl", "isInitialized: $isInit")
+                    if (isInit) {
+                        database.pitchDAO.getPitches().collectLatest { pitchTables ->
+                            Log.e("PitchRepositoryImpl", "pitchTablesCount: ${pitchTables.size}")
+                            _purePitchesList.update { pitchTables }
+                        }
+                    }
                 }
             }
 
             if (database.pitchDAO.count() == 0) {
                 regeneratePitches(settingsManager.generalBaseFrequency)
             }
+            isInitialized.value = true
         }
     }
 
     private fun regeneratePitches(referenceFrequency: Int) {
         coroutineScope.launch(Dispatchers.IO) {
+            isInitialized.value = false
             database.pitchDAO.deletePitches()
 
             ChromaticScaleGenerator()
@@ -80,6 +92,9 @@ class PitchRepositoryImpl(
                     val toneIds = async { insertTone(tone) }
                     makeCrossRef(pitchId.await(), toneIds.await())
                 }
+
+            // signal that the pitches is initialized
+            isInitialized.value = true
         }
     }
 

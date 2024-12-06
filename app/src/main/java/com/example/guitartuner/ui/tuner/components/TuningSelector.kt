@@ -34,9 +34,9 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
 /**
  * Row UI component displaying and allowing selection and retuning of the current tuning.
  *
- * @param tuning The current guitar tuning.
- * @param favTunings Set of tunings marked as favourite by the user.
- * @param customTunings Set of custom tunings added by the user.
+ * @param modifier The modifier to apply to this layout.
+ * @param currentTuningSet The current guitar tuning.
+ * @param tunings The list of available guitar tunings.
  * @param enabled Whether the selector is enabled. Defaults to true.
  * @param openDirect Whether to open the tuning selection screen directly instead of the favourites dropdown.
  * @param onSelect Called when a tuning is selected.
@@ -50,7 +50,7 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
 fun TuningSelector(
     modifier: Modifier = Modifier,
     currentTuningSet: TuningUIState,
-    tunings: Map<Int, TuningUIState>,
+    tunings: List<TuningUIState>,
     enabled: Boolean = true,
     openDirect: Boolean,
     onSelect: (Int) -> Unit,
@@ -104,16 +104,16 @@ fun TuningSelector(
                 expanded = expanded && enabled,
                 onDismissRequest = { expanded = false }
             ) {
-                tunings.forEach { (tuningId, tuningOption) ->
+                tunings.forEach { tuning ->
                     DropdownMenuItem(
                         text = {
                             TuningItem(
                                 modifier = Modifier.padding(vertical = 8.dp),
-                                tuning = tuningOption,
+                                tuning = tuning,
                                 fontWeight = FontWeight.Normal,
                             )
                         }, onClick = {
-                            onSelect(tuningId)
+                            onSelect(tuning.tuningId)
                             expanded = false
                         }
                     )
@@ -224,7 +224,7 @@ fun TuningItem(
     }
 }
 
-internal val previewTuningState: Map<Int, TuningUIState> by lazy {
+internal val previewTuningState: List<TuningUIState> by lazy {
     listOf(
         "Standard" to "E2, A2, D3, G3, B3, E4",
         "Half Step Down (D#)" to "D#2, G#2, C#3, F#3, A#3, D#4",
@@ -236,11 +236,12 @@ internal val previewTuningState: Map<Int, TuningUIState> by lazy {
         "All 4th" to "E2, A2, D3, G3, C4, F4",
         "G Modal" to "D2, G2, D3, G3, C4, D4",
     ).mapIndexed { index, (name, notes) ->
-        (index + 1) to TuningUIState(
+        TuningUIState(
+            tuningId = index + 1,
             tuningName = name,
             notesList = notes.replace(" ", " ")
         )
-    }.toMap()
+    }
 }
 
 // Previews
@@ -250,7 +251,7 @@ private fun PreviewTuningSelector() {
     PreviewWrapper {
         TuningSelector(
             Modifier.padding(8.dp),
-            currentTuningSet = previewTuningState[1]!!,
+            currentTuningSet = previewTuningState[1],
             tunings = previewTuningState,
             openDirect = false,
             onSelect = {},
@@ -267,7 +268,7 @@ private fun PreviewTuningField() {
     PreviewWrapper {
         Column {
             CurrentTuningField(
-                tuning = previewTuningState[1]!!,
+                tuning = previewTuningState[1],
                 expanded = false,
                 showExpanded = false
             )
@@ -275,7 +276,7 @@ private fun PreviewTuningField() {
             Spacer(modifier = Modifier.height(16.dp))
 
             CurrentTuningField(
-                tuning = previewTuningState[1]!!,
+                tuning = previewTuningState[1],
                 expanded = false,
                 showExpanded = true
             )
@@ -283,7 +284,7 @@ private fun PreviewTuningField() {
             Spacer(modifier = Modifier.height(32.dp))
 
             CurrentTuningField(
-                tuning = previewTuningState[1]!!,
+                tuning = previewTuningState[1],
                 expanded = true,
                 showExpanded = false
             )
@@ -292,7 +293,7 @@ private fun PreviewTuningField() {
             Spacer(modifier = Modifier.height(32.dp))
 
             CurrentTuningField(
-                tuning = previewTuningState[1]!!,
+                tuning = previewTuningState[1],
                 expanded = true,
                 showExpanded = true
             )
@@ -307,7 +308,7 @@ private fun PreviewTuningItem() {
     PreviewWrapper {
         TuningItem(
             Modifier.padding(8.dp),
-            tuning = previewTuningState[1]!!,
+            tuning = previewTuningState[1],
             fontWeight = FontWeight.Bold
         )
     }

@@ -38,6 +38,7 @@ import com.example.guitartuner.domain.entity.tuner.Notation
 import com.example.guitartuner.domain.entity.tuner.Note
 import com.example.guitartuner.domain.entity.tuner.Pitch
 import com.example.guitartuner.domain.entity.tuner.Tone
+import com.example.guitartuner.domain.entity.tuner.previewInstrument
 import com.example.guitartuner.ui.model.TuneButtonsUIState
 import com.example.guitartuner.ui.theme.PreviewWrapper
 import com.rohankhayech.android.util.ui.preview.ThemePreview
@@ -387,28 +388,6 @@ internal fun createPreviewButtonsUIState(
     notation = notation,
     instrument = previewInstrument
 )
-
-internal val previewInstrument by lazy {
-    val chromaToPitch = { chroma: ChromaticScale ->
-        Pitch(
-            chroma.ordinal,
-            chroma.frequency.toDouble(),
-            Tone(
-                chroma.note,
-                chroma.octave,
-                if(chroma.semitone) Alteration.SHARP else Alteration.NATURAL
-            )
-        )
-    }
-    Instrument(
-        instrumentId = 0,
-        name = "Guitar",
-        countStrings = 6,
-        lowestPitch = chromaToPitch(ChromaticScale.E0),
-        highestPitch = chromaToPitch(ChromaticScale.C6_SHARP),
-    )
-}
-
 
 @ThemePreview
 @Composable

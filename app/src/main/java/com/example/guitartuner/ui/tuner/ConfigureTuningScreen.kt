@@ -63,7 +63,7 @@ import com.rohankhayech.android.util.ui.preview.PreviewWrapper
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigureTuningScreen(
-    tunings: State<Map<Int, TuningUIState>>,
+    tunings: State<List<TuningUIState>>,
     currentTuningSet: TuningUIState,
     buttonsUIState: TuneButtonsUIState,
     onSelectTuning: (Int) -> Unit,
@@ -156,7 +156,7 @@ private fun Preview() {
         ConfigureTuningScreen(
             tunings = remember { mutableStateOf(previewTuningState) },
             buttonsUIState = previewButtonsUIState,
-            currentTuningSet = previewTuningState[1]!!,
+            currentTuningSet = previewTuningState[1],
             onSelectTuning = {},
             onTuneUpString = {},
             onTuneDownString = {},

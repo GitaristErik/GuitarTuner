@@ -19,7 +19,7 @@ interface PitchDAO {
 
     @Transaction
     @Query("SELECT * FROM PitchTable WHERE pitchId = :pitchId")
-    suspend fun getPitchWithToneById(pitchId: Int): PitchWithTones
+    suspend fun getPitchWithToneById(pitchId: Int): PitchWithTones?
 
     @Transaction
     @Query("SELECT * FROM PitchTable WHERE octave = :octave AND degree = :degree")

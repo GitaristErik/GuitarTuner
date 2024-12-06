@@ -52,15 +52,15 @@ class TunerViewModel(
 
     val tuningsState get() = _tuningsState
     private val _tuningsState by lazy {
-        MutableStateFlow(emptyMap<Int, TuningUIState>())
+        MutableStateFlow(emptyList<TuningUIState>())
     }
 
     val currentTuningSet get() = _currentTuningSet.asStateFlow()
     private val _currentTuningSet by lazy {
-        MutableStateFlow(TuningUIState("", ""))
+        MutableStateFlow(TuningUIState(0, "", ""))
     }
 
-    val selectedTuningId = MutableStateFlow(0)
+    val selectedTuningId = MutableStateFlow(-1)
     val selectedString = MutableStateFlow<Int?>(null)
     val autoMode = MutableStateFlow(true)
 
@@ -77,8 +77,8 @@ class TunerViewModel(
         initTunerRepositoryObserver()
         initAutoModeObserver()
         initStringSelectorObserver()
-        initTuningSelectorObserver()
         initFavoritesTuningSetsObserver()
+        initTuningSelectorObserver()
 
 //        tuningSetsRepository.favoritesTuningSets.launchIn(viewModelScope)
         tuningSetsRepository.currentInstrument.launchIn(viewModelScope)
@@ -88,12 +88,13 @@ class TunerViewModel(
     private fun initFavoritesTuningSetsObserver() {
         viewModelScope.launch {
             tuningSetsRepository.favoritesTuningSets.collect { list ->
-                _tuningsState.value = list.mapIndexed { index, tuning ->
-                    index to TuningUIState(
+                _tuningsState.value = list.map { tuning ->
+                    TuningUIState(
+                        tuningId = tuning.tuningId,
                         tuningName = tuning.name,
                         notesList = tuning.pitches.joinToString(", ") { it.tone.toString() }
                     )
-                }.toMap()
+                }
             }
         }
     }
@@ -146,12 +147,13 @@ class TunerViewModel(
     private fun initTuningSelectorObserver() {
         viewModelScope.launch {
             selectedTuningId.collect {
-                tuningSetsRepository.selectTuning(it)
+                if(it > 0) tuningSetsRepository.selectTuning(it)
             }
         }
         viewModelScope.launch {
             tuningSetsRepository.currentTuningSet.collect { tuning ->
                 _currentTuningSet.value = TuningUIState(
+                    tuningId = tuning.tuningId,
                     tuningName = tuning.name,
                     notesList = tuning.pitches.joinToString(", ") { it.tone.toString() }
                 )

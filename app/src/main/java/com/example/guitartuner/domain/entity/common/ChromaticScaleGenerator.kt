@@ -21,10 +21,10 @@ open class ChromaticScaleGenerator {
     open fun generateAsFlow(
         referenceFrequency: Double = 440.0
     ): Flow<Pair<Double, Tone>> = flow {
-        Log.e("ChromaticScaleGenerator", "generateToFlow: $referenceFrequency")
+//        Log.e("ChromaticScaleGenerator", "generateToFlow: $referenceFrequency")
         List(FREQUENCIES_COUNT) { i ->
             val note = generator(i, referenceFrequency)
-            Log.e("ChromaticScaleGenerator", "generateToFlow: $note")
+//            Log.e("ChromaticScaleGenerator", "generateToFlow: $note")
             emit(note)
         }
     }
