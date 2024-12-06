@@ -71,7 +71,7 @@ class PitchRepositoryImpl(
 
     private fun regeneratePitches(referenceFrequency: Int) {
         coroutineScope.launch(Dispatchers.IO) {
-            database.pitchDAO.deleteAll()
+            database.pitchDAO.deletePitches()
 
             ChromaticScaleGenerator()
                 .generateAsFlow(referenceFrequency.toDouble())
