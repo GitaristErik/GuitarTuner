@@ -41,7 +41,7 @@
     <string name="settings.tuner.tunings">Строї</string>
     <string name="settings.tuner.tunings.desc">Налаштувати строї</string>
     <string name="settings.tuner.deviation">Відхилення для тюнера</string>
-    <string name="settings.tuner.deviation.desc">Мінімальне відхилення для налаштуваного</string>
+    <string name="settings.tuner.deviation.desc">Мінімальне відхилення для\nналаштуваного стану</string>
     <string name="settings.tuner.deviation.desc.value">Центи</string>
     <string name="settings.display.type">Відображення строю</string>
     <string name="settings.display.type.simple">Простий</string>
@@ -88,4 +88,9 @@
     <string name="settings.tunings.instrument.header">Інструменти</string>
     <string name="settings.tunings.instrument.details.header">Деталі інструменту</string>
     <string name="settings.tunings.remove.desc">Кнопка: Видалити цей стрій</string>
+    <string name="other">Інше</string>
+    <string name="lang">Мова</string>
+    <string name="lang.message">Змінити мову програми</string>
+    <string name="settings.tunings.remove.toast">Стрій було видалено.</string>
+    <string name="settings.tunings.edit.desc">Кнопка для редагування строю</string>
 </resources>

@@ -167,7 +167,7 @@ private fun SettingsScreenBody(
         // ---------------
 
         // Other
-        SectionLabel(stringResource(R.string.about))
+        SectionLabel(stringResource(R.string.other))
         SettingsComponents.PreferenceActionLink(
             title = stringResource(R.string.lang),
             subtitle = stringResource(R.string.lang_message),
