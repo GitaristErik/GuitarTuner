@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import com.example.guitartuner.ui.settings.components.SectionLabel
 import com.example.guitartuner.ui.settings.components.SettingsComponents
 import com.example.guitartuner.ui.theme.PreviewWrapper
 import com.rohankhayech.android.util.ui.preview.ThemePreview
+import org.intellij.lang.annotations.Language
 import org.koin.androidx.compose.navigation.koinNavViewModel
 
 
@@ -31,6 +33,7 @@ import org.koin.androidx.compose.navigation.koinNavViewModel
 fun SettingsScreen(
     onClickTunings: () -> Unit,
     onClickAbout: () -> Unit,
+    onClickLanguage: () -> Unit,
 ) {
     val vmSettings = koinNavViewModel<SettingsViewModel>()
     val settings by vmSettings.state.collectAsState()
@@ -41,6 +44,7 @@ fun SettingsScreen(
         updateSettings = updateSettings,
         onClickTunings = onClickTunings,
         onClickAbout = onClickAbout,
+        onClickLanguage = onClickLanguage
     )
 }
 
@@ -50,6 +54,7 @@ private fun SettingsScreenBody(
     updateSettings: (Settings) -> Unit,
     onClickTunings: () -> Unit,
     onClickAbout: () -> Unit,
+    onClickLanguage: () -> Unit,
 ) {
 
     Column(
@@ -95,12 +100,12 @@ private fun SettingsScreenBody(
             checked = settings.tunerEnableNoiseSuppressor,
             onChanged = { updateSettings(settings.copy(tunerEnableNoiseSuppressor = !settings.tunerEnableNoiseSuppressor)) }
         )
-/*        SettingsComponents.PreferenceSwitch(
-            title = stringResource(R.string.settings_advanced_mode),
-            subtitle = stringResource(R.string.settings_advanced_mode_desc),
-            checked = settings.tunerUseAdvancedMode,
-            onChanged = { updateSettings(settings.copy(tunerUseAdvancedMode = !settings.tunerUseAdvancedMode)) }
-        )*/
+        /*        SettingsComponents.PreferenceSwitch(
+                    title = stringResource(R.string.settings_advanced_mode),
+                    subtitle = stringResource(R.string.settings_advanced_mode_desc),
+                    checked = settings.tunerUseAdvancedMode,
+                    onChanged = { updateSettings(settings.copy(tunerUseAdvancedMode = !settings.tunerUseAdvancedMode)) }
+                )*/
         SettingsComponents.PreferenceNumberInput(
             title = stringResource(R.string.settings_tuner_deviation),
             subtitle = stringResource(R.string.settings_tuner_deviation_desc),
@@ -161,17 +166,24 @@ private fun SettingsScreenBody(
 //        Divider(color = MaterialTheme.colorScheme.surfaceVariant)
         // ---------------
 
-        // About
+        // Other
         SectionLabel(stringResource(R.string.about))
-
+        SettingsComponents.PreferenceActionLink(
+            title = stringResource(R.string.lang),
+            subtitle = stringResource(R.string.lang_message),
+            icon = Icons.Outlined.Language,
+            onClick = onClickLanguage
+        )
         SettingsComponents.PreferenceActionLink(
             title = stringResource(R.string.about),
             subtitle = stringResource(R.string.app_name),
             icon = Icons.Outlined.Info,
             onClick = onClickAbout
         )
+
         // ---------------
-    }   }
+    }
+}
 
 // Preview
 @ThemePreview
@@ -194,6 +206,7 @@ private fun Preview() {
             updateSettings = {},
             onClickTunings = {},
             onClickAbout = {},
+            onClickLanguage = {},
         )
     }
 }

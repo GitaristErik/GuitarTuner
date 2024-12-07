@@ -77,8 +77,9 @@ fun AppNavHost(
         ) {
             composable(AppRoutScreen.SettingsAll.route) {
                 SettingsScreen(
-                    onClickAbout = {},
+                    onClickAbout = { context.navigateToAboutApp() },
                     onClickTunings = { navController.navigate(AppRoutScreen.SettingsTunings.route) },
+                    onClickLanguage = { context.navigateToLanguageSettings() },
                 )
             }
 
@@ -97,10 +98,25 @@ fun AppNavHost(
 }
 
 /** Opens the permission settings screen in the device settings. */
-private fun Context.navigateToPermissionSettings() {
+private fun Context.navigateToPermissionSettings() = startNewActivity(
+    Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+)
+
+/** Open the language settings screen. */
+private fun Context.navigateToLanguageSettings() = startNewActivity(
+    Settings.ACTION_APP_LOCALE_SETTINGS
+)
+
+/** Open the about app screen. */
+private fun Context.navigateToAboutApp() = startNewActivity(
+    Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+)
+
+/** Start activity from current context. */
+private fun Context.startNewActivity(action: String) {
     startActivity(
         Intent(
-            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            action,
             Uri.fromParts("package", packageName, null)
         )
     )
