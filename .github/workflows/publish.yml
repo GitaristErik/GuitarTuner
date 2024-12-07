@@ -1,0 +1,33 @@
+name: Github Publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: release.yml
+          workflow_conclusion: success
+          name: release
+          path: downloads
+          if_no_artifact_found: fail
+
+      # 2
+      - name: Generate release tag
+        id: tag
+        run: |
+          echo "::set-output name=release_tag::GuitarTuner_$(date +"%Y.%m.%d_%H-%M")"
+      # 3
+      - name: Push release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          files: downloads/app-debug.apk
