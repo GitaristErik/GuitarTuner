@@ -24,12 +24,8 @@
   </div>
 </div>
 
-> Diploma work at university, the mobile android app is designed to facilitate the accounting and control of resources, as well as the exchange of information between military personnel of different ranks.
+> Tune your guitar with ease using this precise and user-friendly tuner app. Featuring multiple tuning algorithms, customizable presets, and a noise reduction feature, this app ensures your guitar is always in perfect tune.
 >
-> -----------------
->
-> ***In Ukrainian***:
-> *Дипломна робота для університету, мобільний android додаток призначений для полегшення ведення обліку та контролю ресурсів, а також обміну інформацією між військовослужбовцями різних рангів.*
 
 ## 📖 Table of content
 
@@ -51,12 +47,7 @@
 
 #### About this application
 
-> ##### *Tune your guitar with ease using this precise and user-friendly tuner app. Featuring multiple tuning algorithms, customizable presets, and a noise reduction feature, this app ensures your guitar is always in perfect tune*
-> 
-
 ![Screenshot](assets/presentation/Slide3.PNG)
-#### Comparison of pitch detection algorithms:
-![Screenshot](assets/presentation/Slide14.PNG)
 
 #### Key Features:
 * **Perfect for beginners and experienced guitarists**
@@ -74,6 +65,7 @@
     * [AMDF (Average Magnitude Difference Function)](https://ieeexplore.ieee.org/abstract/document/1162598)
     * [DYWA (Dynamic Wavelet)](https://pdfs.semanticscholar.org/1ecf/ae4b3618f92b4267912afbc59e3a3ea1d846.pdf)
 
+![Screenshot](assets/presentation/Slide14.PNG)
 ![Screenshot](assets/presentation/Slide15.PNG)
 
 
