@@ -53,6 +53,7 @@ interface PitchDAO {
     @Query("DELETE FROM sqlite_sequence WHERE name LIKE 'PitchTable'")
     suspend fun clearPrimaryKeyFromPitchTable()
 
+    @Transaction
     suspend fun deletePitches() {
         deleteAllFromPitchTable()
         clearPrimaryKeyFromPitchTable()
