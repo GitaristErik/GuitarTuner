@@ -9,7 +9,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.example.guitartuner.domain.repository.tuner.PermissionManager
-import com.markodevcic.peko.Peko
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -20,16 +19,15 @@ class PermissionManagerImpl(
     private val _state by lazy { MutableStateFlow(makeState()) }
     override val state by lazy { _state.asStateFlow() }
 
+    private var isFirstRequest: Boolean = true
+
     init {
         activity.lifecycle.addObserver(this)
     }
 
-
     override val hasRequiredPermissions
         get() = activity.hasPermission(PM_RECORD_AUDIO)
             .also { isFirstRequest = false }
-
-    private var isFirstRequest: Boolean = true
 
     private val canRequest
         get() = isFirstRequest ||
@@ -42,11 +40,12 @@ class PermissionManagerImpl(
     }
 
     override suspend fun requestPermissions() {
-        if (!hasRequiredPermissions)
-            runCatching {
-                Peko.requestPermissionsAsync(activity, Manifest.permission.RECORD_AUDIO)
-                updateState()
-            }
+        if (!hasRequiredPermissions) {
+            // Use direct permission request to avoid late ActivityResult registration.
+            activity.requestPermissions(arrayOf(PM_RECORD_AUDIO), 1001)
+            // State will be refreshed on next resume; proactively update now too.
+            updateState()
+        }
     }
 
     private fun updateState() {
@@ -68,3 +67,4 @@ fun Context.hasPermission(permission: String): Boolean =
         ContextCompat.checkSelfPermission(this, permission) ==
                 PackageManager.PERMISSION_GRANTED
     }.getOrDefault(false)
+

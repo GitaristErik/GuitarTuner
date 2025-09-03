@@ -2,6 +2,7 @@ package com.example.guitartuner.domain.entity.settings
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.runtime.Immutable
@@ -69,7 +70,7 @@ data class Settings(
         override val iconVector: ImageVector
     ) : SelectOption.Icon<StringLayout>,
         SelectOption.ResId<StringLayout> {
-        LIST(R.string.settings_tuner_layout_list, Icons.Filled.FormatListBulleted),
+        LIST(R.string.settings_tuner_layout_list, Icons.AutoMirrored.Filled.FormatListBulleted),
         GRID(R.string.settings_tuner_layout_grid, Icons.Filled.GridView),
     }
 

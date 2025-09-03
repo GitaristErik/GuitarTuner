@@ -1,50 +1,49 @@
 [versions]
-accompanistAdaptive = "0.26.2-beta"
-agp = "8.2.0"
-koinAndroidx = "3.5.3"
-koinCompose = "1.1.2"
-constraintlayoutCompose = "1.0.1"
-kotlin = "1.9.0"
-ksp = "1.9.21-1.0.16"
-coreKtx = "1.12.0"
+accompanistAdaptive = "0.37.3"
+agp = "8.12.1"
+koinAndroidx = "4.1.0"
+koinCompose = "4.1.0"
+constraintlayoutCompose = "1.1.1"
+kotlin = "2.2.10"
+ksp = "2.2.10-2.0.2"
+coreKtx = "1.17.0"
 junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
-lifecycleRuntimeKtx = "2.6.2"
-peko = "2.1.3"
-roomRuntime = "2.6.1"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+lifecycleRuntimeKtx = "2.9.3"
+# peko = "3.0.5"
+roomRuntime = "2.7.2"
 satchelCore = "1.0.3"
-test-manifest = "1.5.4"
-activityCompose = "1.8.1"
-composeBom = "2023.10.01"
-animation = "1.5.4"
-material3 = "1.1.2"
-materialIconsExtended = "1.5.4"
-materialRipple = "1.5.4"
-material3WindowSizeClass = "1.1.2"
-aboutlibrariesCore = "10.9.2"
-aboutlibrariesCompose = "10.9.2"
-aboutlibraries = "10.9.2"
+test-manifest = "1.9.0"
+activityCompose = "1.10.1"
+composeBom = "2025.08.01"
+animation = "1.9.0"
+material3 = "1.3.2"
+materialIconsExtended = "1.7.8"
+materialRipple = "1.9.0"
+material3WindowSizeClass = "1.3.2"
+aboutlibrariesCore = "12.2.4"
+aboutlibrariesCompose = "12.2.4"
+aboutlibraries = "12.2.4"
 theme = "v0.2.0"
 preview = "v0.2.0"
 tarsor = "2.5"
 mididriver = "v1.25"
-datastorePreferences = "1.0.0"
-lifecycleRuntimeCompose = "2.6.2"
-kotlinxCoroutinesTest = "1.8.0-RC"
-androidx-lifecycle-compose = "2.6.2"
-androidx-lifecycle-runtime-compose = "2.6.2"
-androidx-navigation = "2.7.5"
-lifecycleProcess = "2.6.2"
-material3Android = "1.3.1"
+datastorePreferences = "1.1.7"
+lifecycleRuntimeCompose = "2.9.3"
+kotlinxCoroutines = "1.6.4"
+androidx-lifecycle-compose = "2.9.3"
+androidx-navigation = "2.9.3"
+lifecycleProcess = "2.9.3"
+material3Android = "1.3.2"
 
 [libraries]
 # Android & Compose
-accompanist-adaptive = { module = "com.google.accompanist:accompanist-adaptive", version = "0.32.0" }
+accompanist-adaptive = { module = "com.google.accompanist:accompanist-adaptive", version.ref = "accompanistAdaptive" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.8.2" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
@@ -58,8 +57,7 @@ androidx-material3-window = { group = "androidx.compose.material3", name = "mate
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 androidx-lifecycle-viewModelCompose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle-compose" }
-androidx-lifecycle-runtime = "androidx.lifecycle:lifecycle-runtime-ktx:2.6.2"
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.7.6" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
 androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
 
 # Testing
@@ -68,7 +66,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 
 # Open Source Licenses
 aboutlibraries-core = { group = "com.mikepenz", name = "aboutlibraries-core", version.ref = "aboutlibrariesCore" }
@@ -76,7 +74,7 @@ aboutlibraries-compose = { group = "com.mikepenz", name = "aboutlibraries-compos
 aboutlibraries = { group = "com.mikepenz", name = "aboutlibraries", version.ref = "aboutlibraries" }
 
 # Utility
-peko = { module = "com.markodevcic:peko", version.ref = "peko" }
+# peko = { group = "com.markodevcic", name = "peko", version.ref = "peko" }
 theme = { group = "com.github.rohankhayech.AndroidUtils", name = "theme", version.ref = "theme" }
 preview = { group = "com.github.rohankhayech.AndroidUtils", name = "preview", version.ref = "preview" }
 
@@ -105,6 +103,8 @@ koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", versi
 koin-androidx-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation", version.ref = "koinAndroidx" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCompose" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -113,3 +113,4 @@ jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "k
 aboutLibrariesPlugin = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
 # id("com.google.devtools.ksp") version "1.9.21-1.0.15"
 devtoolsKsp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

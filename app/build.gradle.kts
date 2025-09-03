@@ -1,19 +1,22 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.aboutLibrariesPlugin)
     alias(libs.plugins.devtoolsKsp)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.example.guitartuner"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.guitartuner"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -45,15 +48,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_1_8
+        }
     }
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
@@ -62,6 +64,15 @@ android {
     }
     androidResources {
         generateLocaleConfig = true
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force(
+            "org.jetbrains.kotlinx:kotlinx-coroutines-core:${libs.versions.kotlinxCoroutines.get()}",
+            "org.jetbrains.kotlinx:kotlinx-coroutines-android:${libs.versions.kotlinxCoroutines.get()}"
+        )
     }
 }
 
@@ -83,6 +94,10 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.constraintlayout.compose)
 
+    // Coroutines pinned for Satchel compatibility
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
     // Open Source Licenses
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose)
@@ -94,14 +109,12 @@ dependencies {
 
     // Audio
     implementation(files("libs/TarsosDSP-Android.jar"))
-    implementation(libs.peko)
     implementation(libs.audio.mididriver) {
         version { branch = "master" }
     }
 
     // Other
     implementation(libs.accompanist.adaptive)
-    implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)

@@ -285,7 +285,7 @@ object SettingsComponents {
                     else -> throw IllegalArgumentException("Unknown SelectOption type")
                 }
             }) { item ->
-                SelectOption(
+                SelectOptionChip(
                     title = when (item) {
                         is SelectOption.ResId<*> -> stringResource(item.labelRes)
                         is SelectOption.String<*> -> item.label
@@ -409,7 +409,7 @@ object SettingsComponents {
      * @param icon The icon of the option. It is optional.
      */
     @Composable
-    private fun SelectOption(
+    private fun SelectOptionChip(
         selected: Boolean, onSelected: () -> Unit, title: String?, icon: ImageVector? = null
     ) {
         val color by animateColorAsState(
