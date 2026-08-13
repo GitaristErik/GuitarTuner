@@ -3,6 +3,7 @@ package com.example.guitartuner.ui.core
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,24 +55,6 @@ fun AppNavHost(
         }
 
         navigation(
-            route = AppRoutRoot.Metronome.route,
-            startDestination = AppRoutScreen.Metronome.route,
-        ) {
-            composable(AppRoutScreen.Metronome.route) {
-                EmptyComingSoon()
-            }
-        }
-
-        navigation(
-            route = AppRoutRoot.Gauge.route,
-            startDestination = AppRoutScreen.Gauge.route,
-        ) {
-            composable(AppRoutScreen.Gauge.route) {
-                EmptyComingSoon()
-            }
-        }
-
-        navigation(
             route = AppRoutRoot.Settings.route,
             startDestination = AppRoutScreen.SettingsAll.route,
         ) {
@@ -103,9 +86,17 @@ private fun Context.navigateToPermissionSettings() = startNewActivity(
 )
 
 /** Open the language settings screen. */
-private fun Context.navigateToLanguageSettings() = startNewActivity(
-    Settings.ACTION_APP_LOCALE_SETTINGS
-)
+private fun Context.navigateToLanguageSettings() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        startNewActivity(Settings.ACTION_APP_LOCALE_SETTINGS)
+    } else {
+        runCatching {
+            startActivity(Intent(Settings.ACTION_LOCALE_SETTINGS))
+        }.onFailure {
+            startNewActivity(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        }
+    }
+}
 
 /** Open the about app screen. */
 private fun Context.navigateToAboutApp() = startNewActivity(

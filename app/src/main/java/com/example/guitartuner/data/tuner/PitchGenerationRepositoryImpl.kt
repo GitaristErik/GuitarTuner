@@ -50,9 +50,11 @@ class PitchGenerationRepositoryImpl(
 
     /** Plays the string selection sound for the specified [string]. */
     override fun playStringSelectSound(string: Int) {
+        val note = getMidiNoteFromString(string) ?: return
+        if (!::midi.isInitialized) return
         midi.playNote(
             string,
-            MidiController.noteIndexToMidi(getMidiNoteFromString(string)!!),
+            MidiController.noteIndexToMidi(note),
             DURATION_ON_SELECT_SOUND,
             tuningSetsRepository.currentInstrument.value.midiInstrument
         )
@@ -60,9 +62,11 @@ class PitchGenerationRepositoryImpl(
 
     /** Plays the in tune sound for the selected string. */
     override fun playInTuneSound(string: Int) {
+        val note = getMidiNoteFromString(string) ?: return
+        if (!::midi.isInitialized) return
         midi.playNote(
             string,
-            MidiController.noteIndexToMidi(getMidiNoteFromString(string)!!) + 12,
+            MidiController.noteIndexToMidi(note) + 12,
             DURATION_IN_TUNE_SOUND,
             GeneralMidiConstants.MARIMBA
         )
@@ -111,7 +115,7 @@ class PitchGenerationRepositoryImpl(
          */
         fun start() {
             if (isStarted) return
-            midiDriver!!.start()
+            midiDriver?.start() ?: return
             isStarted = true
         }
 
@@ -123,7 +127,7 @@ class PitchGenerationRepositoryImpl(
             for (i in stringThread.indices) {
                 stopNote(i)
             }
-            midiDriver!!.stop()
+            midiDriver?.stop()
             isStopped = true
         }
 
@@ -154,8 +158,11 @@ class PitchGenerationRepositoryImpl(
         ) {
             stopNote(string)
 
+            val mutex = stringMutex.getOrNull(string) ?: return
+            val driver = midiDriver ?: return
+
             // Play note.
-            synchronized(stringMutex[string]!!) {
+            synchronized(mutex) {
                 stringThread[string] = Thread({
                     try {
                         setInstrument(string, instrument)
@@ -166,14 +173,14 @@ class PitchGenerationRepositoryImpl(
                             .toInt()).toByte() // Status byte and channel
                         event[1] = midiNote.toByte() // Pitch (midi note number)
                         event[2] = 0x7F.toByte() // Velocity
-                        midiDriver!!.write(event)
+                        driver.write(event)
 
                         // Wait for duration of note.
                         Thread.sleep(duration)
                     } catch (e: InterruptedException) {
                         // Cancel thread sleep.
                     } finally {
-                        synchronized(stringMutex[string]!!) {
+                        synchronized(mutex) {
 
                             // Stop the note playing after duration or interrupted.
                             // Send note off event.
@@ -182,14 +189,14 @@ class PitchGenerationRepositoryImpl(
                                 .toInt()).toByte() // Status byte and channel
                             event[1] = midiNote.toByte() // Pitch (midi note number)
                             event[2] = 0x00.toByte() // Velocity
-                            midiDriver!!.write(event)
+                            driver.write(event)
 
                             // Clean up thread.
                             stringThread[string] = null
                         }
                     }
                 }, "string_thread_$string")
-                stringThread[string]!!.start()
+                stringThread[string]?.start()
             }
         }
 
@@ -199,7 +206,7 @@ class PitchGenerationRepositoryImpl(
          */
         fun stopNote(string: Int) {
             if (isNotePlaying(string)) {
-                stringThread[string]!!.interrupt()
+                stringThread[string]?.interrupt()
             }
         }
 
@@ -212,7 +219,7 @@ class PitchGenerationRepositoryImpl(
             val event = ByteArray(2)
             event[0] = (MidiConstants.PROGRAM_CHANGE.toInt() or channel.toByte().toInt()).toByte()
             event[1] = instrument
-            midiDriver!!.write(event)
+            midiDriver?.write(event)
         }
 
         private fun isNotePlaying(string: Int): Boolean {

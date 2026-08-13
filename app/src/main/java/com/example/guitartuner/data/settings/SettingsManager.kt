@@ -98,23 +98,26 @@ class SettingsManager(
 //            themeUseFullBlackTheme = themeUseFullBlackTheme,
         )
         set(value) {
-            generalNotation = value.generalNotation
-            if (value.generalBaseFrequency != generalBaseFrequency) scope.launch {
-                _baseFrequency.emit(value.generalBaseFrequency)
+            val clamped = value.copy(
+                generalBaseFrequency = Settings.clampBaseFrequency(value.generalBaseFrequency),
+                tunerMinDeviation = Settings.clampDeviation(value.tunerMinDeviation),
+            )
+            generalNotation = clamped.generalNotation
+            if (clamped.generalBaseFrequency != generalBaseFrequency) scope.launch {
+                _baseFrequency.emit(clamped.generalBaseFrequency)
             }
-            generalBaseFrequency = value.generalBaseFrequency
+            generalBaseFrequency = clamped.generalBaseFrequency
 
-//            tunerUseAdvancedMode = value.tunerUseAdvancedMode
-            tunerEnableNoiseSuppressor = value.tunerEnableNoiseSuppressor
-            tunerMinDeviation = value.tunerMinDeviation
-            tunerStringLayout = value.tunerStringLayout
-            tunerDisplayType = value.tunerDisplayType
-            tunerPitchDetectionAlgorithm = value.tunerPitchDetectionAlgorithm
+            tunerEnableNoiseSuppressor = clamped.tunerEnableNoiseSuppressor
+            tunerMinDeviation = clamped.tunerMinDeviation
+            tunerStringLayout = clamped.tunerStringLayout
+            tunerDisplayType = clamped.tunerDisplayType
+            tunerPitchDetectionAlgorithm = clamped.tunerPitchDetectionAlgorithm
 
-            soundPlaySoundOnSelect = value.soundPlaySoundOnSelect
-            soundPlaySoundInTune = value.soundPlaySoundInTune
+            soundPlaySoundOnSelect = clamped.soundPlaySoundOnSelect
+            soundPlaySoundInTune = clamped.soundPlaySoundInTune
 
-//            themeUseFullBlackTheme = value.themeUseFullBlackTheme
+            _state.value = settings
         }
 
     init {

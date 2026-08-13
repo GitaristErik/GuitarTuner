@@ -8,6 +8,7 @@ import cafe.adriel.satchel.Satchel
 import cafe.adriel.satchel.storer.file.FileSatchelStorer
 import com.example.guitartuner.data.db.AppDatabase
 import com.example.guitartuner.data.settings.SettingsManager
+import com.example.guitartuner.data.tuner.ActivityHolder
 import com.example.guitartuner.data.tuner.PermissionManagerImpl
 import com.example.guitartuner.data.tuner.PitchGenerationRepositoryImpl
 import com.example.guitartuner.data.tuner.PitchRepositoryImpl
@@ -18,7 +19,8 @@ import com.example.guitartuner.domain.repository.tuner.PitchGenerationRepository
 import com.example.guitartuner.domain.repository.tuner.PitchRepository
 import com.example.guitartuner.domain.repository.tuner.TunerRepository
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository
-import com.example.guitartuner.ui.MainActivity
+import com.example.guitartuner.domain.usecase.FilterTuningsUseCase
+import com.example.guitartuner.domain.usecase.SelectTuningUseCase
 import com.example.guitartuner.ui.settings.SettingsViewModel
 import com.example.guitartuner.ui.tuner.TunerViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -28,37 +30,44 @@ import java.io.File
 
 val appModule = module {
 
-    viewModel {
-        SettingsViewModel(
-            settingsManager = get(), tuningsRepository = get()
+    single { ActivityHolder() }
+
+    single<PermissionManager> {
+        PermissionManagerImpl(
+            application = get(),
+            activityHolder = get(),
         )
     }
 
-    scope<MainActivity> {
-        viewModel {
-            TunerViewModel(
-                tunerRepository = get(),
-                permissionManager = get(),
-                pitchGenerationRepository = get(),
-                tuningSetsRepository = get(),
-                settingsManager = get()
-            )
-        }
-
-        scoped<TunerRepository> {
-            TunerRepositoryImpl(
-                settingsManager = get(),
-                permissionManager = get(),
-                pitchRepository = get(),
-            )
-        }
-
-        scoped<PermissionManager> {
-            PermissionManagerImpl(
-                activity = getSource<MainActivity>()!!
-            )
-        }
+    single<TunerRepository> {
+        TunerRepositoryImpl(
+            settingsManager = get(),
+            permissionManager = get(),
+            pitchRepository = get(),
+        )
     }
+
+    viewModel {
+        SettingsViewModel(
+            settingsManager = get(),
+            tuningsRepository = get(),
+            filterTuningsUseCase = get(),
+            selectTuningUseCase = get(),
+        )
+    }
+
+    viewModel {
+        TunerViewModel(
+            tunerRepository = get(),
+            permissionManager = get(),
+            pitchGenerationRepository = get(),
+            tuningSetsRepository = get(),
+            settingsManager = get(),
+        )
+    }
+
+    factory { SelectTuningUseCase(get()) }
+    factory { FilterTuningsUseCase(get()) }
 
     single<PitchGenerationRepository> {
         PitchGenerationRepositoryImpl(
@@ -95,8 +104,8 @@ val appModule = module {
             get(),
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME,
+        // Keep destructive fallback until proper Room migrations are added.
         ).fallbackToDestructiveMigration()
-            //.setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .build()
     }
 

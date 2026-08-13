@@ -1,6 +1,5 @@
 package com.example.guitartuner.data.tuner
 
-import android.util.Log
 import com.example.guitartuner.data.db.AppDatabase
 import com.example.guitartuner.data.db.model.TuningSetWithPitchesTable
 import com.example.guitartuner.data.db.model.toTuningSet
@@ -22,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -40,11 +41,11 @@ class TuningSetsRepositoryImpl(
     private val database: AppDatabase,
 ) : TuningSetsRepository {
 
-    override val currentInstrument: StateFlow<Instrument> =
-        MutableStateFlow(previewInstrument).asStateFlow()
+    private val _currentInstrument = MutableStateFlow(previewInstrument)
+    override val currentInstrument = _currentInstrument.asStateFlow()
 
     override val favoritesTuningSets get() = _favoritesTuningSets
-    private val _favoritesTuningSets = MutableStateFlow(listOf<TuningSet>())//.asStateFlow()
+    private val _favoritesTuningSets = MutableStateFlow(listOf<TuningSet>())
     private val _favoritesTuningDAO: Flow<List<TuningSetWithPitchesTable>> =
         database.tuningSetDAO.getFavouritesTunings()
 
@@ -54,8 +55,9 @@ class TuningSetsRepositoryImpl(
     }
 
     private val alteration = Alteration.SHARP
-    private val nameForUnsavedTuning: String = "Custom (unsaved)"
+    private val nameForUnsavedTuning: String = NAME_UNSAVED
     private val initializationDeferred = CompletableDeferred<Unit>()
+    private var filterTuningsJob: Job? = null
 
     init {
         initTuningSets()
@@ -82,7 +84,21 @@ class TuningSetsRepositoryImpl(
     }
 
     private suspend fun initCurrentTuningSet() {
-        _currentTuningSet.value = getTuningSetById(settingsManager.lastTuningSetId) ?: return
+        _currentTuningSet.value = getTuningSetById(settingsManager.lastTuningSetId)
+            ?: getFirstFavoriteOrDefault()
+            ?: return
+    }
+
+    private suspend fun getFirstFavoriteOrDefault(): TuningSet? {
+        val favorites = database.tuningSetDAO.getFavouritesTunings()
+            .first()
+            .toTuningSet(alteration)
+        if (favorites.isNotEmpty()) return favorites.first()
+
+        return database.tuningSetDAO.filterTunings(limit = 1)
+            .first()
+            .toTuningSet(alteration)
+            .firstOrNull()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -111,33 +127,6 @@ class TuningSetsRepositoryImpl(
             .toTuningSet(alteration)
             .firstOrNull()
     }
-
-    /*    init {
-    *//*        coroutineScope.launch {
-            delay(1000)
-            initFavoritesTuningSetsCollector()
-        }*//*
-        coroutineScope.launch {
-            delay(1000)
-            initCurrentTuningObserver()
-        }
-    }
-
-    private suspend fun initCurrentTuningObserver() {
-        _tuningsList.collectLatest { tuning ->
-            _currentTuningSet.update { cur ->
-                fakeTuningSets.find { it.tuningId == cur.tuningId }
-                    ?: cur.copy(tuningId = -1, name = "Custom")
-            }
-        }
-    }*/
-
-    /*    private suspend fun initFavoritesTuningSetsCollector() {
-            _tuningsList.collectLatest { tunings ->
-                _favoritesTuningSets.value =
-                    tunings.mapNotNull { if (it.first.isFavorite) it.first else null }
-            }
-        }*/
 
     private fun findTuning(pitches: List<Pitch>, instrumentId: Int) =
         database.tuningSetDAO
@@ -211,16 +200,10 @@ class TuningSetsRepositoryImpl(
         updateTuningSetSuspend(tuningSet)
 
 
-    override fun <T> updateTuningSet(tuningId: Int, tuningMap: Map<String, T>) {
+    override fun updateTuningFavorite(tuningId: Int, isFavorite: Boolean) {
         coroutineScope.launch(Dispatchers.IO) {
             val tuning = getTuningSetById(tuningId) ?: return@launch
-            val newTuning = tuning.copy(
-                name = tuningMap["name"] as? String ?: tuning.name,
-                isFavorite = tuningMap["isFavorite"] as? Boolean ?: tuning.isFavorite,
-                pitches = tuningMap["pitches"] as? List<Pitch> ?: tuning.pitches,
-                instrumentId = tuningMap["instrumentId"] as? Int ?: tuning.instrumentId,
-            )
-            updateTuningSet(newTuning)
+            updateTuningSet(tuning.copy(isFavorite = isFavorite))
         }
     }
 
@@ -234,6 +217,17 @@ class TuningSetsRepositoryImpl(
     }
 
     override fun updateInstrument(instrument: Instrument) {
+        _currentInstrument.value = instrument
+    }
+
+    private fun resolveInstrument(instrumentId: Int): Instrument {
+        if (_currentInstrument.value.instrumentId == instrumentId) {
+            return _currentInstrument.value
+        }
+        return _instrumentsAvailableList.value
+            .firstOrNull { it.first.instrumentId == instrumentId }
+            ?.first
+            ?: previewInstrument
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -257,16 +251,19 @@ class TuningSetsRepositoryImpl(
             val filteredTuningsFlow = database.tuningSetDAO.filterTunings(
                 isFavorite = if (isAll == true) null else isFavorite,
                 instrumentIds = instrumentIds,
-//                    countString = countString,
+                countString = countString,
                 start = startPaging,
                 limit = limit,
             ).transformLatest { list ->
-                emit(list.toTuningSet(alteration).map { it to previewInstrument })
+                emit(list.toTuningSet(alteration).map { tuning ->
+                    tuning to resolveInstrument(tuning.instrumentId)
+                })
             }
 
-        }.filteredTuningsFlow.let {
-            coroutineScope.launch(Dispatchers.IO) {
-                it.collectLatest {
+        }.filteredTuningsFlow.let { flow ->
+            filterTuningsJob?.cancel()
+            filterTuningsJob = coroutineScope.launch(Dispatchers.IO) {
+                flow.collectLatest {
                     _tuningsList.value = it
                 }
             }
@@ -372,5 +369,9 @@ class TuningSetsRepositoryImpl(
                 isFavorite = name.commonPrefixWith("Fav ", true).isNotEmpty(),
             )
         }
+    }
+
+    companion object {
+        const val NAME_UNSAVED = "Custom (unsaved)"
     }
 }

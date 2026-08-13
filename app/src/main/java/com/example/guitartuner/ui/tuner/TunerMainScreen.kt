@@ -20,8 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,7 +67,7 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
  * @param currentTuningSet The currently selected tuning.
  * @param buttonsUIState The UI state of the tuning buttons.
  * @param selectedString The index of the currently selected string within the tuning.
- * @param tuned An array indicating whether each string has been tuned.
+ * @param tuned A list indicating whether each string has been tuned.
  * @param autoDetect A boolean indicating whether the tuner will automatically detect the currently playing string.
  * @param settings The user's preferences for the tuner.
  * @param onSelectString A function to be called when a string is selected.
@@ -89,7 +89,7 @@ fun TunerMainScreen(
     currentTuningSet: TuningUIState,
     buttonsUIState: TuneButtonsUIState,
     selectedString: Int?,
-    tuned: BooleanArray,
+    tuned: List<Boolean>,
     autoDetect: Boolean,
     settings: Settings,
     onSelectString: (Int) -> Unit,
@@ -101,6 +101,7 @@ fun TunerMainScreen(
     onAutoChanged: (Boolean) -> Unit,
     onOpenTuningSelector: () -> Unit,
 ) {
+    val tunedArray = tuned.toBooleanArray()
 
     TunerBody(expanded = expanded,
         tunings = tunings,
@@ -109,7 +110,7 @@ fun TunerMainScreen(
         noteOffset = noteOffset,
         isTuned = isTuned,
         selectedString = selectedString,
-        tuned = tuned,
+        tuned = tunedArray,
         autoDetect = autoDetect,
         settings = settings,
         onSelectString = onSelectString,
@@ -213,10 +214,10 @@ fun TunerMainScreen(
                             .padding(vertical = 8.dp),
                         buttonsUIState = buttonsUIState,
                         selectedString = selectedString,
-                        tuned = tuned,
+                        tuned = tunedArray,
                         onSelect = onSelectString,
                     )
-                    Divider(
+                    HorizontalDivider(
                         Modifier
                             .width((1f / LocalDensity.current.density).dp)
                             .fillMaxHeight()
@@ -468,7 +469,7 @@ internal fun PreviewTunerWrapper(
             currentTuningSet = previewTuningState[1]!!,
             buttonsUIState = previewButtonsUIState,
             selectedString = 1,
-            tuned = BooleanArray(6) { it == 4 },
+            tuned = List(6) { it == 4 },
             autoDetect = true,
             settings = settings,
             {},

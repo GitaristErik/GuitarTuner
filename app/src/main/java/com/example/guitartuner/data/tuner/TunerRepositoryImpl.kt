@@ -17,6 +17,7 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler
 import be.tarsos.dsp.pitch.PitchDetectionResult
 import be.tarsos.dsp.pitch.PitchProcessor
 import com.example.guitartuner.data.settings.SettingsManager
+import com.example.guitartuner.data.tuner.toTarsosAlgorithm
 import com.example.guitartuner.domain.entity.settings.Settings
 import com.example.guitartuner.domain.entity.tuner.Tone
 import com.example.guitartuner.domain.entity.tuner.Tuning
@@ -117,7 +118,7 @@ class TunerRepositoryImpl(
                 }
 
                 pitchProcessor = PitchProcessor(
-                    settings.tunerPitchDetectionAlgorithm.algorithm,
+                    settings.tunerPitchDetectionAlgorithm.toTarsosAlgorithm(),
                     SAMPLE_RATE.toFloat(),
                     bufferSize,
                     this@TunerRepositoryImpl
@@ -169,7 +170,8 @@ class TunerRepositoryImpl(
                 pitchRepository.getPitchById(it.first)?.run { this to it.second }
             }
         } else {
-            pitchRepository.findPitchByTone(selectedTone!!)?.let {
+            val tone = selectedTone ?: return null
+            pitchRepository.findPitchByTone(tone)?.let {
                 it to getTuningDeviation(it.frequency, detectedFrequency)
             }
         } ?: return null

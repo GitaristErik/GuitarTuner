@@ -42,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.guitartuner.R
+import com.example.guitartuner.domain.entity.settings.SelectOption
 import com.example.guitartuner.domain.entity.settings.Settings
 import com.example.guitartuner.ui.settings.components.SettingsComponents.PreferenceActionLink
 import com.example.guitartuner.ui.settings.components.SettingsComponents.PreferenceNumberInput
@@ -52,21 +53,9 @@ import com.rohankhayech.android.util.ui.preview.ThemePreview
 
 object SettingsComponents {
 
-    sealed interface SelectOption<T : Enum<T>> {
-        val type: T get() = this as T
-
-        interface ResId<T : Enum<T>> : SelectOption<T> {
-            @get:StringRes
-            val labelRes: Int
-        }
-
-        interface String<T : Enum<T>> : SelectOption<T> {
-            val label: kotlin.String
-        }
-
-        interface Icon<T : Enum<T>> : SelectOption<T> {
-            val iconVector: ImageVector
-        }
+    /** UI-only icon association for domain [SelectOption] values. */
+    interface IconOption {
+        val iconVector: ImageVector
     }
 
     @Composable
@@ -144,7 +133,7 @@ object SettingsComponents {
             ) {
                 Icon(
                     Icons.Default.KeyboardArrowLeft,
-                    contentDescription = "arrow left for button"
+                    contentDescription = stringResource(R.string.nav_back)
                 )
             }
             Box(contentAlignment = Alignment.Center) {
@@ -179,7 +168,7 @@ object SettingsComponents {
             ) {
                 Icon(
                     Icons.Default.KeyboardArrowRight,
-                    contentDescription = "arrow right for button"
+                    contentDescription = stringResource(R.string.open_tuning_selector)
                 )
             }
         }
@@ -258,7 +247,11 @@ object SettingsComponents {
      */
     @Composable
     fun <T : SelectOption<T>> PreferenceSelector(
-        title: String, selected: T, options: Array<T>, onSelected: (T) -> Unit
+        title: String,
+        selected: T,
+        options: Array<T>,
+        onSelected: (T) -> Unit,
+        icons: Map<T, ImageVector> = emptyMap(),
     ) = Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -267,7 +260,7 @@ object SettingsComponents {
         verticalArrangement = Arrangement.spacedBy(4.dp, CenterVertically),
     ) {
         val listState = rememberLazyListState(
-            initialFirstVisibleItemIndex = options.indexOf(selected),
+            initialFirstVisibleItemIndex = options.indexOf(selected).coerceAtLeast(0),
             initialFirstVisibleItemScrollOffset = -500
         )
 
@@ -280,20 +273,19 @@ object SettingsComponents {
             items(items = options, key = {
                 when (it) {
                     is SelectOption.ResId<*> -> it.labelRes
-                    is SelectOption.String<*> -> it.label
-                    is SelectOption.Icon<*> -> it.iconVector.hashCode()
-                    else -> throw IllegalArgumentException("Unknown SelectOption type")
+                    is SelectOption.StringLabel<*> -> it.label
+                    else -> it.hashCode()
                 }
             }) { item ->
                 SelectOptionChip(
                     title = when (item) {
                         is SelectOption.ResId<*> -> stringResource(item.labelRes)
-                        is SelectOption.String<*> -> item.label
+                        is SelectOption.StringLabel<*> -> item.label
                         else -> null
                     },
                     selected = item == selected,
                     onSelected = { onSelected(item) },
-                    icon = (item as? SelectOption.Icon<*>)?.iconVector
+                    icon = icons[item]
                 )
             }
         }

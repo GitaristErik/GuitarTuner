@@ -6,11 +6,11 @@
     <string name="tab_tuner">Tuner</string>
     <string name="tab_metronome">Metronome</string>
     <string name="tab_gauge" translatable="false">Strings Gauge</string>
-    <string name="tab_settings">Settings"</string>
+    <string name="tab_settings">Settings</string>
 
     <!--    Empty page -->
     <string name="empty_screen_title">Screen under construction</string>
-    <string name="empty_screen_subtitle">This screen is still under construction. This sample will help you learn about adaptive layouts in Jetpack Compose</string>
+    <string name="empty_screen_subtitle">This screen is still under construction.</string>
 
     <!--    Tuner -->
     <!--    Tuner: Chart -->
@@ -31,7 +31,7 @@
     <string name="request_permission">Request Permission</string>
     <string name="permission_needed">Permission Needed</string>
     <string name="tuner_audio_permission_rationale">The tuner requires permission to record audio to detect the pitch of incoming audio.\n\nPlease enable this permission to use the tuner:</string>
-    <string name="tuner_audio_permission_rationale_denied">Cannot use tuner the as permission to use your microphone has not been granted.\n\nThe tuner requires this permission to detect the pitch of incoming audio.\n\nPlease enable this permission in Settings:</string>
+    <string name="tuner_audio_permission_rationale_denied">Cannot use the tuner as permission to use your microphone has not been granted.\n\nThe tuner requires this permission to detect the pitch of incoming audio.\n\nPlease enable this permission in Settings:</string>
     <string name="permission_denied">Permission Denied</string>
     <string name="open_permission_settings">Open Settings</string>
 
@@ -141,5 +141,6 @@
     <string name="settings.tunings.filter.general.custom">Custom</string>
     <string name="settings.tunings.instrument.header">Instruments</string>
     <string name="settings.tunings.instrument.details.header">Instrument details</string>
+    <string name="tuning_custom_unsaved">Custom (unsaved)</string>
 
 </resources>

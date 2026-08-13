@@ -2,13 +2,14 @@ package com.example.guitartuner.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.guitartuner.data.settings.SettingsManager
 import com.example.guitartuner.domain.entity.settings.Settings
 import com.example.guitartuner.domain.entity.tuner.Pitch
 import com.example.guitartuner.domain.entity.tuner.TuningSet
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository.TuningFilterBuilder.TuningFilter
+import com.example.guitartuner.domain.usecase.FilterTuningsUseCase
+import com.example.guitartuner.domain.usecase.SelectTuningUseCase
 import com.example.guitartuner.ui.model.FilterBoxUIState
 import com.example.guitartuner.ui.model.TuningSettingsUIState
 import kotlinx.coroutines.FlowPreview
@@ -22,7 +23,9 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val settingsManager: SettingsManager,
-    private val tuningsRepository: TuningSetsRepository
+    private val tuningsRepository: TuningSetsRepository,
+    private val filterTuningsUseCase: FilterTuningsUseCase,
+    private val selectTuningUseCase: SelectTuningUseCase,
 ) : ViewModel() {
 
     val state by lazy { settingsManager.state }
@@ -30,7 +33,6 @@ class SettingsViewModel(
     fun updateSettings(settings: Settings) {
         settingsManager.settings = settings
     }
-
 
     val currentTuningSet get() = _currentTuningSet.asStateFlow()
     private val _currentTuningSet by lazy {
@@ -59,7 +61,6 @@ class SettingsViewModel(
     private val _listTuningsState by lazy {
         MutableStateFlow<List<TuningSettingsUIState>>(emptyList())
     }
-
 
     init {
         initCollectorCurrentTuning()
@@ -93,7 +94,7 @@ class SettingsViewModel(
             _filtersSelectedState
                 .debounce(DELAY_FILTERS_BEFORE_REQUEST)
                 .collectLatest {
-                    tuningsRepository.filterTunings {
+                    filterTuningsUseCase {
                         filter(it.general)
                         filter(it.instrument)
                         filter(it.strings)
@@ -104,31 +105,39 @@ class SettingsViewModel(
 
     private fun initCollectorFiltersInstrument() {
         viewModelScope.launch {
-            tuningsRepository.instrumentsAvailableList.collectLatest {
-                _filtersInstrumentState.value = it.map { (instrument, isAvailable) ->
+            combine(
+                tuningsRepository.instrumentsAvailableList,
+                _filtersSelectedState
+            ) { instruments, selected ->
+                instruments.map { (instrument, isAvailable) ->
                     FilterBoxUIState(
                         key = instrument.instrumentId.toString(),
                         value = instrument.instrumentId,
                         text = instrument.name,
                         isEnabled = isAvailable,
+                        isSelected = selected.instrument.id.contains(instrument.instrumentId),
                     )
                 }
-            }
+            }.collectLatest { _filtersInstrumentState.value = it }
         }
     }
 
     private fun initCollectorFiltersStrings() {
         viewModelScope.launch {
-            tuningsRepository.stringsCountAvailableList.collectLatest {
-                _filtersStringsState.value = it.map { (count, isAvailable) ->
+            combine(
+                tuningsRepository.stringsCountAvailableList,
+                _filtersSelectedState
+            ) { counts, selected ->
+                counts.map { (count, isAvailable) ->
                     FilterBoxUIState(
                         key = count.toString(),
                         value = count,
                         text = count.toString(),
                         isEnabled = isAvailable,
+                        isSelected = selected.strings.count.contains(count),
                     )
                 }
-            }
+            }.collectLatest { _filtersStringsState.value = it }
         }
     }
 
@@ -153,31 +162,30 @@ class SettingsViewModel(
     private fun List<Pitch>.mapToNotesList(): String =
         map { it.tone }.joinToString(", ")
 
-
     fun selectTuning(tuningId: Int) {
-        tuningsRepository.selectTuning(tuningId)
+        selectTuningUseCase(tuningId)
     }
 
     fun toggleFavoriteTuning(tuningId: Int, isFavorite: Boolean) =
-        tuningsRepository.updateTuningSet(tuningId, mapOf("isFavorite" to isFavorite))
+        tuningsRepository.updateTuningFavorite(tuningId, isFavorite)
 
     fun saveTuning(tuningName: String) {
+        val name = tuningName.trim().ifBlank { return }
         viewModelScope.launch {
             val savedTuningId = tuningsRepository.updateTuningSet(
                 tuningsRepository.currentTuningSet.value.copy(
                     tuningId = 0,
-                    name = tuningName,
+                    name = name,
                     isFavorite = true,
                 )
             )
-            tuningsRepository.selectTuning(savedTuningId)
+            selectTuningUseCase(savedTuningId)
         }
     }
 
     fun deleteTuning(tuningId: Int) {
         tuningsRepository.deleteTuning(tuningId)
     }
-
 
     fun toggleFilterGeneral(
         filter: TuningFilter.General,
