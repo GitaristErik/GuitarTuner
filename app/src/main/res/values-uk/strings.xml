@@ -93,4 +93,5 @@
     <string name="lang.message">Змінити мову програми</string>
     <string name="settings.tunings.remove.toast">Стрій було видалено.</string>
     <string name="settings.tunings.edit.desc">Кнопка для редагування строю</string>
+    <string name="tuning_custom_unsaved">Користувацький (незбережений)</string>
 </resources>

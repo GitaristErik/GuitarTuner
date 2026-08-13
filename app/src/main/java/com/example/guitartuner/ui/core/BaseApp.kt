@@ -168,7 +168,7 @@ private fun AppNavigationWrapper(
                 navigateToTopLevelDestination = navigateTo,
             )
         }
-    } else {
+    } else if (appNavigationInfo.navigationType == NavigationType.NAVIGATION_RAIL) {
         ModalNavigationDrawer(
             drawerContent = {
                 ModalNavigationDrawerContent(selectedDestination = selectedDestination,
@@ -190,6 +190,13 @@ private fun AppNavigationWrapper(
                 },
             )
         }
+    } else {
+        AppContent(
+            appNavigationInfo = appNavigationInfo,
+            navController = navController,
+            selectedDestination = selectedDestination,
+            navigateToTopLevelDestination = navigateTo,
+        )
     }
 }
 

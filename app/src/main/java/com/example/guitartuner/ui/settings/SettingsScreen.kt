@@ -5,19 +5,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.List
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.guitartuner.R
 import com.example.guitartuner.domain.entity.settings.Settings
 import com.example.guitartuner.domain.entity.tuner.Notation
@@ -25,7 +27,6 @@ import com.example.guitartuner.ui.settings.components.SectionLabel
 import com.example.guitartuner.ui.settings.components.SettingsComponents
 import com.example.guitartuner.ui.theme.PreviewWrapper
 import com.rohankhayech.android.util.ui.preview.ThemePreview
-import org.intellij.lang.annotations.Language
 import org.koin.androidx.compose.navigation.koinNavViewModel
 
 
@@ -36,7 +37,7 @@ fun SettingsScreen(
     onClickLanguage: () -> Unit,
 ) {
     val vmSettings = koinNavViewModel<SettingsViewModel>()
-    val settings by vmSettings.state.collectAsState()
+    val settings by vmSettings.state.collectAsStateWithLifecycle()
     val updateSettings = { it: Settings -> vmSettings.updateSettings(it) }
 
     SettingsScreenBody(
@@ -72,9 +73,13 @@ private fun SettingsScreenBody(
             subtitle = stringResource(R.string.settings_general_base_frequency_desc),
             initValue = settings.generalBaseFrequency,
             valueDescription = stringResource(R.string.settings_general_base_frequency_value_desc),
-            onValueChange = { updateSettings(settings.copy(generalBaseFrequency = it)) },
-            max = 460,
-            min = 420,
+            onValueChange = {
+                updateSettings(
+                    settings.copy(generalBaseFrequency = Settings.clampBaseFrequency(it))
+                )
+            },
+            max = Settings.MAX_BASE_FREQUENCY,
+            min = Settings.MIN_BASE_FREQUENCY,
         )
         SettingsComponents.PreferenceSelector(
             title = stringResource(R.string.settings_general_notation),
@@ -82,7 +87,7 @@ private fun SettingsScreenBody(
             options = Notation.entries.toTypedArray(),
             onSelected = { updateSettings(settings.copy(generalNotation = it)) }
         )
-        Divider(color = MaterialTheme.colorScheme.surfaceVariant)
+        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
         // ---------------
 
 
@@ -100,26 +105,28 @@ private fun SettingsScreenBody(
             checked = settings.tunerEnableNoiseSuppressor,
             onChanged = { updateSettings(settings.copy(tunerEnableNoiseSuppressor = !settings.tunerEnableNoiseSuppressor)) }
         )
-        /*        SettingsComponents.PreferenceSwitch(
-                    title = stringResource(R.string.settings_advanced_mode),
-                    subtitle = stringResource(R.string.settings_advanced_mode_desc),
-                    checked = settings.tunerUseAdvancedMode,
-                    onChanged = { updateSettings(settings.copy(tunerUseAdvancedMode = !settings.tunerUseAdvancedMode)) }
-                )*/
         SettingsComponents.PreferenceNumberInput(
             title = stringResource(R.string.settings_tuner_deviation),
             subtitle = stringResource(R.string.settings_tuner_deviation_desc),
             initValue = settings.tunerMinDeviation,
             valueDescription = stringResource(R.string.settings_tuner_deviation_desc_value),
-            onValueChange = { updateSettings(settings.copy(tunerMinDeviation = it)) },
-            max = 90,
-            min = 3,
+            onValueChange = {
+                updateSettings(
+                    settings.copy(tunerMinDeviation = Settings.clampDeviation(it))
+                )
+            },
+            max = Settings.MAX_DEVIATION,
+            min = Settings.MIN_DEVIATION,
         )
         SettingsComponents.PreferenceSelector(
             title = stringResource(R.string.settings_tuner_layout),
             selected = settings.tunerStringLayout,
             options = Settings.StringLayout.entries.toTypedArray(),
-            onSelected = { updateSettings(settings.copy(tunerStringLayout = it)) }
+            onSelected = { updateSettings(settings.copy(tunerStringLayout = it)) },
+            icons = mapOf(
+                Settings.StringLayout.LIST to Icons.AutoMirrored.Filled.FormatListBulleted,
+                Settings.StringLayout.GRID to Icons.Filled.GridView,
+            ),
         )
         SettingsComponents.PreferenceSelector(
             title = stringResource(R.string.settings_tuner_display),
@@ -133,7 +140,7 @@ private fun SettingsScreenBody(
             options = Settings.TunerPitchDetectionAlgorithm.entries.toTypedArray(),
             onSelected = { updateSettings(settings.copy(tunerPitchDetectionAlgorithm = it)) }
         )
-        Divider(color = MaterialTheme.colorScheme.surfaceVariant)
+        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
         // ---------------
 
 
@@ -151,21 +158,9 @@ private fun SettingsScreenBody(
             checked = settings.soundPlaySoundInTune,
             onChanged = { updateSettings(settings.copy(soundPlaySoundInTune = !settings.soundPlaySoundInTune)) }
         )
-        Divider(color = MaterialTheme.colorScheme.surfaceVariant)
+        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
 
         // ---------------
-        // Theme preferences
-//        SectionLabel(title = stringResource(R.string.settings_theme))
-//
-//        SettingsComponents.PreferenceSwitch(
-//            title = stringResource(R.string.settings_use_black_theme),
-//            subtitle = stringResource(R.string.settings_use_black_theme_desc),
-//            checked = settings.themeUseFullBlackTheme,
-//            onChanged = { updateSettings(settings.copy(themeUseFullBlackTheme = !settings.themeUseFullBlackTheme)) }
-//        )
-//        Divider(color = MaterialTheme.colorScheme.surfaceVariant)
-        // ---------------
-
         // Other
         SectionLabel(stringResource(R.string.other))
         SettingsComponents.PreferenceActionLink(
@@ -192,8 +187,6 @@ private fun Preview() {
     PreviewWrapper {
         SettingsScreenBody(
             settings = Settings(
-//                tunerUseAdvancedMode = false,
-//                themeUseFullBlackTheme = true,
                 soundPlaySoundInTune = true,
                 soundPlaySoundOnSelect = true,
                 tunerEnableNoiseSuppressor = false,
