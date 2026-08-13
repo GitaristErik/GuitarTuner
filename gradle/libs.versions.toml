@@ -36,6 +36,8 @@ androidx-lifecycle-compose = "2.9.3"
 androidx-navigation = "2.9.3"
 lifecycleProcess = "2.9.3"
 material3Android = "1.3.2"
+mockk = "1.14.5"
+turbine = "1.2.1"
 
 [libraries]
 # Android & Compose
@@ -67,6 +69,8 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 # Open Source Licenses
 aboutlibraries-core = { group = "com.mikepenz", name = "aboutlibraries-core", version.ref = "aboutlibrariesCore" }

@@ -7,32 +7,24 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import com.example.guitartuner.data.tuner.PermissionManagerImpl
+import com.example.guitartuner.domain.repository.tuner.PermissionManager
 import com.example.guitartuner.ui.core.BaseApp
 import com.example.guitartuner.ui.theme.GuitarTunerTheme
 import com.example.guitartuner.ui.theme.PreviewWindowWrapper
-import com.example.guitartuner.ui.tuner.TunerViewModel
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import com.rohankhayech.android.util.ui.preview.OrientationThemePreview
-import org.koin.android.ext.android.getKoin
-import org.koin.android.ext.android.inject
-import org.koin.android.scope.AndroidScopeComponent
-import org.koin.androidx.scope.activityScope
-import org.koin.compose.getKoin
-import org.koin.core.qualifier.named
-import org.koin.core.scope.Scope
-import org.koin.core.scope.ScopeID
+import org.koin.android.ext.android.get
 
-class MainActivity : ComponentActivity(), AndroidScopeComponent {
+class MainActivity : ComponentActivity() {
 
-    override val scope: Scope by activityScope()
-
-    val viewModel by inject<TunerViewModel>()
+    private val permissionManager: PermissionManager by lazy { get() }
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        linkScope()
+        (permissionManager as? PermissionManagerImpl)?.attach(this)
 
         setContent {
             GuitarTunerTheme {
@@ -46,20 +38,9 @@ class MainActivity : ComponentActivity(), AndroidScopeComponent {
         }
     }
 
-    private fun linkScope(scopeId: ScopeID = SCOPE_ID_KEY) {
-        getKoin()
-            .getOrCreateScope(scopeId, named("session"))
-            .linkTo(scope)
-    }
-
-    companion object {
-        private const val SCOPE_ID_KEY = "SCOPE_ID_KEY"
-
-        @Composable
-        fun koinMainViewModel() = getKoin()
-            .getScopeOrNull(SCOPE_ID_KEY)
-            ?.getOrNull<MainActivity>()
-            ?.viewModel
+    override fun onDestroy() {
+        (permissionManager as? PermissionManagerImpl)?.detach(this)
+        super.onDestroy()
     }
 }
 

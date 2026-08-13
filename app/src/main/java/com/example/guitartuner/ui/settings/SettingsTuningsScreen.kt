@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -17,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.guitartuner.R
-import com.example.guitartuner.domain.entity.tuner.TuningSet
 import com.example.guitartuner.domain.repository.tuner.TuningSetsRepository.TuningFilterBuilder.TuningFilter
 import com.example.guitartuner.ui.model.FilterBoxUIState
 import com.example.guitartuner.ui.model.TuningSettingsUIState
@@ -34,10 +32,10 @@ import org.koin.androidx.compose.navigation.koinNavViewModel
 @Composable
 fun SettingsTuningsScreen(navigateToUp: () -> Unit = {}) {
     val vm = koinNavViewModel<SettingsViewModel>()
-    val currentTuningState by vm.currentTuningSet.collectAsState()
-    val instrumentsFilter by vm.filtersInstrumentState.collectAsState()
-    val stringsFilter by vm.filtersStringsState.collectAsState()
-    val tunings by vm.listTuningsState.collectAsState()
+    val currentTuningState by vm.currentTuningSet.collectAsStateWithLifecycle()
+    val instrumentsFilter by vm.filtersInstrumentState.collectAsStateWithLifecycle()
+    val stringsFilter by vm.filtersStringsState.collectAsStateWithLifecycle()
+    val tunings by vm.listTuningsState.collectAsStateWithLifecycle()
 
     SettingsTuningsScreenContent(
         currentTuningState,
@@ -80,15 +78,17 @@ private fun SettingsTuningsScreenContent(
             }
         )
     }
-    val generalFilters by rememberSaveable(key = "general-filters") {
-        mutableStateOf(TuningFilter.General.entries.map {
-            FilterBoxUIState(
-                key = "general_filter_" + it.name,
-                value = it,
-                text = names[it.ordinal],
-                isEnabled = true,
-            )
-        })
+    var selectedGeneral by rememberSaveable(key = "general-filters-selected") {
+        mutableStateOf(emptySet<String>())
+    }
+    val generalFilters = TuningFilter.General.entries.map {
+        FilterBoxUIState(
+            key = "general_filter_" + it.name,
+            value = it,
+            text = names[it.ordinal],
+            isEnabled = true,
+            isSelected = selectedGeneral.contains(it.name),
+        )
     }
 
     var showSaveDialog by rememberSaveable(key = "show-save-dialog") { mutableStateOf(false) }
@@ -120,7 +120,15 @@ private fun SettingsTuningsScreenContent(
         stickyHeader("general-header") { SectionHeader(title = stringResource(R.string.settings_tunings_other_header)) }
         item("filter-bar-general") {
             TuningControls.FilterBox(
-                values = generalFilters, onSelect = onToggleGeneralFilter
+                values = generalFilters,
+                onSelect = { filter, selected ->
+                    selectedGeneral = if (selected) {
+                        selectedGeneral + filter.name
+                    } else {
+                        selectedGeneral - filter.name
+                    }
+                    onToggleGeneralFilter(filter, selected)
+                }
             )
         }
 

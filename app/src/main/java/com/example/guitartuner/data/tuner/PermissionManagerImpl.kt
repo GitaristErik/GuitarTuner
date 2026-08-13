@@ -1,6 +1,7 @@
 package com.example.guitartuner.data.tuner
 
 import android.Manifest
+import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
@@ -11,27 +12,64 @@ import androidx.lifecycle.LifecycleOwner
 import com.example.guitartuner.domain.repository.tuner.PermissionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.lang.ref.WeakReference
+
+/**
+ * Holds the current [ComponentActivity] so permission requests can be issued
+ * without scoping the entire tuner graph to the activity.
+ */
+class ActivityHolder {
+    @Volatile
+    private var activityRef: WeakReference<ComponentActivity>? = null
+
+    var activity: ComponentActivity?
+        get() = activityRef?.get()
+        set(value) {
+            activityRef = value?.let { WeakReference(it) }
+        }
+}
 
 class PermissionManagerImpl(
-    private val activity: ComponentActivity
+    private val application: Application,
+    private val activityHolder: ActivityHolder,
 ) : LifecycleEventObserver, PermissionManager {
 
-    private val _state by lazy { MutableStateFlow(makeState()) }
-    override val state by lazy { _state.asStateFlow() }
+    private val _state = MutableStateFlow(makeState())
+    override val state = _state.asStateFlow()
 
     private var isFirstRequest: Boolean = true
+    private var attachedActivity: ComponentActivity? = null
 
-    init {
+    override val hasRequiredPermissions: Boolean
+        get() = application.hasPermission(PM_RECORD_AUDIO)
+
+    private val canRequest: Boolean
+        get() {
+            val activity = activityHolder.activity
+            return isFirstRequest ||
+                (activity?.shouldShowRequestPermissionRationale(PM_RECORD_AUDIO) == true)
+        }
+
+    fun attach(activity: ComponentActivity) {
+        if (attachedActivity === activity) {
+            updateState()
+            return
+        }
+        attachedActivity?.lifecycle?.removeObserver(this)
+        attachedActivity = activity
+        activityHolder.activity = activity
         activity.lifecycle.addObserver(this)
+        updateState()
     }
 
-    override val hasRequiredPermissions
-        get() = activity.hasPermission(PM_RECORD_AUDIO)
-            .also { isFirstRequest = false }
-
-    private val canRequest
-        get() = isFirstRequest ||
-                activity.shouldShowRequestPermissionRationale(PM_RECORD_AUDIO)
+    fun detach(activity: ComponentActivity) {
+        if (attachedActivity !== activity) return
+        activity.lifecycle.removeObserver(this)
+        attachedActivity = null
+        if (activityHolder.activity === activity) {
+            activityHolder.activity = null
+        }
+    }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         if (event == Lifecycle.Event.ON_RESUME) {
@@ -40,12 +78,13 @@ class PermissionManagerImpl(
     }
 
     override suspend fun requestPermissions() {
-        if (!hasRequiredPermissions) {
-            // Use direct permission request to avoid late ActivityResult registration.
-            activity.requestPermissions(arrayOf(PM_RECORD_AUDIO), 1001)
-            // State will be refreshed on next resume; proactively update now too.
+        if (hasRequiredPermissions) {
             updateState()
+            return
         }
+        // Do not refresh state until the user answers; ON_RESUME will update.
+        isFirstRequest = false
+        activityHolder.activity?.requestPermissions(arrayOf(PM_RECORD_AUDIO), REQUEST_CODE)
     }
 
     private fun updateState() {
@@ -58,13 +97,13 @@ class PermissionManagerImpl(
     )
 
     companion object {
-        const val PM_RECORD_AUDIO = (Manifest.permission.RECORD_AUDIO)
+        const val PM_RECORD_AUDIO = Manifest.permission.RECORD_AUDIO
+        private const val REQUEST_CODE = 1001
     }
 }
 
 fun Context.hasPermission(permission: String): Boolean =
     runCatching {
         ContextCompat.checkSelfPermission(this, permission) ==
-                PackageManager.PERMISSION_GRANTED
+            PackageManager.PERMISSION_GRANTED
     }.getOrDefault(false)
-

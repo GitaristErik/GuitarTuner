@@ -5,4 +5,5 @@ data class FilterBoxUIState<T>(
     val value: T,
     val text: String,
     val isEnabled: Boolean,
+    val isSelected: Boolean = false,
 )

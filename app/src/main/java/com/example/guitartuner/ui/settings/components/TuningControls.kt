@@ -1,7 +1,6 @@
 package com.example.guitartuner.ui.settings.components
 
 import android.widget.Toast
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -17,21 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.DismissValue
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
-import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -93,6 +84,7 @@ object TuningControls {
                     filter = values[index].value,
                     filterText = values[index].text,
                     enabled = values[index].isEnabled,
+                    selected = values[index].isSelected,
                     key = values[index].key,
                     onSelect = onSelect
                 )
@@ -114,30 +106,26 @@ object TuningControls {
         filterText: String,
         enabled: Boolean,
         onSelect: (T, Boolean) -> Unit,
-        selected: Boolean? = null,
+        selected: Boolean = false,
         key: String? = null
     ) {
-        val (isSelected, selectChange) = if (selected == null) {
-            var state by rememberSaveable(key) { mutableStateOf(false) }
-            state to { select: Boolean -> state = select }
-        } else selected to { _ -> }
-
-        FilterChip(modifier = Modifier.animateContentSize(),
+        FilterChip(
+            modifier = Modifier.animateContentSize(),
             enabled = enabled,
-            selected = isSelected,
+            selected = selected,
             onClick = {
                 if (enabled) {
-                    selectChange(!isSelected)
-                    onSelect(filter, !isSelected)
+                    onSelect(filter, !selected)
                 }
             },
             leadingIcon = {
-                if (isSelected) Icon(
+                if (selected) Icon(
                     Icons.Default.Done,
-                    filterText + stringResource(R.string.settings_tunings_filter_desc)
+                    contentDescription = filterText + stringResource(R.string.settings_tunings_filter_desc)
                 )
             },
-            label = { Text(filterText) })
+            label = { Text(filterText) },
+        )
     }
 
     /**
@@ -350,68 +338,6 @@ object TuningControls {
 
 
     /**
-     * This composable function creates a list item displaying a custom tuning, with options to favourite or remove it.
-     * @param tuning The tuning to display.
-     * @param onSelect Called when this tuning is selected.
-     * @param onFavSelect Called when the favourite button is pressed.
-     * @param onRemove Called when this tuning is swiped to be removed.
-     */
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    fun LazyItemScope.TuningSettingsItemSwippable2(
-        tuning: TuningSettingsUIState,
-        onSelect: (Int) -> Unit,
-        onFavSelect: (Int, Boolean) -> Unit,
-        onRemove: (Int) -> Unit,
-    ) {
-        val dismissState = rememberDismissState(confirmStateChange = { dismissValue ->
-            if (dismissValue == DismissValue.DismissedToStart) {
-                onRemove(tuning.tuningId)
-                true
-            } else false
-        })
-
-        SwipeToDismiss(modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
-            state = dismissState,
-            directions = setOf(DismissDirection.EndToStart),
-            background = {
-                val color by animateColorAsState(
-                    when (dismissState.currentValue) {
-                        DismissValue.DismissedToStart -> MaterialTheme.colorScheme.errorContainer
-//                            .copy(alpha = 0.36f)
-//                            .compositeOver(MaterialTheme.colorScheme.surface)
-
-                        else -> MaterialTheme.colorScheme.onErrorContainer
-//                            .copy(alpha = 0.05f)
-//                            .compositeOver(MaterialTheme.colorScheme.surface)
-                    }, label = "Tuning Item Background Color"
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color)
-                        .padding(end = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Icon(
-                        Icons.Default.DeleteForever,
-                        contentDescription = stringResource(R.string.settings_tunings_delete_desc),
-                        tint = MaterialTheme.colorScheme.onError
-                    )
-                }
-            },
-            dismissContent = {
-                TuningSettingsItem(
-                    tuning = tuning,
-                    onSelect = onSelect,
-                    onFavSelect = onFavSelect
-                )
-            })
-    }
-
-    /**
      * Dialog allowing the user to enter a name and save the specified tuning.
      * @param modifier The modifier to apply to this layout node.
      * @param tuningName The name of the tuning to save.
@@ -444,7 +370,7 @@ object TuningControls {
             },
             confirmButton = {
                 TextButton(onClick = {
-                    onSave(name)
+                    onSave(name.trim())
                 }) {
                     Text(text = stringResource(R.string.settings_tunings_alert_save).uppercase())
                 }
