@@ -41,12 +41,12 @@ class TunerViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
-    private val permissionState = MutableStateFlow(
+    private val permissionFlow = MutableStateFlow(
         PermissionManager.PermissionState(hasRequiredPermissions = true, canRequest = false)
     )
-    private val tunerState = MutableStateFlow<Tuning?>(null)
-    private val currentInstrument = MutableStateFlow(previewInstrument)
-    private val currentTuningSet = MutableStateFlow(
+    private val tunerFlow = MutableStateFlow<Tuning?>(null)
+    private val instrumentFlow = MutableStateFlow(previewInstrument)
+    private val tuningSetFlow = MutableStateFlow(
         TuningSet(
             tuningId = 1,
             name = "Standard",
@@ -61,8 +61,8 @@ class TunerViewModelTest {
             instrumentId = 1,
         )
     )
-    private val favorites = MutableStateFlow(listOf(currentTuningSet.value))
-    private val settingsState = MutableStateFlow(Settings.previewSettings())
+    private val favoritesFlow = MutableStateFlow(listOf(tuningSetFlow.value))
+    private val settingsFlow = MutableStateFlow(Settings.previewSettings())
 
     private lateinit var permissionManager: PermissionManager
     private lateinit var tunerRepository: TunerRepository
@@ -75,28 +75,27 @@ class TunerViewModelTest {
         Dispatchers.setMain(dispatcher)
 
         permissionManager = mockk {
-            every { state } returns permissionState
+            every { state } returns permissionFlow
             every { hasRequiredPermissions } returns true
             coEvery { requestPermissions() } just runs
         }
         tunerRepository = mockk(relaxed = true) {
-            every { state } returns tunerState
+            every { state } returns tunerFlow
             every { autoMode = any() } just runs
             every { selectTone(any()) } just runs
         }
         pitchGenerationRepository = mockk(relaxed = true)
-        tuningSetsRepository = mockk(relaxed = true) {
-            every { currentInstrument } returns currentInstrument
-            every { currentTuningSet } returns this@TunerViewModelTest.currentTuningSet
-            every { favoritesTuningSets } returns favorites
-            every { selectTuning(any()) } just runs
-        }
-        settingsManager = mockk(relaxed = true) {
-            every { state } returns settingsState
-            every { generalNotation } returns settingsState.value.generalNotation
-            every { soundPlaySoundInTune } returns false
-            every { soundPlaySoundOnSelect } returns false
-        }
+        tuningSetsRepository = mockk(relaxed = true)
+        every { tuningSetsRepository.currentInstrument } returns instrumentFlow
+        every { tuningSetsRepository.currentTuningSet } returns tuningSetFlow
+        every { tuningSetsRepository.favoritesTuningSets } returns favoritesFlow
+        every { tuningSetsRepository.selectTuning(any()) } just runs
+
+        settingsManager = mockk(relaxed = true)
+        every { settingsManager.state } returns settingsFlow
+        every { settingsManager.generalNotation } returns settingsFlow.value.generalNotation
+        every { settingsManager.soundPlaySoundInTune } returns false
+        every { settingsManager.soundPlaySoundOnSelect } returns false
     }
 
     @After
@@ -143,8 +142,8 @@ class TunerViewModelTest {
                 state = awaitItem()
             }
 
-            tunerState.value = Tuning(
-                closestPitch = currentTuningSet.value.pitches[0],
+            tunerFlow.value = Tuning(
+                closestPitch = tuningSetFlow.value.pitches[0],
                 currentFrequency = 82.4,
                 deviation = 0,
                 isTuned = true,
@@ -152,7 +151,7 @@ class TunerViewModelTest {
             val tuned = awaitItem()
             assertTrue(tuned.tunedStrings[0])
 
-            currentTuningSet.value = currentTuningSet.value.copy(tuningId = 2, name = "Drop D")
+            tuningSetFlow.value = tuningSetFlow.value.copy(tuningId = 2, name = "Drop D")
             val reset = awaitItem()
             assertTrue(reset.tunedStrings.all { !it })
             cancelAndIgnoreRemainingEvents()

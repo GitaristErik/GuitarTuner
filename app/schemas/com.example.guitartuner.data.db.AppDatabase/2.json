@@ -1,0 +1,203 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "191e47bcdaf338fd4aaca95c2d401345",
+    "entities": [
+      {
+        "tableName": "PitchTable",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pitchId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `frequency` REAL NOT NULL, `octave` INTEGER NOT NULL, `degree` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pitchId",
+            "columnName": "pitchId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "frequency",
+            "columnName": "frequency",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "octave",
+            "columnName": "octave",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "degree",
+            "columnName": "degree",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "pitchId"
+          ]
+        }
+      },
+      {
+        "tableName": "PitchCrossRefTable",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pitchId` INTEGER NOT NULL, `toneId` INTEGER NOT NULL, PRIMARY KEY(`pitchId`, `toneId`))",
+        "fields": [
+          {
+            "fieldPath": "pitchId",
+            "columnName": "pitchId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toneId",
+            "columnName": "toneId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "pitchId",
+            "toneId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_PitchCrossRefTable_toneId",
+            "unique": false,
+            "columnNames": [
+              "toneId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PitchCrossRefTable_toneId` ON `${TABLE_NAME}` (`toneId`)"
+          },
+          {
+            "name": "index_PitchCrossRefTable_pitchId",
+            "unique": false,
+            "columnNames": [
+              "pitchId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PitchCrossRefTable_pitchId` ON `${TABLE_NAME}` (`pitchId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "ToneTable",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`toneId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `note` TEXT NOT NULL, `octave` INTEGER NOT NULL, `alteration` TEXT NOT NULL, `degree` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "toneId",
+            "columnName": "toneId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "octave",
+            "columnName": "octave",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alteration",
+            "columnName": "alteration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "degree",
+            "columnName": "degree",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "toneId"
+          ]
+        }
+      },
+      {
+        "tableName": "TuningSetTable",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tuningId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `instrumentId` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "tuningId",
+            "columnName": "tuningId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "instrumentId",
+            "columnName": "instrumentId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isFavorite",
+            "columnName": "isFavorite",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "tuningId"
+          ]
+        }
+      },
+      {
+        "tableName": "TuningSetCrossRefTable",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tuningId` INTEGER NOT NULL, `pitchId` INTEGER NOT NULL, PRIMARY KEY(`tuningId`, `pitchId`))",
+        "fields": [
+          {
+            "fieldPath": "tuningId",
+            "columnName": "tuningId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pitchId",
+            "columnName": "pitchId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "tuningId",
+            "pitchId"
+          ]
+        }
+      }
+    ],
+    "views": [
+      {
+        "viewName": "TuningSetWithPitchesTable",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT ts.tuningId, ts.name, ts.instrumentId, ts.isFavorite, \n        pt.pitchId, pt.frequency, \n        tt.toneId, tt.note, tt.octave, tt.alteration, tt.degree \n    FROM TuningSetTable as ts\n    INNER JOIN TuningSetCrossRefTable as tsr ON ts.tuningId = tsr.tuningId\n    INNER JOIN PitchTable as pt ON tsr.pitchId = pt.pitchId\n    INNER JOIN PitchCrossRefTable as pcr ON pt.pitchId = pcr.pitchId\n    INNER JOIN ToneTable as tt ON pcr.toneId = tt.toneId"
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '191e47bcdaf338fd4aaca95c2d401345')"
+    ]
+  }
+}
