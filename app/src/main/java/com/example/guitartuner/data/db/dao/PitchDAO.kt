@@ -47,16 +47,28 @@ interface PitchDAO {
 
 
     // remove ----------------------
+    @Query("DELETE FROM PitchCrossRefTable")
+    suspend fun deleteAllFromPitchCrossRefTable()
+
+    @Query("DELETE FROM ToneTable")
+    suspend fun deleteAllFromToneTable()
+
     @Query("DELETE FROM PitchTable")
     suspend fun deleteAllFromPitchTable()
 
     @Query("DELETE FROM sqlite_sequence WHERE name LIKE 'PitchTable'")
     suspend fun clearPrimaryKeyFromPitchTable()
 
+    @Query("DELETE FROM sqlite_sequence WHERE name LIKE 'ToneTable'")
+    suspend fun clearPrimaryKeyFromToneTable()
+
     @Transaction
     suspend fun deletePitches() {
+        deleteAllFromPitchCrossRefTable()
+        deleteAllFromToneTable()
         deleteAllFromPitchTable()
         clearPrimaryKeyFromPitchTable()
+        clearPrimaryKeyFromToneTable()
     }
 
 }

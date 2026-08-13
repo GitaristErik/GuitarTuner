@@ -21,7 +21,8 @@ import com.example.guitartuner.data.db.model.TuningSetWithPitchesTable
         TuningSetCrossRefTable::class],
     views = [TuningSetWithPitchesTable::class],
     version = 2,
-    exportSchema = false
+    // Schema export enabled for migration tracking; keep destructive fallback until migrations land.
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
 

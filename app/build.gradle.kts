@@ -9,6 +9,10 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "com.example.guitartuner"
     compileSdk = 36

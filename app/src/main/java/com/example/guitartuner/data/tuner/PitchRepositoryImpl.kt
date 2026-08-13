@@ -14,6 +14,7 @@ import com.example.guitartuner.domain.entity.tuner.Tone
 import com.example.guitartuner.domain.repository.tuner.PitchRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +34,7 @@ class PitchRepositoryImpl(
     override val purePitchesList get() = _purePitchesList.asStateFlow()
 
     private val alteration: Alteration = Alteration.SHARP
+    private var regenerateJob: Job? = null
 
     override suspend fun getPitchById(id: Int): Pitch? = database.pitchDAO
         .getPitchWithToneById(id)
@@ -63,10 +65,10 @@ class PitchRepositoryImpl(
         coroutineScope.launch(Dispatchers.IO) {
             launch {
                 isInitialized.collectLatest { isInit ->
-                    Log.e("PitchRepositoryImpl", "isInitialized: $isInit")
+                    Log.d("PitchRepositoryImpl", "isInitialized: $isInit")
                     if (isInit) {
                         database.pitchDAO.getPitches().collectLatest { pitchTables ->
-                            Log.e("PitchRepositoryImpl", "pitchTablesCount: ${pitchTables.size}")
+                            Log.d("PitchRepositoryImpl", "pitchTablesCount: ${pitchTables.size}")
                             _purePitchesList.update { pitchTables }
                         }
                     }
@@ -81,7 +83,8 @@ class PitchRepositoryImpl(
     }
 
     private fun regeneratePitches(referenceFrequency: Int) {
-        coroutineScope.launch(Dispatchers.IO) {
+        regenerateJob?.cancel()
+        regenerateJob = coroutineScope.launch(Dispatchers.IO) {
             isInitialized.value = false
             database.pitchDAO.deletePitches()
 

@@ -159,7 +159,7 @@ class SettingsViewModel(
     }
 
     fun toggleFavoriteTuning(tuningId: Int, isFavorite: Boolean) =
-        tuningsRepository.updateTuningSet(tuningId, mapOf("isFavorite" to isFavorite))
+        tuningsRepository.updateTuningFavorite(tuningId, isFavorite)
 
     fun saveTuning(tuningName: String) {
         viewModelScope.launch {

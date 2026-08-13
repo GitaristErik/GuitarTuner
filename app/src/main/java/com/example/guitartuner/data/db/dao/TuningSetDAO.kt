@@ -45,19 +45,27 @@ interface TuningSetDAO {
     fun filterTunings(
         isFavorite: Boolean? = null,
         instrumentIds: List<Int>? = null,
-//        countString: List<Int> = emptyList(),
+        countString: List<Int>? = null,
         start: Int = 0,
         limit: Int = Int.MAX_VALUE
     ): Flow<List<TuningSetWithPitchesTable>> {
-        val instrumentIdsQuery = if(instrumentIds?.isEmpty() == true) null
+        val instrumentIdsQuery = if (instrumentIds?.isEmpty() == true) null
         else instrumentIds?.joinToString(",") { it.toString() }
 
+        val countStringQuery = if (countString?.isEmpty() == true) null
+        else countString?.joinToString(",") { it.toString() }
+
+        // Parentheses required so OR does not break out of AND precedence.
         val query = """
         SELECT * FROM TuningSetWithPitchesTable
         WHERE (${isFavorite} IS NULL OR TuningSetWithPitchesTable.isFavorite = ${isFavorite})
-        AND (${instrumentIdsQuery ?: "null"}) IS NULL OR TuningSetWithPitchesTable.instrumentId IN (${instrumentIdsQuery ?: "null"})
+        AND ((${instrumentIdsQuery ?: "null"}) IS NULL OR TuningSetWithPitchesTable.instrumentId IN (${instrumentIdsQuery ?: "null"}))
+        AND ((${countStringQuery ?: "null"}) IS NULL OR (
+            SELECT COUNT(DISTINCT pitchId) FROM TuningSetCrossRefTable
+            WHERE TuningSetCrossRefTable.tuningId = TuningSetWithPitchesTable.tuningId
+        ) IN (${countStringQuery ?: "null"}))
         LIMIT $limit OFFSET $start """.trimIndent()
-        val rawQuery = SimpleSQLiteQuery(query) //, arrayOf(isFavorite, instrumentIdsQuery, limit, start))
+        val rawQuery = SimpleSQLiteQuery(query)
         return rawQueryFilterTunings(rawQuery)
     }
 
@@ -71,7 +79,16 @@ interface TuningSetDAO {
 
     // remove ----------------------
 
+    @Query("DELETE FROM TuningSetCrossRefTable WHERE tuningId = :tuningId")
+    fun deleteTuningSetCrossRefsById(tuningId: Int)
+
     @Query("DELETE FROM TuningSetTable WHERE tuningId = :tuningId")
-    fun deleteTuningSetById(tuningId: Int)
+    fun deleteTuningSetTableById(tuningId: Int)
+
+    @Transaction
+    fun deleteTuningSetById(tuningId: Int) {
+        deleteTuningSetCrossRefsById(tuningId)
+        deleteTuningSetTableById(tuningId)
+    }
 
 }

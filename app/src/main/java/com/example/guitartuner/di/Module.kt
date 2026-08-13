@@ -95,6 +95,7 @@ val appModule = module {
             get(),
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME,
+        // Keep destructive fallback for now until proper Room migrations are added.
         ).fallbackToDestructiveMigration()
             //.setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .build()
